@@ -58,6 +58,13 @@ h1 {
     text-align: center;
 }
 
+#tabelaRegistros th,
+#tabelaRegistros td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+
 /* botões de ação */
 .btn-editar,
 .btn-excluir {
