@@ -1,3 +1,5 @@
+/* manutencao.css — atualizado para tabela responsiva com scroll horizontal (não comprimida) */
+
 /* container */
 .container {
     max-width: 1200px;
@@ -11,32 +13,33 @@
     -webkit-overflow-scrolling: touch;    /* smooth scroll em mobile */
 }
 
-/* tabela */
-table {
-    width: 100%;
+/* tabela: largura natural do conteúdo (não encolhe) */
+.table-responsive table {
+    width: max-content;     /* tabela usa a largura necessária pelos conteúdos */
+    min-width: 100%;        /* garante que, no mínimo, ocupe a largura do container */
     border-collapse: collapse;
     margin: 20px 0;
-    table-layout: fixed;      /* força colunas a respeitarem largura disponível e a quebrar texto */
+    /* removido table-layout: fixed; para evitar compressão */
 }
 
-/* colunas e células */
-th,
-td {
+/* células: evitar quebras que espremam o layout */
+.table-responsive th,
+.table-responsive td {
     border: 1px solid #ddd;
     padding: 10px;
     text-align: left;
-    word-break: break-word;   /* permite quebra de palavras longas */
-    white-space: normal;      /* permite quebra de linha dentro da célula */
+    white-space: nowrap;    /* impede quebra de linha, forçando o scroll horizontal */
+    word-break: normal;
 }
 
 /* cabeçalho */
-th {
+.table-responsive th {
     background-color: #f2f2f2;
     font-weight: bold;
 }
 
 /* linhas pares */
-tr:nth-child(even) {
+.table-responsive tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
@@ -219,9 +222,8 @@ h1 {
         margin-top: 5px;
     }
 
-    /* para telas menores, ainda permitimos scroll horizontal, mas tornamos células menores */
-    table {
-        display: block;
+    /* para telas menores, permitimos ainda scroll horizontal via wrapper */
+    .table-responsive {
         overflow-x: auto;
     }
 
@@ -280,4 +282,13 @@ h1 {
         padding: 8px 10px;
         font-size: 13px;
     }
+}
+
+/* breakpoint para permitir quebra em telas muito pequenas */
+@media (max-width: 420px) {
+  .table-responsive th,
+  .table-responsive td {
+    white-space: normal;       /* permite quebra dentro de células em telas muito pequenas */
+    word-break: break-word;
+  }
 }
