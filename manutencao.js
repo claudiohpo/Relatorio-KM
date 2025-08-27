@@ -124,7 +124,7 @@ function exibirRegistros() {
 
   if (registrosPagina.length === 0) {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td colspan="8" style="text-align: center;">Nenhum registro encontrado</td>`;
+    tr.innerHTML = `<td colspan="9" style="text-align: center;">Nenhum registro encontrado</td>`; //valor antigo colspan=8
     tbody.appendChild(tr);
     return;
   }
