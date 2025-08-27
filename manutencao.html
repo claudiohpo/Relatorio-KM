@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Manutenção de Registros de KM</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="manutencao.css" />
+</head>
+
+<body>
+  <main class="container">
+    <h1>Manutenção de Registros de KM</h1>
+
+    <div class="filtros">
+      <label>
+        Data Inicial
+        <input type="date" id="filtroDataInicio">
+      </label>
+
+      <label>
+        Data Final
+        <input type="date" id="filtroDataFim">
+      </label>
+
+      <label>
+        Local
+        <input type="text" id="filtroLocal" placeholder="Filtrar por local">
+      </label>
+
+      <div class="botoes-filtro">
+        <button id="btnAplicarFiltros" class="btn-filtro">Aplicar Filtros</button>
+        <button id="btnLimparFiltros" class="btn-limpar">Limpar Filtros</button>
+      </div>
+    </div>
+
+    <div id="tabela-container">
+      <table id="tabelaRegistros">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Chamado</th>
+            <th>Local</th>
+            <th>KM Saída</th>
+            <th>KM Chegada</th>
+            <th>KM Total</th>
+            <th>Observações</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Os registros serão carregados aqui via JavaScript -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pagination">
+      <button id="btnAnterior" disabled>Anterior</button>
+      <span id="infoPagina">Página 1 de 1</span>
+      <button id="btnProximo" disabled>Próximo</button>
+    </div>
+
+    <div class="botoes-rodape">
+      <button id="btnVoltar" class="btn-voltar">Voltar para Cadastro</button>
+      <button id="btnBaixarRelatorioCSV" class="btn-relatorio">Baixar Relatório Completo (CSV)</button>
+      <button id="btnBaixarRelatorioXLS" class="btn-relatorio">Baixar Relatório Completo (XLSX)</button>
+    </div>
+
+    <!-- Modal de confirmação de exclusão -->
+    <div id="modalExcluir" class="modal">
+      <div class="modal-content">
+        <h3>Confirmar Exclusão</h3>
+        <p>Tem certeza que deseja excluir este registro?</p>
+        <div class="modal-buttons">
+          <button id="btnCancelarExclusao">Cancelar</button>
+          <button id="btnConfirmarExclusao">Excluir</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de edição -->
+    <div id="modalEditar" class="modal">
+      <div class="modal-content">
+        <h3>Editar Registro</h3>
+        <form id="formEditar">
+          <input type="hidden" id="editId">
+
+          <label>
+            Data *
+            <input type="date" id="editData" required>
+          </label>
+
+          <label>
+            Chamado
+            <input type="text" id="editChamado" placeholder="Opcional">
+          </label>
+
+          <label>
+            Local *
+            <input type="text" id="editLocal" required placeholder="Ex.: São Paulo - Cliente X">
+          </label>
+
+          <div class="row">
+            <label>
+              KM saída *
+              <input type="number" id="editKmSaida" required min="0" step="1">
+            </label>
+            <label>
+              KM chegada *
+              <input type="number" id="editKmChegada" required min="0" step="1">
+            </label>
+          </div>
+
+          <label>
+            Observações
+            <textarea id="editObservacoes" rows="3" placeholder="Opcional"></textarea>
+          </label>
+
+          <div class="modal-buttons">
+            <button type="button" id="btnCancelarEdicao">Cancelar</button>
+            <button type="submit">Salvar Alterações</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      Desenvolvido por <a href="https://github.com/claudiohpo" target="_blank" rel="noopener">Cláudio Oliveira</a> - 2025
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="manutencao.js"></script>
+</body>
+
+</html>
