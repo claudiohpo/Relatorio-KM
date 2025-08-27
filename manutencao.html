@@ -6,16 +6,6 @@
   <title>Manutenção de Registros de KM</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="manutencao.css" />
-  <style>
-    /* Centralizar os grupos de botões */
-    .grupo-botoes {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 15px 0;
-    }
-  </style>
 </head>
 <body>
   <main class="container">
@@ -35,8 +25,8 @@
         <input type="text" id="filtroLocal" placeholder="Filtrar por local">
       </label>
 
-      <!-- Grupo 1: filtros + editar/excluir -->
-      <div class="grupo-botoes">
+      <!-- Botões de filtros + editar/excluir -->
+      <div class="botoes-filtro">
         <button id="btnAplicarFiltros" class="btn-filtro">Aplicar Filtros</button>
         <button id="btnLimparFiltros" class="btn-limpar">Limpar Filtros</button>
         <button id="btnEditar" class="btn-editar">Editar</button>
@@ -70,8 +60,7 @@
       <button id="btnProximo" disabled>Próximo</button>
     </div>
 
-    <!-- Grupo 2: voltar e relatórios -->
-    <div class="grupo-botoes">
+    <div class="botoes-rodape">
       <button id="btnVoltar" class="btn-voltar">Voltar para Cadastro</button>
       <button id="btnBaixarRelatorioCSV" class="btn-relatorio">Baixar Relatório Completo (CSV)</button>
       <button id="btnBaixarRelatorioXLS" class="btn-relatorio">Baixar Relatório Completo (XLSX)</button>

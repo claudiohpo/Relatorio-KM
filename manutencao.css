@@ -3,9 +3,8 @@
 /* container */
 .container {
     max-width: 1200px;
-    margin: 0 auto; /* centraliza conteúdo no meio da tela */
+    margin: 0 auto; /* centraliza o container */
     box-sizing: border-box;
-    padding: 0 15px;
 }
 
 /* wrapper responsivo para tabela */
@@ -21,7 +20,6 @@
     min-width: 100%;        /* garante que, no mínimo, ocupe a largura do container */
     border-collapse: collapse;
     margin: 20px 0;
-    /* removido table-layout: fixed; para evitar compressão */
 }
 
 /* células */
@@ -46,13 +44,12 @@
     background-color: #f9f9f9;
 }
 
-/* actions: botões dentro da tabela */
+/* actions */
 .actions {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: center;
 }
 
 /* título */
@@ -62,63 +59,39 @@ h1 {
     text-align: center;
 }
 
-/* coluna de seleção da tabela */
+/* coluna de seleção */
 #tabelaRegistros td:first-child,
 #tabelaRegistros th:first-child {
   width: 40px;
   text-align: center;
 }
 
-/* === Botões Padronizados === */
-.btn {
+/* ===== PADRÃO DE BOTÕES (Editar, Excluir, Filtro e Limpar) ===== */
+.btn-editar,
+.btn-excluir,
+.btn-filtro,
+.btn-limpar {
   padding: 10px 14px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
   white-space: nowrap;
-  min-width: 120px; /* todos mesmo tamanho */
+  min-width: 110px;     /* garante largura igual */
   text-align: center;
+  transition: opacity 0.2s ease-in-out;
 }
 
-.btn-editar {
-  background-color: #4CAF50;
-  color: white;
-}
+.btn-editar { background-color: #4CAF50; color: white; }
+.btn-excluir { background-color: #f44336; color: white; }
+.btn-filtro  { background-color: #1f6feb; color: white; }
+.btn-limpar  { background-color: #ff9800; color: white; }
 
-.btn-excluir {
-  background-color: #f44336;
-  color: white;
-}
-
-.btn-filtro {
-    background-color: #1f6feb;
-    color: white;
-}
-
-.btn-limpar {
-    background-color: #ff9800;
-    color: white;
-}
-
-.btn-voltar {
-    background-color: #ff9800;
-    color: white;
-}
-
-.btn-relatorio {
-    background-color: #333;
-    color: white;
-}
-
-/* === Containers de Botões Centralizados === */
-.botoes-acoes, 
-.botoes-rodape {
-    display: flex;
-    justify-content: center; /* centraliza os grupos */
-    gap: 10px;
-    flex-wrap: wrap;
-    margin: 20px 0;
+.btn-editar:hover,
+.btn-excluir:hover,
+.btn-filtro:hover,
+.btn-limpar:hover {
+    opacity: 0.85;
 }
 
 /* filtros */
@@ -136,6 +109,14 @@ h1 {
     font-size: 14px;
     flex: 1;
     min-width: 120px;
+}
+
+/* container de botões de filtro */
+.botoes-filtro {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
 }
 
 /* paginação */
@@ -159,6 +140,26 @@ h1 {
     background-color: #ccc;
     cursor: not-allowed;
 }
+
+/* botoes rodape */
+.botoes-rodape {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.btn-voltar,
+.btn-relatorio {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+}
+
+.btn-voltar { background-color: #ff9800; }
+.btn-relatorio { background-color: #333; }
 
 /* modal */
 .modal {
@@ -191,71 +192,69 @@ h1 {
     margin-top: 20px;
 }
 
-/* === Responsividade === */
+/* ================== RESPONSIVIDADE ================== */
 @media (max-width: 768px) {
-    .filtros {
-        flex-direction: column;
-        align-items: stretch;
-    }
+    .filtros { flex-direction: column; align-items: stretch; }
+    .filtros label { width: 100%; }
 
-    .filtros label {
+    .botoes-filtro {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 2 botões por linha */
+        gap: 10px;
         width: 100%;
     }
 
-    .botoes-acoes,
-    .botoes-rodape {
-        justify-content: center;
-        flex-wrap: wrap;
+    .btn-filtro,
+    .btn-limpar {
+        width: 100%;
     }
 
-    .btn {
-        flex: 1 1 calc(50% - 10px); /* 2 botões por linha */
-        max-width: 48%;
+    .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 2 botões por linha */
+        gap: 8px;
+        width: 100%;
     }
 
-    .modal-content {
-        width: 95%;
-        padding: 15px;
+    .btn-editar,
+    .btn-excluir {
+        width: 100%;
     }
 
-    th,
-    td {
+    .botoes-rodape { flex-direction: column; }
+    .btn-voltar, .btn-relatorio { width: 100%; }
+
+    .modal-content { width: 95%; padding: 15px; }
+
+    th, td {
         padding: 8px 5px;
         font-size: 12px;
     }
 }
 
 @media (max-width: 520px) {
-    .container {
-        padding: 10px;
-    }
+    .container { padding: 10px; }
+    .filtros { gap: 10px; }
+    .pagination { flex-wrap: wrap; }
 
-    .filtros {
-        gap: 10px;
-    }
+    .modal-buttons { flex-direction: column; }
+    .modal-buttons button { width: 100%; }
 
-    .pagination {
-        flex-wrap: wrap;
-    }
+    .botoes-filtro { gap: 5px; }
 
-    .modal-buttons {
-        flex-direction: column;
-    }
-
-    .modal-buttons button {
-        width: 100%;
-    }
-
-    .btn {
-        flex: 1 1 100%; /* 1 botão por linha se a tela for muito pequena */
-        max-width: 100%;
+    .btn-filtro,
+    .btn-limpar,
+    .btn-editar,
+    .btn-excluir {
+        padding: 8px 10px;
+        font-size: 13px;
     }
 }
 
 @media (max-width: 420px) {
   .table-responsive th,
   .table-responsive td {
-    white-space: normal;       /* permite quebra dentro de células em telas muito pequenas */
+    white-space: normal;
     word-break: break-word;
   }
 }
