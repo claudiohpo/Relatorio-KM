@@ -14,46 +14,59 @@
     <h1>Manutenção de Registros de KM</h1>
 
     <div class="filtros">
-      <label>
-        Data Inicial
-        <input type="date" id="filtroDataInicio">
-      </label>
+  <label>
+    Data Inicial
+    <input type="date" id="filtroDataInicio">
+  </label>
 
-      <label>
-        Data Final
-        <input type="date" id="filtroDataFim">
-      </label>
+  <label>
+    Data Final
+    <input type="date" id="filtroDataFim">
+  </label>
 
-      <label>
-        Local
-        <input type="text" id="filtroLocal" placeholder="Filtrar por local">
-      </label>
+  <label>
+    Local
+    <input type="text" id="filtroLocal" placeholder="Filtrar por local">
+  </label>
 
-      <div class="botoes-filtro">
-        <button id="btnAplicarFiltros" class="btn-filtro">Aplicar Filtros</button>
-        <button id="btnLimparFiltros" class="btn-limpar">Limpar Filtros</button>
-      </div>
-    </div>
+  <!-- Novo bloco de botões -->
+  <div class="botoes-filtro">
+    <button id="btnAplicarFiltros" class="btn-filtro">Aplicar Filtros</button>
+    <button id="btnLimparFiltros" class="btn-limpar">Limpar Filtros</button>
+    <button id="btnEditar" class="btn-editar">Editar</button>
+    <button id="btnExcluir" class="btn-excluir">Excluir</button>
+  </div>
+</div>
 
-    <div id="tabela-container" class="table-responsive">
-      <table id="tabelaRegistros">
-        <thead>
-          <tr>
-            <th>Data</th>
-            <th>Chamado</th>
-            <th>Local</th>
-            <th>KM Saída</th>
-            <th>KM Chegada</th>
-            <th>KM Total</th>
-            <th>Observações</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Os registros serão carregados aqui via JavaScript -->
-        </tbody>
-      </table>
-    </div>
+<div id="tabela-container" class="table-responsive">
+  <table id="tabelaRegistros">
+    <thead>
+      <tr>
+        <th></th> <!-- Coluna de seleção -->
+        <th>Data</th>
+        <th>Chamado</th>
+        <th>Local</th>
+        <th>KM Saída</th>
+        <th>KM Chegada</th>
+        <th>KM Total</th>
+        <th>Observações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Exemplo: cada linha terá um input de seleção -->
+      <!-- 
+      <tr>
+        <td><input type="radio" name="registroSelecionado" value="ID_DO_REGISTRO"></td>
+        <td>01/01/2025</td>
+        <td>123</td>
+        <td>São Paulo</td>
+        ...
+      </tr>
+      -->
+    </tbody>
+  </table>
+</div>
+
 
     <div class="pagination">
       <button id="btnAnterior" disabled>Anterior</button>

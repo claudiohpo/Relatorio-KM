@@ -58,22 +58,39 @@ h1 {
     text-align: center;
 }
 
-#tabelaRegistros th,
+/* #tabelaRegistros th,
 #tabelaRegistros td {
   text-align: center;
   vertical-align: middle;
+} */
+
+/* coluna de seleção da tabela */
+#tabelaRegistros td:first-child,
+#tabelaRegistros th:first-child {
+  width: 40px;
+  text-align: center;
 }
 
 
-/* botões de ação */
+/* Editar e Excluir no mesmo estilo já existente */
 .btn-editar,
 .btn-excluir {
-    padding: 6px 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 12px;
-    white-space: nowrap;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.btn-editar {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.btn-excluir {
+  background-color: #f44336;
+  color: white;
 }
 
 .btn-editar {
@@ -103,11 +120,12 @@ h1 {
     min-width: 120px;
 }
 
-/* botoes filtro */
+/* botões de filtro + editar/excluir alinhados */
 .botoes-filtro {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 5px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
 }
 
 .btn-filtro,
