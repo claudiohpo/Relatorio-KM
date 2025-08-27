@@ -1,4 +1,4 @@
-let registroParaExcluir = null;
+let registroSelecionado = null;
 let registros = [];
 let paginaAtual = 1;
 const registrosPorPagina = 10;
@@ -6,8 +6,8 @@ const registrosPorPagina = 10;
 document.addEventListener("DOMContentLoaded", function () {
   carregarRegistros();
 
-  // Event listeners para os botões
-  document.getElementById("btnVoltar").addEventListener("click", function () {
+  // Botões principais
+  document.getElementById("btnVoltar").addEventListener("click", () => {
     window.location.href = "index.html";
   });
   document
@@ -22,13 +22,14 @@ document.addEventListener("DOMContentLoaded", function () {
   document
     .getElementById("btnLimparFiltros")
     .addEventListener("click", limparFiltros);
-  document.getElementById("btnAnterior").addEventListener("click", function () {
+
+  document.getElementById("btnAnterior").addEventListener("click", () => {
     if (paginaAtual > 1) {
       paginaAtual--;
       exibirRegistros();
     }
   });
-  document.getElementById("btnProximo").addEventListener("click", function () {
+  document.getElementById("btnProximo").addEventListener("click", () => {
     const totalPaginas = Math.ceil(registros.length / registrosPorPagina);
     if (paginaAtual < totalPaginas) {
       paginaAtual++;
@@ -51,6 +52,23 @@ document.addEventListener("DOMContentLoaded", function () {
   document
     .getElementById("formEditar")
     .addEventListener("submit", salvarEdicao);
+
+  // Botões de editar/excluir (fora da tabela)
+  document.getElementById("btnEditar").addEventListener("click", () => {
+    if (!registroSelecionado) {
+      alert("Selecione um registro para editar!");
+      return;
+    }
+    abrirModalEdicao(registroSelecionado);
+  });
+
+  document.getElementById("btnExcluir").addEventListener("click", () => {
+    if (!registroSelecionado) {
+      alert("Selecione um registro para excluir!");
+      return;
+    }
+    abrirModalExclusao(registroSelecionado);
+  });
 });
 
 // Função para limpar os filtros
@@ -59,7 +77,6 @@ function limparFiltros() {
   document.getElementById("filtroDataFim").value = "";
   document.getElementById("filtroLocal").value = "";
 
-  // Recarregar a tabela sem filtros
   paginaAtual = 1;
   exibirRegistros();
 }
@@ -67,34 +84,24 @@ function limparFiltros() {
 async function carregarRegistros() {
   try {
     const response = await fetch("/api/km");
-    if (!response.ok) {
-      throw new Error("Erro ao carregar registros");
-    }
+    if (!response.ok) throw new Error("Erro ao carregar registros");
 
     registros = await response.json();
 
-    // Calcular KM Total para cada registro
     registros.forEach((registro) => {
       registro.kmTotal = registro.kmChegada - registro.kmSaida || 0;
     });
 
-    // Ordenar registros por data (decrescente) e por createdAt (decrescente) para desempate
     registros.sort((a, b) => {
-      // Primeiro compara pelas datas
       const dateComparison = new Date(b.data) - new Date(a.data);
-      if (dateComparison !== 0) {
-        return dateComparison;
-      }
-      // Se as datas forem iguais, ordena por createdAt (mais recente primeiro)
+      if (dateComparison !== 0) return dateComparison;
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
 
     exibirRegistros();
   } catch (error) {
     console.error("Erro:", error);
-    alert(
-      "Erro ao carregar registros. Verifique o console para mais detalhes."
-    );
+    alert("Erro ao carregar registros. Veja o console para detalhes.");
   }
 }
 
@@ -102,18 +109,13 @@ function exibirRegistros() {
   const tbody = document.querySelector("#tabelaRegistros tbody");
   tbody.innerHTML = "";
 
-  // Aplicar filtros se existirem
   let registrosFiltrados = aplicarFiltrosInterno(registros);
 
-  // Calcular índices para paginação
   const inicio = (paginaAtual - 1) * registrosPorPagina;
   const fim = inicio + registrosPorPagina;
   const registrosPagina = registrosFiltrados.slice(inicio, fim);
 
-  // Atualizar informações de paginação
-  const totalPaginas = Math.ceil(
-    registrosFiltrados.length / registrosPorPagina
-  );
+  const totalPaginas = Math.ceil(registrosFiltrados.length / registrosPorPagina);
   document.getElementById(
     "infoPagina"
   ).textContent = `Página ${paginaAtual} de ${totalPaginas}`;
@@ -131,6 +133,7 @@ function exibirRegistros() {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
+      <td><input type="radio" name="registroSelecionado" value="${registro._id}"></td>
       <td>${formatarData(registro.data)}</td>
       <td>${registro.chamado || ""}</td>
       <td>${registro.local}</td>
@@ -138,22 +141,16 @@ function exibirRegistros() {
       <td>${registro.kmChegada}</td>
       <td>${registro.kmTotal}</td>
       <td>${registro.observacoes || ""}</td>
-      <td class="actions">
-        <button class="btn-editar" data-id="${registro._id}">Editar</button>
-        <button class="btn-excluir" data-id="${registro._id}">Excluir</button>
-      </td>
     `;
 
     tbody.appendChild(tr);
   });
 
-  // Adicionar event listeners aos botões de ação
-  document.querySelectorAll(".btn-editar").forEach((btn) => {
-    btn.addEventListener("click", () => abrirModalEdicao(btn.dataset.id));
-  });
-
-  document.querySelectorAll(".btn-excluir").forEach((btn) => {
-    btn.addEventListener("click", () => abrirModalExclusao(btn.dataset.id));
+  // Captura seleção do radio
+  document.querySelectorAll("input[name='registroSelecionado']").forEach((radio) => {
+    radio.addEventListener("change", () => {
+      registroSelecionado = radio.value;
+    });
   });
 }
 
@@ -168,65 +165,54 @@ function aplicarFiltrosInterno(registros) {
   const local = document.getElementById("filtroLocal").value.toLowerCase();
 
   return registros.filter((registro) => {
-    // Filtro por data
     if (dataInicio && registro.data < dataInicio) return false;
     if (dataFim && registro.data > dataFim) return false;
-
-    // Filtro por local
     if (local && !registro.local.toLowerCase().includes(local)) return false;
-
     return true;
   });
 }
 
 function formatarData(data) {
   if (!data) return "";
-
-  // Assume que a data está no formato YYYY-MM-DD
   const partes = data.split("-");
-  if (partes.length === 3) {
-    return `${partes[2]}/${partes[1]}/${partes[0]}`;
-  }
-
+  if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
   return data;
 }
 
+// ----------------- EXCLUSÃO -----------------
 function abrirModalExclusao(id) {
-  registroParaExcluir = id;
+  registroSelecionado = id;
   document.getElementById("modalExcluir").style.display = "flex";
 }
 
 function fecharModalExclusao() {
-  registroParaExcluir = null;
+  registroSelecionado = null;
   document.getElementById("modalExcluir").style.display = "none";
 }
 
 async function confirmarExclusao() {
-  if (!registroParaExcluir) return;
+  if (!registroSelecionado) return;
 
   try {
-    const response = await fetch(`/api/km?id=${registroParaExcluir}`, {
+    const response = await fetch(`/api/km?id=${registroSelecionado}`, {
       method: "DELETE",
     });
-
-    if (!response.ok) {
-      throw new Error("Erro ao excluir registro");
-    }
+    if (!response.ok) throw new Error("Erro ao excluir registro");
 
     alert("Registro excluído com sucesso!");
     fecharModalExclusao();
-    carregarRegistros(); // Recarregar a lista
+    carregarRegistros();
   } catch (error) {
     console.error("Erro:", error);
-    alert("Erro ao excluir registro. Verifique o console para mais detalhes.");
+    alert("Erro ao excluir registro.");
   }
 }
 
+// ----------------- EDIÇÃO -----------------
 function abrirModalEdicao(id) {
   const registro = registros.find((r) => r._id === id);
   if (!registro) return;
 
-  // Preencher o formulário com os dados do registro
   document.getElementById("editId").value = registro._id;
   document.getElementById("editData").value = registro.data;
   document.getElementById("editChamado").value = registro.chamado || "";
@@ -253,7 +239,6 @@ async function salvarEdicao(e) {
   const kmChegada = parseInt(document.getElementById("editKmChegada").value);
   const observacoes = document.getElementById("editObservacoes").value;
 
-  // Validações
   if (kmChegada < kmSaida) {
     alert("KM de chegada não pode ser menor que KM de saída!");
     return;
@@ -272,33 +257,25 @@ async function salvarEdicao(e) {
   try {
     const response = await fetch(`/api/km?id=${id}`, {
       method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dadosAtualizados),
     });
-
-    if (!response.ok) {
-      throw new Error("Erro ao atualizar registro");
-    }
+    if (!response.ok) throw new Error("Erro ao atualizar registro");
 
     alert("Registro atualizado com sucesso!");
     fecharModalEdicao();
-    carregarRegistros(); // Recarregar a lista
+    carregarRegistros();
   } catch (error) {
     console.error("Erro:", error);
-    alert(
-      "Erro ao atualizar registro. Verifique o console para mais detalhes."
-    );
+    alert("Erro ao atualizar registro.");
   }
 }
 
+// ----------------- RELATÓRIOS -----------------
 async function baixarRelatorioCompletoCSV() {
   try {
     const response = await fetch("/api/report?format=csv");
-    if (!response.ok) {
-      throw new Error("Erro ao baixar relatório");
-    }
+    if (!response.ok) throw new Error("Erro ao baixar relatório");
 
     const csv = await response.text();
     const blob = new Blob([csv], { type: "text/csv" });
@@ -310,13 +287,12 @@ async function baixarRelatorioCompletoCSV() {
     URL.revokeObjectURL(url);
   } catch (error) {
     console.error("Erro:", error);
-    alert("Erro ao baixar relatório. Verifique o console para mais detalhes.");
+    alert("Erro ao baixar relatório.");
   }
 }
 
 async function baixarRelatorioCompletoXLS() {
   try {
-    // Pode reaproveitar os registros já carregados
     let dados = aplicarFiltrosInterno(registros).map((r) => ({
       Data: formatarData(r.data),
       Chamado: r.chamado || "",
@@ -332,22 +308,18 @@ async function baixarRelatorioCompletoXLS() {
       return;
     }
 
-    // Criar worksheet e workbook
     const worksheet = XLSX.utils.json_to_sheet(dados);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Relatório KM");
 
-    // Ajustar largura das colunas automaticamente
     const colWidths = Object.keys(dados[0]).map((key) => ({
-      wch:
-        Math.max(
-          key.length,
-          ...dados.map((r) => (r[key] ? r[key].toString().length : 0))
-        ) + 2,
+      wch: Math.max(
+        key.length,
+        ...dados.map((r) => (r[key] ? r[key].toString().length : 0))
+      ) + 2,
     }));
     worksheet["!cols"] = colWidths;
 
-    // Baixar o arquivo .xlsx
     XLSX.writeFile(workbook, "relatorio_km_completo.xlsx");
   } catch (error) {
     console.error("Erro:", error);
