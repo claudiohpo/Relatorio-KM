@@ -274,7 +274,18 @@ async function salvarEdicao(e) {
 // ----------------- RELATÓRIOS -----------------
 async function baixarRelatorioCompletoCSV() {
   try {
-    const response = await fetch("/api/report?format=csv");
+    // Pegue os valores dos filtros atuais
+    const dataInicio = document.getElementById("filtroDataInicio").value;
+    const dataFim = document.getElementById("filtroDataFim").value;
+    const local = document.getElementById("filtroLocal").value;
+
+    // Construa a query string com filtros (se existirem)
+    let query = "?format=csv";
+    if (dataInicio) query += `&from=${dataInicio}`;
+    if (dataFim) query += `&to=${dataFim}`;
+    if (local) query += `&local=${encodeURIComponent(local)}`;  // Encode para evitar problemas com espaços/especiais
+
+    const response = await fetch(`/api/report${query}`);
     if (!response.ok) throw new Error("Erro ao baixar relatório");
 
     const csv = await response.text();
