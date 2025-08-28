@@ -31,16 +31,21 @@ module.exports = async (req, res) => {
     if (req.method !== "GET") return res.status(405).end("Method Not Allowed");
 
     const col = await getCollection();
-    const { from, to, local, format } = req.query;  // Adicionado 'local'
+    const { from, to, format, local } = req.query;
     const filter = {};
+    
+    // Filtro por data
     if (from || to) {
       filter.data = {};
       if (from) filter.data.$gte = from;
       if (to) filter.data.$lte = to;
     }
+    
+    // Filtro por local
     if (local) {
-      filter.local = { $regex: new RegExp(local, 'i') };  // Filtro case-insensitive por local
+      filter.local = { $regex: local, $options: "i" }; // Busca case-insensitive
     }
+    
     const docs = await col.find(filter).sort({ data: 1 }).toArray();
 
     if ((format || "csv").toLowerCase() === "csv") {
@@ -60,7 +65,7 @@ module.exports = async (req, res) => {
         local: d.local || "",
         kmSaida: d.kmSaida ?? "",
         kmChegada: d.kmChegada ?? "",
-        kmTotal: d.kmTotal ?? d.kmChegada - d.kmSaida, // Calcular se não existir
+        kmTotal: d.kmTotal ?? (d.kmChegada - d.kmSaida),
         observacoes: d.observacoes || "",
         criadoEm: d.createdAt
           ? new Date(d.createdAt).toISOString()
