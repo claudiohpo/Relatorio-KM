@@ -25,18 +25,20 @@ Um sistema completo para controle de quilometragem veicular, permitindo o regist
 
 ```
 📁 projeto-km/
-├── 📁 api/
-│   ├── km.js          # API principal (CRUD)
-│   └── report.js      # Geração de relatórios
-├── 📄 index.html      # Página principal
-├── 📄 manutencao.html # Página de gestão
-├── 📄 styles.css      # Estilos principais
-├── 📄 manutencao.css  # Estilos da página de gestão
-├── 📄 script.js       # Script principal
-├── 📄 manutencao.js   # Script da página de gestão
-├── 📄 vercel.json     # Configuração do Vercel
-├── 📄 package.json    # Dependências do projeto
-└── 📄 .env.example    # Variáveis de ambiente exemplo
+├── 📁 api/                # Funções serverless
+│   ├── km.js                 # API principal (CRUD)
+│   └── report.js             # Geração de relatórios
+├── 📁 css/                # Pasta contendo Estilos 
+│   ├── main.css              # Estilos principais 
+│   └── management.css        # Estilos da página de gestão 
+├── 📁 js/                 # Scripts frontend (agrupa JS para separar do backend em /api)
+│   ├── main.js               # Script principal 
+│   └── management.js         # Script da página de gestão 
+├── 📄 index.html          # Página principal 
+├── 📄 management.html     # Página de gestão 
+├── 📄 vercel.json         # Configuração do Vercel
+└── 📄 package.json        # Dependências do projeto
+
 ```
 
 ## 🚀 Como Usar
