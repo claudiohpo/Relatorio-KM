@@ -97,6 +97,6 @@ btnSalvar.addEventListener("click", async (e) => {
 const btnManutencao = document.getElementById("btnManutencao");
 if (btnManutencao) {
   btnManutencao.addEventListener("click", () => {
-    window.location.href = "manutencao.html";
+    window.location.href = "/management.html";
   });
 }
