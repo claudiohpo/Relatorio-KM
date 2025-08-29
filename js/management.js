@@ -132,51 +132,28 @@ function exibirRegistros() {
     return;
   }
 
-//   registrosPagina.forEach((registro) => {
-//     const tr = document.createElement("tr");
-//     tr.innerHTML = `
-//       <td><input type="radio" name="registroSelecionado" value="${registro._id}"></td>
-//       <td>${formatarData(registro.data)}</td>
-//       <td>${registro.chamado || ""}</td>
-//       <td>${registro.local || ""}</td>
-//       <td>${registro.kmSaida || ""}</td>
-//       <td>${registro.kmChegada || ""}</td>
-//       <td>${registro.kmTotal || 0}</td>
-//       <td>${registro.observacoes || ""}</td>
-//     `;
-//     tbody.appendChild(tr);
-//   });
-
-//   // Captura seleção
-//   document.querySelectorAll("input[name='registroSelecionado']").forEach((radio) => {
-//     radio.addEventListener("change", () => {
-//       registroSelecionado = radio.value;
-//     });
-//   });
-// }
-
-registrosPagina.forEach((registro) => {
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
-    <td><input type="radio" name="registroSelecionado" value="${registro._id}"></td>
-    <td>${formatarData(registro.data)}</td>
-    <td>${registro.chamado || ""}</td>
-    <td>${registro.local || ""}</td>
-    <td>${registro.kmSaida || ""}</td>
-    <td>${registro.kmChegada || ""}</td>
-    <td>${registro.kmTotal !== undefined ? registro.kmTotal : ""}</td>
-    <td>${registro.observacoes || ""}</td>
-  `;
-
-  // Listener direto no radio recém-criado
-  const radio = tr.querySelector("input[name='registroSelecionado']");
-  radio.addEventListener("change", () => {
-    registroSelecionado = registro._id;
+  registrosPagina.forEach((registro) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td><input type="radio" name="registroSelecionado" value="${registro._id}"></td>
+      <td>${formatarData(registro.data)}</td>
+      <td>${registro.chamado || ""}</td>
+      <td>${registro.local || ""}</td>
+      <td>${registro.kmSaida || ""}</td>
+      <td>${registro.kmChegada || ""}</td>
+      <td>${registro.kmTotal || 0}</td>
+      <td>${registro.observacoes || ""}</td>
+    `;
+    tbody.appendChild(tr);
   });
 
-  tbody.appendChild(tr);
-});
-
+  // Captura seleção
+  document.querySelectorAll("input[name='registroSelecionado']").forEach((radio) => {
+    radio.addEventListener("change", () => {
+      registroSelecionado = radio.value;
+    });
+  });
+}
 
 function aplicarFiltros() {
   paginaAtual = 1;
