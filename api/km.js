@@ -98,6 +98,7 @@ module.exports = async (req, res) => {
         kmChegada,
         kmTotal: (kmChegada !== null && kmSaida !== null) ? (Number(kmChegada) - Number(kmSaida)) : null,
         local: body.local || null,              // sempre "local"
+        chamado: body.chamado || null,          // <-- novo campo "chamado"
         observacoes: body.observacoes || null,  // sempre "observacoes"
         createdAt: now,
         updatedAt: now
@@ -116,6 +117,7 @@ module.exports = async (req, res) => {
       if (body.kmSaida !== undefined) update.kmSaida = (body.kmSaida !== null && body.kmSaida !== "") ? Number(body.kmSaida) : null;
       if (body.kmChegada !== undefined) update.kmChegada = (body.kmChegada !== null && body.kmChegada !== "") ? Number(body.kmChegada) : null;
       if (body.local !== undefined) update.local = body.local;
+      if (body.chamado !== undefined) update.chamado = body.chamado;   // <-- tratar no update também
       if (body.observacoes !== undefined) update.observacoes = body.observacoes;
 
       if (update.kmChegada !== undefined || update.kmSaida !== undefined) {

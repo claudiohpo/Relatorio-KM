@@ -70,7 +70,6 @@ btnSalvar.addEventListener("click", async (e) => {
     chamado,
     local,
     observacoes,
-    obs: observacoes,       // compatibilidade com api que espera campo 'obs'
     kmSaida,
     kmChegada,
     criadoEm: new Date().toISOString(),

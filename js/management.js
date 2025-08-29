@@ -142,7 +142,7 @@ function exibirRegistros() {
       <td>${registro.kmSaida || ""}</td>
       <td>${registro.kmChegada || ""}</td>
       <td>${registro.kmTotal || 0}</td>
-      <td>${registro.observacoes || registro.obs || ""}</td>
+      <td>${registro.observacoes || ""}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -221,7 +221,7 @@ function abrirModalEdicao(id) {
   document.getElementById("editLocal").value = registro.local || "";
   document.getElementById("editKmSaida").value = registro.kmSaida || "";
   document.getElementById("editKmChegada").value = registro.kmChegada || "";
-  document.getElementById("editObservacoes").value = registro.observacoes || registro.obs || "";
+  document.getElementById("editObservacoes").value = registro.observacoes || "";
 
   document.getElementById("modalEditar").style.display = "flex";
 }
@@ -257,7 +257,6 @@ async function salvarEdicao(e) {
     chamado,
     local,
     observacoes,
-    obs: observacoes,
     kmSaida,
     kmChegada,
     kmTotal: (!isNaN(kmChegada) && !isNaN(kmSaida)) ? (kmChegada - kmSaida) : undefined,
@@ -317,7 +316,7 @@ async function baixarRelatorioCompletoXLS() {
       "KM Saída": r.kmSaida,
       "KM Chegada": r.kmChegada,
       "KM Total": r.kmTotal,
-      Observações: r.observacoes || r.obs || "",
+      Observações: r.observacoes || "",
     }));
 
     if (dados.length === 0) {
