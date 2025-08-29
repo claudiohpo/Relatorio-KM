@@ -1,4 +1,4 @@
-// js/auth.js - login and register
+// js/auth.js - login and register (melhor tratamento de resposta)
 const loginForm = document.getElementById("loginForm");
 const loginMsg = document.getElementById("loginMsg");
 const openRegister = document.getElementById("openRegister");
@@ -10,13 +10,19 @@ function showOverlay(el){ el.classList.add("show"); el.setAttribute("aria-hidden
 function hideOverlay(el){ el.classList.remove("show"); el.setAttribute("aria-hidden","true"); }
 
 openRegister.addEventListener("click", () => showOverlay(overlayRegister));
-// recovery link is inert for now (feature postponed)
-openRecover.addEventListener("click", () => {
-  // optional: show a friendly message
-  alert("Recuperação de senha será implementada em breve.");
-});
+openRecover.addEventListener("click", () => { alert("Recuperação de senha será implementada em breve."); });
 
 document.getElementById("regCancel").addEventListener("click", () => hideOverlay(overlayRegister));
+
+async function parseResponse(res) {
+  // tenta JSON; se falhar, retorna texto como { error: text }
+  const text = await res.text().catch(() => "");
+  try {
+    return text ? JSON.parse(text) : {};
+  } catch (e) {
+    return { error: text || "Resposta inválida do servidor" };
+  }
+}
 
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -44,23 +50,26 @@ registerForm.addEventListener("submit", async (e) => {
   try {
     const res = await fetch("/api/users", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
       body: JSON.stringify({ action: "register", username, email, password })
     });
-    const body = await res.json().catch(()=>({ error: "Resposta inválida do servidor" }));
+
+    const body = await parseResponse(res);
+
     if (!res.ok) {
       msgEl.style.color = "red";
-      msgEl.textContent = body.error || "Erro no cadastro.";
+      msgEl.textContent = body.error || `Erro ${res.status}`;
       console.error("Cadastro falhou:", body);
-    } else {
-      msgEl.style.color = "green";
-      msgEl.textContent = "Cadastro concluído. Faça login.";
-      setTimeout(()=> hideOverlay(overlayRegister), 1000);
+      return;
     }
+
+    msgEl.style.color = "green";
+    msgEl.textContent = "Cadastro concluído. Faça login.";
+    setTimeout(()=> hideOverlay(overlayRegister), 1000);
   } catch (err) {
+    console.error("Erro fetch /api/users register:", err);
     msgEl.style.color = "red";
     msgEl.textContent = "Erro de conexão com o servidor.";
-    console.error("Erro fetch /api/users register:", err);
   }
 });
 
@@ -80,24 +89,25 @@ loginForm.addEventListener("submit", async (e) => {
   try {
     const res = await fetch("/api/users", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
       body: JSON.stringify({ action: "login", username, password })
     });
-    const body = await res.json().catch(()=>({ error: "Resposta inválida do servidor" }));
+
+    const body = await parseResponse(res);
+
     if (!res.ok) {
       loginMsg.style.color = "red";
-      loginMsg.textContent = body.error || "Falha no login.";
+      loginMsg.textContent = body.error || `Falha no login (${res.status})`;
       console.error("Login falhou:", body);
-    } else {
-      // success: store username and redirect to app page (your old index)
-      localStorage.setItem("km_username", username);
-      // ajuste o destino se você renomeou sua página de KM (ex.: app.html)
-      window.location.href = "app.html";
+      return;
     }
+
+    localStorage.setItem("km_username", username);
+    window.location.href = "app.html";
   } catch (err) {
+    console.error("Erro fetch /api/users login:", err);
     loginMsg.style.color = "red";
     loginMsg.textContent = "Erro de conexão com o servidor.";
-    console.error("Erro fetch /api/users login:", err);
   }
 });
 

@@ -1,4 +1,4 @@
-// api/users.js (versão resiliente, lazy nodemailer)
+// api/users.js - handler robusto para register/login
 const { MongoClient } = require("mongodb");
 
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -6,94 +6,117 @@ const DB_NAME = process.env.DB_NAME || "km_db";
 const USERS_COLLECTION = process.env.USERS_COLLECTION || "USUARIOS";
 
 let clientPromise = null;
+
 async function getDb() {
   if (!MONGODB_URI) throw new Error("MONGODB_URI não definido");
   if (!clientPromise) {
-    const client = new MongoClient(MONGODB_URI);
+    const client = new MongoClient(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
     clientPromise = client.connect().then(() => client);
   }
   const client = await clientPromise;
   return client.db(DB_NAME);
 }
 
-async function sendRecoveryEmail(toEmail, username, password) {
-  // lazy require nodemailer so the module is optional
-  let nodemailer;
-  try {
-    nodemailer = require("nodemailer");
-  } catch (err) {
-    console.warn("nodemailer não disponível; pulando envio de e-mail", err && err.message);
-    return;
-  }
-
-  if (!process.env.SMTP_HOST) {
-    console.warn("SMTP não configurado, pulando envio de e-mail");
-    return;
-  }
-
-  try {
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || "587", 10),
-      secure: process.env.SMTP_SECURE === "true",
-      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-    });
-
-    const body = `Segue seus dados de acesso:\nUsuário: ${username}\nSenha: ${password}\n\n(Projeto acadêmico - senha em texto claro)`;
-    await transporter.sendMail({
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
-      to: toEmail,
-      subject: "Recuperação de senha - Registro KM",
-      text: body
-    });
-  } catch (err) {
-    console.error("Erro ao enviar e-mail de recuperação:", err);
-  }
+// fallback to read raw body when req.body is not set (serverless environments)
+async function readRawBody(req) {
+  return new Promise((resolve) => {
+    let data = "";
+    req.on && req.on("data", (chunk) => (data += chunk));
+    req.on && req.on("end", () => resolve(data || null));
+    req.on && req.on("error", () => resolve(null));
+    // If no streaming methods (some envs), return null
+    setTimeout(() => resolve(null), 50);
+  });
 }
 
 module.exports = async (req, res) => {
+  // garantir JSON em todas as respostas
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+
   try {
+    if (req.method !== "POST") {
+      res.statusCode = 405;
+      return res.end(JSON.stringify({ error: "Method Not Allowed. Use POST com action." }));
+    }
+
+    // body: prefira req.body se disponível; senão leia raw e parse
+    let body = req.body && Object.keys(req.body).length ? req.body : null;
+    if (!body) {
+      const raw = await readRawBody(req);
+      if (raw) {
+        try {
+          body = JSON.parse(raw);
+        } catch (e) {
+          // não é JSON válido - retornar erro
+          res.statusCode = 400;
+          return res.end(JSON.stringify({ error: "Corpo inválido. Envie JSON válido." }));
+        }
+      } else {
+        body = {};
+      }
+    }
+
+    // Log minimal para debug (sem expor senhas nos logs em produção; aqui é útil enquanto debugamos)
+    console.log("api/users - recebido body:", JSON.stringify(Object.assign({}, body, { password: body.password ? "[REDACTED]" : undefined })));
+
+    const action = body.action;
+    if (!action) {
+      res.statusCode = 400;
+      return res.end(JSON.stringify({ error: "Campo 'action' obrigatório (register | login)." }));
+    }
+
     const db = await getDb();
     const users = db.collection(USERS_COLLECTION);
 
-    if (req.method === 'POST' && req.url.endsWith('/register')) {
-      const { username, email, password } = req.body || {};
-      if (!username || !email || !password) return res.status(400).json({ error:'Dados incompletos' });
-      const exists = await users.findOne({ username });
-      if (exists) return res.status(409).json({ error:'Usuário já existe' });
-      await users.insertOne({ username, email, password });
-      return res.status(201).json({ message:'Usuário criado' });
-    }
-
-    if (req.method === 'POST' && req.url.endsWith('/login')) {
-      const { username, password } = req.body || {};
-      if (!username || !password) return res.status(400).json({ error:'Dados incompletos' });
-      const user = await users.findOne({ username });
-      if (!user || user.password !== password) return res.status(401).json({ error:'Usuário ou senha inválidos' });
-      return res.status(200).json({ message:'OK' });
-    }
-
-    if (req.method === 'POST' && req.url.endsWith('/recover')) {
-      const { email } = req.body || {};
-      if (!email) return res.status(400).json({ error:'Email obrigatório' });
-      const user = await users.findOne({ email });
-      if (!user) return res.status(200).json({ message:'Se o e-mail estiver cadastrado, você receberá instruções.' });
-      try {
-        await sendRecoveryEmail(email, user.username, user.password);
-      } catch(err) {
-        console.error('Erro enviando email', err);
+    if (action === "register") {
+      const { username, email, password } = body;
+      if (!username || !email || !password) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: "Dados incompletos." }));
       }
-      return res.status(200).json({ message:'Se o e-mail estiver cadastrado, você receberá instruções.' });
+
+      const usernameNormalized = String(username).trim().toLowerCase();
+      if (!/^[a-z0-9_\-]+$/.test(usernameNormalized)) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: "Nome de usuário inválido. Use letras, números, '_' ou '-'." }));
+      }
+
+      const existing = await users.findOne({ username: usernameNormalized });
+      if (existing) {
+        res.statusCode = 409;
+        return res.end(JSON.stringify({ error: "Usuário já existe." }));
+      }
+
+      await users.insertOne({ username: usernameNormalized, email, password });
+      res.statusCode = 201;
+      return res.end(JSON.stringify({ message: "Usuário criado." }));
     }
 
-    res.setHeader('Allow','POST');
-    res.status(405).end('Method Not Allowed');
-  } catch(err) {
-    console.error(err);
-    // detect specific errors
-    if (err.message && err.message.includes("MONGODB_URI")) {
-      return res.status(500).json({ error: "Configuração MONGODB_URI ausente ou inválida no ambiente." });
+    if (action === "login") {
+      const { username, password } = body;
+      if (!username || !password) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: "Dados incompletos." }));
+      }
+      const usernameNormalized = String(username).trim().toLowerCase();
+      const user = await users.findOne({ username: usernameNormalized });
+      if (!user || user.password !== password) {
+        res.statusCode = 401;
+        return res.end(JSON.stringify({ error: "Usuário ou senha inválidos." }));
+      }
+      res.statusCode = 200;
+      return res.end(JSON.stringify({ message: "OK" }));
     }
-    return res.status(500).json({ error:'Erro interno' });
+
+    res.statusCode = 400;
+    return res.end(JSON.stringify({ error: "Action desconhecida." }));
+  } catch (err) {
+    // Log detalhado para debugging (você pode remover stack em produção)
+    console.error("api/users error:", err && err.stack ? err.stack : err);
+
+    // retorna JSON com mensagem curta + detalhe para debugging
+    res.statusCode = 500;
+    const msg = (err && err.message) ? err.message : "Erro interno";
+    return res.end(JSON.stringify({ error: "Erro interno", detail: msg }));
   }
 };
