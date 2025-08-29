@@ -10,68 +10,65 @@
 <body>
   <main class="container">
     <h1>Registro de KM Rodados</h1>
+
     <div class="card auth-card">
       <form id="loginForm" autocomplete="off">
         <label class="lbl">Usuário
           <input class="inp" type="text" id="loginUsername" required placeholder="Seu usuário" />
         </label>
+
         <label class="lbl">Senha
           <input class="inp" type="password" id="loginPassword" required placeholder="Sua senha" />
         </label>
+
         <div class="row" style="gap:8px;">
           <button id="btnLogin" type="submit" class="btn primary" style="flex:1">Entrar</button>
           <button id="btnDemo" type="button" class="btn" style="flex:0">Demo</button>
         </div>
+
         <div class="auth-footer">
           <span class="link-like" id="openRegister">Criar conta</span> ·
-          <span class="link-like" id="openRecover">Recuperar senha</span>
+          <span class="link-like" id="openRecover">Recuperar senha (em breve)</span>
         </div>
+
         <p id="loginMsg" class="msg" style="margin-top:10px"></p>
       </form>
     </div>
   </main>
 
-  <!-- Modals -->
+  <!-- Modal: Cadastro -->
   <div class="overlay" id="overlayRegister" aria-hidden="true">
-    <div class="popup">
+    <div class="popup" role="dialog" aria-modal="true">
       <h2>Criar conta</h2>
       <form id="registerForm">
-        <label>Usuário
-          <input type="text" id="regUsername" required />
+        <label class="lbl">Usuário
+          <input class="inp" type="text" id="regUsername" required />
         </label>
-        <label>Email
-          <input type="email" id="regEmail" required />
+        <label class="lbl">Email
+          <input class="inp" type="email" id="regEmail" required />
         </label>
-        <label>Senha
-          <input type="password" id="regPassword" required />
+        <label class="lbl">Senha
+          <input class="inp" type="password" id="regPassword" required />
         </label>
-        <label>Confirmar senha
-          <input type="password" id="regPassword2" required />
+        <label class="lbl">Confirmar senha
+          <input class="inp" type="password" id="regPassword2" required />
         </label>
+
         <div class="actions">
           <button type="button" id="regCancel" class="btn">Cancelar</button>
           <button type="submit" id="regSubmit" class="btn primary">Cadastrar</button>
         </div>
+
         <p id="regMsg" class="msg"></p>
       </form>
     </div>
   </div>
 
-  <div class="overlay" id="overlayRecover" aria-hidden="true">
-    <div class="popup">
-      <h2>Recuperar senha</h2>
-      <form id="recoverForm">
-        <label>Email cadastrado
-          <input type="email" id="recEmail" required />
-        </label>
-        <div class="actions">
-          <button type="button" id="recCancel" class="btn">Cancelar</button>
-          <button type="submit" id="recSubmit" class="btn primary">Enviar</button>
-        </div>
-        <p id="recMsg" class="msg"></p>
-      </form>
+  <footer>
+    <div class="footer-inner">
+      Desenvolvido por <a href="https://github.com/claudiohpo" target="_blank" rel="noopener">Cláudio Oliveira</a>
     </div>
-  </div>
+  </footer>
 
   <script src="js/auth.js"></script>
 </body>

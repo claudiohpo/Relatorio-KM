@@ -1,10 +1,16 @@
 /* css/auth.css - styles for login/register modals */
+:root {
+    --card: #ffffff;
+    --accent: #2b7cff;
+    --muted: #666666;
+}
+
 .auth-card {
     max-width: 420px;
     margin: 20px auto;
     padding: 18px;
     border-radius: 10px;
-    background: var(--card, #fff);
+    background: var(--card);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
 }
 
@@ -12,6 +18,7 @@
     display: block;
     margin: 10px 0 6px;
     font-weight: 600;
+    font-size: 14px;
 }
 
 .inp {
@@ -20,6 +27,7 @@
     border-radius: 6px;
     border: 1px solid #ddd;
     font-size: 14px;
+    box-sizing: border-box;
 }
 
 .row {
@@ -37,19 +45,19 @@
 }
 
 .btn.primary {
-    background: var(--accent, #2b7cff);
+    background: var(--accent);
     color: white;
 }
 
 .auth-footer {
     margin-top: 12px;
     text-align: center;
-    color: var(--muted, #666);
+    color: var(--muted);
     font-size: 14px;
 }
 
 .link-like {
-    color: var(--accent, #2b7cff);
+    color: var(--accent);
     cursor: pointer;
     text-decoration: underline;
 }
@@ -71,7 +79,7 @@
 .popup {
     width: 420px;
     max-width: 94%;
-    background: var(--card, #fff);
+    background: var(--card);
     padding: 16px;
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
@@ -87,4 +95,5 @@
 .msg {
     margin-top: 6px;
     font-size: 13px;
+    color: #333;
 }

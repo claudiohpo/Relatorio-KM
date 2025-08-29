@@ -1,7 +1,7 @@
-
-// helper to call backend with X-Usuario header
-function fetchWithUser(url, opts={}){
+// helper to call backend with X-Usuario header (adicionar no topo de main.js e management.js)
+function fetchWithUser(url, opts = {}) {
   const username = localStorage.getItem('km_username');
+  opts = opts || {};
   opts.headers = opts.headers || {};
   if (username) opts.headers['X-Usuario'] = username;
   return fetch(url, opts);
@@ -64,13 +64,16 @@ btnSalvar.addEventListener("click", async (e) => {
   const observacoes = document.getElementById("observacoes").value.trim();
   const kmChegada = kmChegadaInput === "" ? null : Number(kmChegadaInput);
 
+  // Montar payload incluindo campos duplicados (nome/obs) para compatibilidade com backend
   const payload = {
     data,
     chamado,
     local,
+    nome: local,            // compatibilidade com api que espera campo 'nome'
+    observacoes,
+    obs: observacoes,       // compatibilidade com api que espera campo 'obs'
     kmSaida,
     kmChegada,
-    observacoes,
     criadoEm: new Date().toISOString(),
   };
 

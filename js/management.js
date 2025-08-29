@@ -1,7 +1,7 @@
-
-// helper to call backend with X-Usuario header
-function fetchWithUser(url, opts={}){
+// helper to call backend with X-Usuario header (adicionar no topo de main.js e management.js)
+function fetchWithUser(url, opts = {}) {
   const username = localStorage.getItem('km_username');
+  opts = opts || {};
   opts.headers = opts.headers || {};
   if (username) opts.headers['X-Usuario'] = username;
   return fetch(url, opts);
@@ -98,13 +98,13 @@ async function carregarRegistros() {
     registros = await response.json();
 
     registros.forEach((registro) => {
-      registro.kmTotal = registro.kmChegada - registro.kmSaida || 0;
+      registro.kmTotal = (registro.kmChegada || 0) - (registro.kmSaida || 0);
     });
 
     registros.sort((a, b) => {
       const dateComparison = new Date(b.data) - new Date(a.data);
       if (dateComparison !== 0) return dateComparison;
-      return new Date(b.createdAt) - new Date(a.createdAt);
+      return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
     });
 
     exibirRegistros();
@@ -124,7 +124,7 @@ function exibirRegistros() {
   const fim = inicio + registrosPorPagina;
   const registrosPagina = registrosFiltrados.slice(inicio, fim);
 
-  const totalPaginas = Math.ceil(registrosFiltrados.length / registrosPorPagina);
+  const totalPaginas = Math.max(1, Math.ceil(registrosFiltrados.length / registrosPorPagina));
   document.getElementById(
     "infoPagina"
   ).textContent = `Página ${paginaAtual} de ${totalPaginas}`;
@@ -133,7 +133,7 @@ function exibirRegistros() {
 
   if (registrosPagina.length === 0) {
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td colspan="9" style="text-align: center;">Nenhum registro encontrado</td>`; //valor antigo colspan=8
+    tr.innerHTML = `<td colspan="9" style="text-align: center;">Nenhum registro encontrado</td>`;
     tbody.appendChild(tr);
     return;
   }
@@ -145,11 +145,11 @@ function exibirRegistros() {
       <td><input type="radio" name="registroSelecionado" value="${registro._id}"></td>
       <td>${formatarData(registro.data)}</td>
       <td>${registro.chamado || ""}</td>
-      <td>${registro.local}</td>
-      <td>${registro.kmSaida}</td>
-      <td>${registro.kmChegada}</td>
-      <td>${registro.kmTotal}</td>
-      <td>${registro.observacoes || ""}</td>
+      <td>${registro.local || registro.nome || ""}</td>
+      <td>${registro.kmSaida || ""}</td>
+      <td>${registro.kmChegada || ""}</td>
+      <td>${registro.kmTotal || 0}</td>
+      <td>${registro.observacoes || registro.obs || ""}</td>
     `;
 
     tbody.appendChild(tr);
@@ -171,19 +171,20 @@ function aplicarFiltros() {
 function aplicarFiltrosInterno(registros) {
   const dataInicio = document.getElementById("filtroDataInicio").value;
   const dataFim = document.getElementById("filtroDataFim").value;
-  const local = document.getElementById("filtroLocal").value.toLowerCase();
+  const local = (document.getElementById("filtroLocal").value || "").toLowerCase();
 
   return registros.filter((registro) => {
     if (dataInicio && registro.data < dataInicio) return false;
     if (dataFim && registro.data > dataFim) return false;
-    if (local && !registro.local.toLowerCase().includes(local)) return false;
+    const campoLocal = (registro.local || registro.nome || "").toLowerCase();
+    if (local && !campoLocal.includes(local)) return false;
     return true;
   });
 }
 
 function formatarData(data) {
   if (!data) return "";
-  const partes = data.split("-");
+  const partes = (typeof data === "string" ? data : "").split("-");
   if (partes.length === 3) return `${partes[2]}/${partes[1]}/${partes[0]}`;
   return data;
 }
@@ -203,7 +204,7 @@ async function confirmarExclusao() {
   if (!registroSelecionado) return;
 
   try {
-    const response = await fetch(`/api/km?id=${registroSelecionado}`, {
+    const response = await fetchWithUser(`/api/km?id=${registroSelecionado}`, {
       method: "DELETE",
     });
     if (!response.ok) throw new Error("Erro ao excluir registro");
@@ -219,16 +220,16 @@ async function confirmarExclusao() {
 
 // ----------------- EDIÇÃO -----------------
 function abrirModalEdicao(id) {
-  const registro = registros.find((r) => r._id === id);
+  const registro = registros.find((r) => String(r._id) === String(id));
   if (!registro) return;
 
   document.getElementById("editId").value = registro._id;
   document.getElementById("editData").value = registro.data;
   document.getElementById("editChamado").value = registro.chamado || "";
-  document.getElementById("editLocal").value = registro.local;
-  document.getElementById("editKmSaida").value = registro.kmSaida;
-  document.getElementById("editKmChegada").value = registro.kmChegada;
-  document.getElementById("editObservacoes").value = registro.observacoes || "";
+  document.getElementById("editLocal").value = registro.local || registro.nome || "";
+  document.getElementById("editKmSaida").value = registro.kmSaida || "";
+  document.getElementById("editKmChegada").value = registro.kmChegada || "";
+  document.getElementById("editObservacoes").value = registro.observacoes || registro.obs || "";
 
   document.getElementById("modalEditar").style.display = "flex";
 }
@@ -248,23 +249,31 @@ async function salvarEdicao(e) {
   const kmChegada = parseInt(document.getElementById("editKmChegada").value);
   const observacoes = document.getElementById("editObservacoes").value;
 
-  if (kmChegada < kmSaida) {
+  if (!id) {
+    alert("ID do registro ausente.");
+    return;
+  }
+
+  if (!isNaN(kmChegada) && !isNaN(kmSaida) && kmChegada < kmSaida) {
     alert("KM de chegada não pode ser menor que KM de saída!");
     return;
   }
 
   const dadosAtualizados = {
+    id,
     data,
     chamado,
     local,
+    nome: local,           // compatibilidade
+    observacoes,
+    obs: observacoes,      // compatibilidade
     kmSaida,
     kmChegada,
-    observacoes,
-    kmTotal: kmChegada - kmSaida,
+    kmTotal: (!isNaN(kmChegada) && !isNaN(kmSaida)) ? (kmChegada - kmSaida) : undefined,
   };
 
   try {
-    const response = await fetch(`/api/km?id=${id}`, {
+    const response = await fetchWithUser("/api/km", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dadosAtualizados),
@@ -294,7 +303,7 @@ async function baixarRelatorioCompletoCSV() {
     if (dataFim) query += `&to=${dataFim}`;
     if (local) query += `&local=${encodeURIComponent(local)}`;  // Encode para evitar problemas com espaços/especiais
 
-    const response = await fetch(`/api/report${query}`);
+    const response = await fetchWithUser(`/api/report${query}`);
     if (!response.ok) throw new Error("Erro ao baixar relatório");
 
     const csv = await response.text();
@@ -316,11 +325,11 @@ async function baixarRelatorioCompletoXLS() {
     let dados = aplicarFiltrosInterno(registros).map((r) => ({
       Data: formatarData(r.data),
       Chamado: r.chamado || "",
-      Local: r.local,
+      Local: r.local || r.nome || "",
       "KM Saída": r.kmSaida,
       "KM Chegada": r.kmChegada,
       "KM Total": r.kmTotal,
-      Observações: r.observacoes || "",
+      Observações: r.observacoes || r.obs || "",
     }));
 
     if (dados.length === 0) {
