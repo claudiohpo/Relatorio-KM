@@ -3,6 +3,7 @@
     --card: #ffffff;
     --accent: #2b7cff;
     --muted: #666666;
+    --back: #ff9800;
 }
 
 .auth-card {
@@ -97,4 +98,10 @@
     font-size: 13px;
     color: #333;
 }
+
+.btn.cancel {
+    background-color: #ff9800;
+    color: #fff;
+}
+
 
