@@ -69,7 +69,6 @@ btnSalvar.addEventListener("click", async (e) => {
     data,
     chamado,
     local,
-    nome: local,            // compatibilidade com api que espera campo 'nome'
     observacoes,
     obs: observacoes,       // compatibilidade com api que espera campo 'obs'
     kmSaida,

@@ -10,7 +10,7 @@ async function getDb() {
   if (!MONGODB_URI) throw new Error("MONGODB_URI não definido");
   if (!clientPromise) {
     const client = new MongoClient(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
-    clientPromise = client.connect().then(()=>client);
+    clientPromise = client.connect().then(() => client);
   }
   const client = await clientPromise;
   return client.db(DB_NAME);
@@ -41,7 +41,6 @@ async function getCollectionForRequest(req) {
 function toYMD(value) {
   if (!value) return new Date().toISOString().slice(0, 10);
   const s = String(value);
-  // se vier "2025-08-29T00:00:00.000Z" -> corta os 10 primeiros
   if (s.length >= 10 && s[4] === "-" && s[7] === "-") return s.slice(0, 10);
   try {
     return new Date(s).toISOString().slice(0, 10);
@@ -50,7 +49,7 @@ function toYMD(value) {
   }
 }
 
-// fallback parser for environments that don't set req.body
+// fallback parser
 async function parseBodyFallback(req) {
   return new Promise((resolve) => {
     let data = "";
@@ -73,7 +72,7 @@ module.exports = async (req, res) => {
         try {
           const doc = await collection.findOne({ _id: new ObjectId(q.id) });
           return res.json(doc || null);
-        } catch (err) {
+        } catch {
           return res.status(400).json({ error: "ID inválido" });
         }
       }
@@ -81,7 +80,6 @@ module.exports = async (req, res) => {
         const docs = await collection.find().sort({ data: -1, createdAt: -1 }).limit(1).toArray();
         return res.json(docs[0] || null);
       }
-      // list all (ordenar por data desc e createdAt desc)
       const docs = await collection.find().sort({ data: -1, createdAt: -1 }).toArray();
       return res.json(docs);
     }
@@ -93,14 +91,16 @@ module.exports = async (req, res) => {
       const kmSaida = (body.kmSaida !== undefined && body.kmSaida !== null) ? Number(body.kmSaida) : null;
       const kmChegada = (body.kmChegada !== undefined && body.kmChegada !== null) ? Number(body.kmChegada) : null;
 
+      const now = new Date();
       const doc = {
-        data: dataStr,                                   // <-- string YYYY-MM-DD
+        data: dataStr,
         kmSaida,
         kmChegada,
         kmTotal: (kmChegada !== null && kmSaida !== null) ? (Number(kmChegada) - Number(kmSaida)) : null,
-        local: (body.local !== undefined ? body.local : (body.nome !== undefined ? body.nome : null)), // <-- salva local
-        observacoes: (body.observacoes !== undefined ? body.observacoes : (body.obs !== undefined ? body.obs : null)), // <-- salva observações
-        createdAt: new Date()
+        local: body.local || null,              // sempre "local"
+        observacoes: body.observacoes || null,  // sempre "observacoes"
+        createdAt: now,
+        updatedAt: now
       };
 
       const result = await collection.insertOne(doc);
@@ -112,17 +112,12 @@ module.exports = async (req, res) => {
       if (!body.id) return res.status(400).json({ error: "ID obrigatório" });
 
       let update = {};
-      if (body.data) update.data = toYMD(body.data);        // <-- mantém como string
+      if (body.data) update.data = toYMD(body.data);
       if (body.kmSaida !== undefined) update.kmSaida = (body.kmSaida !== null && body.kmSaida !== "") ? Number(body.kmSaida) : null;
       if (body.kmChegada !== undefined) update.kmChegada = (body.kmChegada !== null && body.kmChegada !== "") ? Number(body.kmChegada) : null;
-      if (body.local !== undefined || body.nome !== undefined) {
-        update.local = (body.local !== undefined) ? body.local : body.nome;
-      }
-      if (body.observacoes !== undefined || body.obs !== undefined) {
-        update.observacoes = (body.observacoes !== undefined) ? body.observacoes : body.obs;
-      }
+      if (body.local !== undefined) update.local = body.local;
+      if (body.observacoes !== undefined) update.observacoes = body.observacoes;
 
-      // recalc kmTotal se kmSaida/ kmChegada tiverem mudado
       if (update.kmChegada !== undefined || update.kmSaida !== undefined) {
         const existing = await collection.findOne({ _id: new ObjectId(body.id) });
         const kmSaida = (update.kmSaida !== undefined) ? update.kmSaida : existing.kmSaida;
@@ -142,7 +137,7 @@ module.exports = async (req, res) => {
       try {
         await collection.deleteOne({ _id: new ObjectId(q.id) });
         return res.json({ message: "Registro excluído com sucesso" });
-      } catch (err) {
+      } catch {
         return res.status(400).json({ error: "ID inválido" });
       }
     }

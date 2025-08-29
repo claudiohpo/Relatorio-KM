@@ -1,17 +1,25 @@
-// helper to call backend with X-Usuario header (adicionar no topo de main.js e management.js)
+// ----------------- HELPER FETCH -----------------
+// Centraliza chamada ao backend, adicionando usuário logado e Content-Type
 function fetchWithUser(url, opts = {}) {
   const username = localStorage.getItem('km_username');
   opts = opts || {};
   opts.headers = opts.headers || {};
+
   if (username) opts.headers['X-Usuario'] = username;
+  if (opts.body && !opts.headers['Content-Type']) {
+    opts.headers['Content-Type'] = 'application/json';
+  }
+
   return fetch(url, opts);
 }
 
+// ----------------- VARIÁVEIS GLOBAIS -----------------
 let registroSelecionado = null;
 let registros = [];
 let paginaAtual = 1;
 const registrosPorPagina = 10;
 
+// ----------------- INICIALIZAÇÃO -----------------
 document.addEventListener("DOMContentLoaded", function () {
   carregarRegistros();
 
@@ -19,19 +27,12 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("btnVoltar").addEventListener("click", () => {
     window.location.href = "app.html";
   });
-  document
-    .getElementById("btnBaixarRelatorioCSV")
-    .addEventListener("click", baixarRelatorioCompletoCSV);
-  document
-    .getElementById("btnBaixarRelatorioXLS")
-    .addEventListener("click", baixarRelatorioCompletoXLS);
-  document
-    .getElementById("btnAplicarFiltros")
-    .addEventListener("click", aplicarFiltros);
-  document
-    .getElementById("btnLimparFiltros")
-    .addEventListener("click", limparFiltros);
+  document.getElementById("btnBaixarRelatorioCSV").addEventListener("click", baixarRelatorioCompletoCSV);
+  document.getElementById("btnBaixarRelatorioXLS").addEventListener("click", baixarRelatorioCompletoXLS);
+  document.getElementById("btnAplicarFiltros").addEventListener("click", aplicarFiltros);
+  document.getElementById("btnLimparFiltros").addEventListener("click", limparFiltros);
 
+  // Paginação
   document.getElementById("btnAnterior").addEventListener("click", () => {
     if (paginaAtual > 1) {
       paginaAtual--;
@@ -47,22 +48,14 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Modal de exclusão
-  document
-    .getElementById("btnCancelarExclusao")
-    .addEventListener("click", fecharModalExclusao);
-  document
-    .getElementById("btnConfirmarExclusao")
-    .addEventListener("click", confirmarExclusao);
+  document.getElementById("btnCancelarExclusao").addEventListener("click", fecharModalExclusao);
+  document.getElementById("btnConfirmarExclusao").addEventListener("click", confirmarExclusao);
 
   // Modal de edição
-  document
-    .getElementById("btnCancelarEdicao")
-    .addEventListener("click", fecharModalEdicao);
-  document
-    .getElementById("formEditar")
-    .addEventListener("submit", salvarEdicao);
+  document.getElementById("btnCancelarEdicao").addEventListener("click", fecharModalEdicao);
+  document.getElementById("formEditar").addEventListener("submit", salvarEdicao);
 
-  // Botões de editar/excluir (fora da tabela)
+  // Botões fora da tabela
   document.getElementById("btnEditar").addEventListener("click", () => {
     if (!registroSelecionado) {
       alert("Selecione um registro para editar!");
@@ -80,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// Função para limpar os filtros
+// ----------------- FILTROS -----------------
 function limparFiltros() {
   document.getElementById("filtroDataInicio").value = "";
   document.getElementById("filtroDataFim").value = "";
@@ -97,10 +90,12 @@ async function carregarRegistros() {
 
     registros = await response.json();
 
+    // Calcula KM total
     registros.forEach((registro) => {
       registro.kmTotal = (registro.kmChegada || 0) - (registro.kmSaida || 0);
     });
 
+    // Ordena por data (desc) e depois por createdAt
     registros.sort((a, b) => {
       const dateComparison = new Date(b.data) - new Date(a.data);
       if (dateComparison !== 0) return dateComparison;
@@ -114,6 +109,7 @@ async function carregarRegistros() {
   }
 }
 
+// ----------------- EXIBIÇÃO -----------------
 function exibirRegistros() {
   const tbody = document.querySelector("#tabelaRegistros tbody");
   tbody.innerHTML = "";
@@ -125,9 +121,7 @@ function exibirRegistros() {
   const registrosPagina = registrosFiltrados.slice(inicio, fim);
 
   const totalPaginas = Math.max(1, Math.ceil(registrosFiltrados.length / registrosPorPagina));
-  document.getElementById(
-    "infoPagina"
-  ).textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+  document.getElementById("infoPagina").textContent = `Página ${paginaAtual} de ${totalPaginas}`;
   document.getElementById("btnAnterior").disabled = paginaAtual <= 1;
   document.getElementById("btnProximo").disabled = paginaAtual >= totalPaginas;
 
@@ -140,22 +134,20 @@ function exibirRegistros() {
 
   registrosPagina.forEach((registro) => {
     const tr = document.createElement("tr");
-
     tr.innerHTML = `
       <td><input type="radio" name="registroSelecionado" value="${registro._id}"></td>
       <td>${formatarData(registro.data)}</td>
       <td>${registro.chamado || ""}</td>
-      <td>${registro.local || registro.nome || ""}</td>
+      <td>${registro.local || ""}</td>
       <td>${registro.kmSaida || ""}</td>
       <td>${registro.kmChegada || ""}</td>
       <td>${registro.kmTotal || 0}</td>
       <td>${registro.observacoes || registro.obs || ""}</td>
     `;
-
     tbody.appendChild(tr);
   });
 
-  // Captura seleção do radio
+  // Captura seleção
   document.querySelectorAll("input[name='registroSelecionado']").forEach((radio) => {
     radio.addEventListener("change", () => {
       registroSelecionado = radio.value;
@@ -176,7 +168,7 @@ function aplicarFiltrosInterno(registros) {
   return registros.filter((registro) => {
     if (dataInicio && registro.data < dataInicio) return false;
     if (dataFim && registro.data > dataFim) return false;
-    const campoLocal = (registro.local || registro.nome || "").toLowerCase();
+    const campoLocal = (registro.local || "").toLowerCase();
     if (local && !campoLocal.includes(local)) return false;
     return true;
   });
@@ -226,7 +218,7 @@ function abrirModalEdicao(id) {
   document.getElementById("editId").value = registro._id;
   document.getElementById("editData").value = registro.data;
   document.getElementById("editChamado").value = registro.chamado || "";
-  document.getElementById("editLocal").value = registro.local || registro.nome || "";
+  document.getElementById("editLocal").value = registro.local || "";
   document.getElementById("editKmSaida").value = registro.kmSaida || "";
   document.getElementById("editKmChegada").value = registro.kmChegada || "";
   document.getElementById("editObservacoes").value = registro.observacoes || registro.obs || "";
@@ -264,9 +256,8 @@ async function salvarEdicao(e) {
     data,
     chamado,
     local,
-    nome: local,           // compatibilidade
     observacoes,
-    obs: observacoes,      // compatibilidade
+    obs: observacoes,
     kmSaida,
     kmChegada,
     kmTotal: (!isNaN(kmChegada) && !isNaN(kmSaida)) ? (kmChegada - kmSaida) : undefined,
@@ -275,7 +266,6 @@ async function salvarEdicao(e) {
   try {
     const response = await fetchWithUser("/api/km", {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(dadosAtualizados),
     });
     if (!response.ok) throw new Error("Erro ao atualizar registro");
@@ -292,16 +282,14 @@ async function salvarEdicao(e) {
 // ----------------- RELATÓRIOS -----------------
 async function baixarRelatorioCompletoCSV() {
   try {
-    // Pegue os valores dos filtros atuais
     const dataInicio = document.getElementById("filtroDataInicio").value;
     const dataFim = document.getElementById("filtroDataFim").value;
     const local = document.getElementById("filtroLocal").value;
 
-    // Construa a query string com filtros (se existirem)
     let query = "?format=csv";
     if (dataInicio) query += `&from=${dataInicio}`;
     if (dataFim) query += `&to=${dataFim}`;
-    if (local) query += `&local=${encodeURIComponent(local)}`;  // Encode para evitar problemas com espaços/especiais
+    if (local) query += `&local=${encodeURIComponent(local)}`;
 
     const response = await fetchWithUser(`/api/report${query}`);
     if (!response.ok) throw new Error("Erro ao baixar relatório");
@@ -325,7 +313,7 @@ async function baixarRelatorioCompletoXLS() {
     let dados = aplicarFiltrosInterno(registros).map((r) => ({
       Data: formatarData(r.data),
       Chamado: r.chamado || "",
-      Local: r.local || r.nome || "",
+      Local: r.local || "",
       "KM Saída": r.kmSaida,
       "KM Chegada": r.kmChegada,
       "KM Total": r.kmTotal,
