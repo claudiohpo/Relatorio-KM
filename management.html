@@ -8,6 +8,22 @@
   <link rel="stylesheet" href="css/management.css" />
 </head>
 <body>
+  <!-- Guard: exige sessão (sessionStorage). Se não existir, redireciona para index.html -->
+  <script>
+    (function () {
+      try {
+        const username = sessionStorage.getItem('km_username');
+        if (!username) {
+          try { localStorage.removeItem('km_username'); } catch (e) {}
+          const redirect = encodeURIComponent(location.pathname + location.search + location.hash);
+          window.location.replace('/index.html?redirect=' + redirect);
+        }
+      } catch (e) {
+        window.location.replace('/index.html?redirect=' + encodeURIComponent(location.pathname));
+      }
+    })();
+  </script>
+
   <main class="container">
     <h1>Manutenção de Registros de KM</h1>
 

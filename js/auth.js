@@ -1,4 +1,6 @@
 // js/auth.js - login and register (melhor tratamento de resposta)
+// Atualizado: grava sessão em sessionStorage e respeita redirect param
+
 const loginForm = document.getElementById("loginForm");
 const loginMsg = document.getElementById("loginMsg");
 const openRegister = document.getElementById("openRegister");
@@ -102,7 +104,23 @@ loginForm.addEventListener("submit", async (e) => {
       return;
     }
 
-    localStorage.setItem("km_username", username);
+    // grava sessão somente em sessionStorage (não persiste entre janelas)
+    sessionStorage.setItem("km_username", username);
+
+    // redireciona para página original se fornecida
+    const params = new URLSearchParams(window.location.search);
+    const redirect = params.get('redirect');
+    if (redirect) {
+      // decode caso o redirect tenha sido codificado
+      try {
+        const decoded = decodeURIComponent(redirect);
+        window.location.href = decoded;
+        return;
+      } catch (err) {
+        console.warn("Erro ao decodificar redirect, redirecionando para app.html", err);
+      }
+    }
+
     window.location.href = "app.html";
   } catch (err) {
     console.error("Erro fetch /api/users login:", err);

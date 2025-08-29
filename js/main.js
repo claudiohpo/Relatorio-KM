@@ -1,6 +1,7 @@
+// js/main.js - usa sessionStorage para sessão e fetchWithUser
 // helper to call backend with X-Usuario header (adicionar no topo de main.js e management.js)
 function fetchWithUser(url, opts = {}) {
-  const username = localStorage.getItem('km_username');
+  const username = sessionStorage.getItem('km_username');
   opts = opts || {};
   opts.headers = opts.headers || {};
   if (username) opts.headers['X-Usuario'] = username;
@@ -112,8 +113,9 @@ if (btnManutencao) {
 }
 
 const btnSair = document.getElementById("btnSair");
-if (btnSair) {
-  btnSair.addEventListener("click", () => {
-    window.location.href = "/index.html";
-  });
-}
+btnSair.addEventListener("click", () => {
+  // Remove sessão e qualquer vestígio em localStorage
+  try { sessionStorage.removeItem('km_username'); } catch (e) {}
+  try { localStorage.removeItem('km_username'); } catch (e) {}
+  window.location.href = "/index.html";
+});

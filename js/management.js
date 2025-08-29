@@ -1,7 +1,9 @@
+// js/management.js - usa sessionStorage para sessão e fetchWithUser
+
 // ----------------- HELPER FETCH -----------------
 // Centraliza chamada ao backend, adicionando usuário logado e Content-Type
 function fetchWithUser(url, opts = {}) {
-  const username = localStorage.getItem('km_username');
+  const username = sessionStorage.getItem('km_username');
   opts = opts || {};
   opts.headers = opts.headers || {};
 
@@ -11,6 +13,13 @@ function fetchWithUser(url, opts = {}) {
   }
 
   return fetch(url, opts);
+}
+
+// Verifica sessão ao iniciar (caso o guard inline falhe por algum motivo)
+if (!sessionStorage.getItem('km_username')) {
+  try { localStorage.removeItem('km_username'); } catch (e) {}
+  const redirect = encodeURIComponent(location.pathname + location.search + location.hash);
+  window.location.replace('/index.html?redirect=' + redirect);
 }
 
 // ----------------- VARIÁVEIS GLOBAIS -----------------
@@ -284,7 +293,7 @@ async function baixarRelatorioCompletoCSV() {
     const dataInicio = document.getElementById("filtroDataInicio").value;
     const dataFim = document.getElementById("filtroDataFim").value;
     const local = document.getElementById("filtroLocal").value;
-    const username = localStorage.getItem('km_username'); // ✅ usuário logado
+    const username = sessionStorage.getItem('km_username'); // ✅ usuário logado
 
     let query = `?format=csv${username ? `&username=${username}` : ""}`;
     if (dataInicio) query += `&from=${dataInicio}`;
