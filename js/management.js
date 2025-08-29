@@ -1,3 +1,12 @@
+
+// helper to call backend with X-Usuario header
+function fetchWithUser(url, opts={}){
+  const username = localStorage.getItem('km_username');
+  opts.headers = opts.headers || {};
+  if (username) opts.headers['X-Usuario'] = username;
+  return fetch(url, opts);
+}
+
 let registroSelecionado = null;
 let registros = [];
 let paginaAtual = 1;
@@ -83,7 +92,7 @@ function limparFiltros() {
 
 async function carregarRegistros() {
   try {
-    const response = await fetch("/api/km");
+    const response = await fetchWithUser("/api/km");
     if (!response.ok) throw new Error("Erro ao carregar registros");
 
     registros = await response.json();

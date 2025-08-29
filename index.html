@@ -1,64 +1,78 @@
 <!doctype html>
 <html lang="pt-BR">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Registro de KM Rodados</title>
+  <title>Login - Registro de KM Rodados</title>
   <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/auth.css" />
 </head>
-
 <body>
   <main class="container">
     <h1>Registro de KM Rodados</h1>
-
-    <form id="kmForm">
-      <label>
-        Data *
-        <input type="date" id="data" name="data" required />
-      </label>
-
-      <label>
-        Chamado
-        <input type="text" id="chamado" name="chamado" placeholder="Informe o número do chamado" />
-      </label>
-
-      <label>
-        Local *
-        <input type="text" id="local" name="local" required placeholder="Ex.: São Paulo - Cliente X" />
-      </label>
-
-      <div class="row">
-        <label>
-          KM saída *
-          <input type="number" id="kmSaida" name="kmSaida" placeholder="0" required min="0" step="1" />
+    <div class="card auth-card">
+      <form id="loginForm" autocomplete="off">
+        <label class="lbl">Usuário
+          <input class="inp" type="text" id="loginUsername" required placeholder="Seu usuário" />
         </label>
-        <label>
-          KM chegada
-          <input type="number" id="kmChegada" name="kmChegada" placeholder="0" step="1" />
+        <label class="lbl">Senha
+          <input class="inp" type="password" id="loginPassword" required placeholder="Sua senha" />
         </label>
-      </div>
-
-      <label>
-        Observações
-        <textarea id="observacoes" name="observacoes" rows="3" placeholder="Opcional"></textarea>
-      </label>
-
-      <div class="actions">
-        <button type="button" id="btnSalvar">Salvar</button>
-        <button type="button" id="btnManutencao">Relatório / Manutenção</button>
-      </div>
-
-      <p id="msg" class="msg"></p>
-    </form>
+        <div class="row" style="gap:8px;">
+          <button id="btnLogin" type="submit" class="btn primary" style="flex:1">Entrar</button>
+          <button id="btnDemo" type="button" class="btn" style="flex:0">Demo</button>
+        </div>
+        <div class="auth-footer">
+          <span class="link-like" id="openRegister">Criar conta</span> ·
+          <span class="link-like" id="openRecover">Recuperar senha</span>
+        </div>
+        <p id="loginMsg" class="msg" style="margin-top:10px"></p>
+      </form>
+    </div>
   </main>
 
-  <footer>
-    <div class="footer-inner">
-      Desenvolvido por <a href="https://github.com/claudiohpo" target="_blank" rel="noopener">Cláudio Oliveira</a> - 2025
+  <!-- Modals -->
+  <div class="overlay" id="overlayRegister" aria-hidden="true">
+    <div class="popup">
+      <h2>Criar conta</h2>
+      <form id="registerForm">
+        <label>Usuário
+          <input type="text" id="regUsername" required />
+        </label>
+        <label>Email
+          <input type="email" id="regEmail" required />
+        </label>
+        <label>Senha
+          <input type="password" id="regPassword" required />
+        </label>
+        <label>Confirmar senha
+          <input type="password" id="regPassword2" required />
+        </label>
+        <div class="actions">
+          <button type="button" id="regCancel" class="btn">Cancelar</button>
+          <button type="submit" id="regSubmit" class="btn primary">Cadastrar</button>
+        </div>
+        <p id="regMsg" class="msg"></p>
+      </form>
     </div>
-  </footer>
+  </div>
 
-  <script src="js/main.js"></script>
+  <div class="overlay" id="overlayRecover" aria-hidden="true">
+    <div class="popup">
+      <h2>Recuperar senha</h2>
+      <form id="recoverForm">
+        <label>Email cadastrado
+          <input type="email" id="recEmail" required />
+        </label>
+        <div class="actions">
+          <button type="button" id="recCancel" class="btn">Cancelar</button>
+          <button type="submit" id="recSubmit" class="btn primary">Enviar</button>
+        </div>
+        <p id="recMsg" class="msg"></p>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
 </body>
 </html>

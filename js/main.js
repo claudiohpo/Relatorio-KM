@@ -1,3 +1,12 @@
+
+// helper to call backend with X-Usuario header
+function fetchWithUser(url, opts={}){
+  const username = localStorage.getItem('km_username');
+  opts.headers = opts.headers || {};
+  if (username) opts.headers['X-Usuario'] = username;
+  return fetch(url, opts);
+}
+
 const BACKEND_URL = ""; // deixar vazio para usar mesmo domínio (/api/*)
 
 const form = document.getElementById("kmForm");
@@ -7,7 +16,7 @@ const btnSalvar = document.getElementById("btnSalvar");
 // Função para carregar o último registro e preencher KM Saída
 async function carregarUltimoRegistro() {
   try {
-    const response = await fetch("/api/km?ultimo=true");
+    const response = await fetchWithUser("/api/km?ultimo=true");
     if (!response.ok) {
       throw new Error("Falha ao carregar último registro");
     }
@@ -66,7 +75,7 @@ btnSalvar.addEventListener("click", async (e) => {
   };
 
   try {
-    const res = await fetch("/api/km", {
+    const res = await fetchWithUser("/api/km", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
