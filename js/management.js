@@ -284,8 +284,9 @@ async function baixarRelatorioCompletoCSV() {
     const dataInicio = document.getElementById("filtroDataInicio").value;
     const dataFim = document.getElementById("filtroDataFim").value;
     const local = document.getElementById("filtroLocal").value;
+    const username = localStorage.getItem('km_username'); // ✅ usuário logado
 
-    let query = "?format=csv";
+    let query = `?format=csv${username ? `&username=${username}` : ""}`;
     if (dataInicio) query += `&from=${dataInicio}`;
     if (dataFim) query += `&to=${dataFim}`;
     if (local) query += `&local=${encodeURIComponent(local)}`;
@@ -306,6 +307,7 @@ async function baixarRelatorioCompletoCSV() {
     alert("Erro ao baixar relatório.");
   }
 }
+
 
 async function baixarRelatorioCompletoXLS() {
   try {
