@@ -194,7 +194,7 @@ const svgEyeClosed = `
       }
 
       // manter foco no input após clicar no botão (opcional)
-      input.focus();
+      //input.focus();
     });
 
     // opcional: evitar submissão do formulário ao pressionar enter no botão
