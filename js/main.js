@@ -110,3 +110,10 @@ if (btnManutencao) {
     window.location.href = "/management.html";
   });
 }
+
+const btnSair = document.getElementById("btnSair");
+if (btnSair) {
+  btnSair.addEventListener("click", () => {
+    window.location.href = "/index.html";
+  });
+}
