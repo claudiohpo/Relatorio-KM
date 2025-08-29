@@ -129,39 +129,79 @@ loginForm.addEventListener("submit", async (e) => {
   }
 });
 
-// Password toggle: attach to any .password-toggle button that sits next to an input[data-password-toggle]
-(function setupPasswordToggles(){
-  const eyeSVG = '...';     // SVG do olho
-  const eyeOffSVG = '...';  // SVG olho-off (usado quando a senha está visível)
+// SVGs usados no botão (strings)
+const svgEyeOpen = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
+  <circle cx="12" cy="12" r="3.2" fill="currentColor" />
+</svg>`;
 
-  document.addEventListener('click', function(e){
-    if (e.target && (e.target.classList.contains('password-toggle') || e.target.closest('.password-toggle'))) {
-      const btn = e.target.classList.contains('password-toggle') ? e.target : e.target.closest('.password-toggle');
-      const wrapper = btn.closest('.password-wrapper');
-      if (!wrapper) return;
-      const input = wrapper.querySelector('input[data-password-toggle]');
-      if (!input) return;
-      if (input.type === 'password') {
+const svgEyeClosed = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+  <path d="M17.94 17.94A10.95 10.95 0 0 1 12 19c-7 0-11-7-11-7 1.38-3.73 4.58-6.35 8.45-6.85" />
+  <path d="M22.54 16.88A20.22 20.22 0 0 0 23 12s-4-7-11-7c-1.97 0-3.84.45-5.53 1.24" />
+  <path d="M1 1l22 22" stroke="currentColor" />
+</svg>`;
+
+/*
+  Setup: procura inputs com data-password-toggle e insere/reutiliza botões .password-toggle
+  - se input não estiver dentro de .password-wrapper, o script cria o wrapper automaticamente
+  - usa aria-pressed/aria-label para acessibilidade
+*/
+(function setupPasswordToggles() {
+  const inputs = document.querySelectorAll('input[data-password-toggle]');
+
+  inputs.forEach(input => {
+    // garantir que o input esteja dentro de um .password-wrapper
+    let wrapper = input.closest('.password-wrapper');
+    if (!wrapper) {
+      // criar wrapper e mover input para dentro
+      wrapper = document.createElement('div');
+      wrapper.className = 'password-wrapper';
+      input.parentNode.insertBefore(wrapper, input);
+      wrapper.appendChild(input);
+    }
+
+    // procurar botão existente, se não existir criar
+    let btn = wrapper.querySelector('.password-toggle');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'password-toggle';
+      btn.setAttribute('aria-label', 'Mostrar senha');
+      btn.setAttribute('aria-pressed', 'false');
+      wrapper.appendChild(btn);
+    }
+
+    // inicializar ícone (olho aberto -> senha oculta por padrão)
+    btn.innerHTML = svgEyeOpen;
+    btn.setAttribute('aria-pressed', 'false');
+    btn.setAttribute('aria-label', 'Mostrar senha');
+
+    // clique no botão alterna input.type e ícone
+    btn.addEventListener('click', function () {
+      const isPassword = input.type === 'password';
+      if (isPassword) {
         input.type = 'text';
-        btn.setAttribute('aria-pressed','true');
-        btn.setAttribute('aria-label','Ocultar senha');
-        btn.innerHTML = eyeOffSVG;
+        btn.innerHTML = svgEyeClosed; // ícone olho fechado (senha visível)
+        btn.setAttribute('aria-pressed', 'true');
+        btn.setAttribute('aria-label', 'Ocultar senha');
       } else {
         input.type = 'password';
-        btn.setAttribute('aria-pressed','false');
-        btn.setAttribute('aria-label','Mostrar senha');
-        btn.innerHTML = eyeSVG;
-      }
-    }
-  });
-
-  document.addEventListener('DOMContentLoaded', function(){
-    document.querySelectorAll('.password-wrapper').forEach(wrapper=>{
-      const btn = wrapper.querySelector('.password-toggle');
-      const input = wrapper.querySelector('input[data-password-toggle]');
-      if (btn && input) {
-        btn.innerHTML = eyeSVG;
+        btn.innerHTML = svgEyeOpen; // ícone olho aberto (senha oculta)
         btn.setAttribute('aria-pressed', 'false');
+        btn.setAttribute('aria-label', 'Mostrar senha');
+      }
+
+      // manter foco no input após clicar no botão (opcional)
+      input.focus();
+    });
+
+    // opcional: evitar submissão do formulário ao pressionar enter no botão
+    btn.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        btn.click();
       }
     });
   });
