@@ -1,5 +1,5 @@
+// api/users.js (versão resiliente, lazy nodemailer)
 const { MongoClient } = require("mongodb");
-const nodemailer = require("nodemailer");
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const DB_NAME = process.env.DB_NAME || "km_db";
@@ -10,25 +10,45 @@ async function getDb() {
   if (!MONGODB_URI) throw new Error("MONGODB_URI não definido");
   if (!clientPromise) {
     const client = new MongoClient(MONGODB_URI);
-    clientPromise = client.connect().then(()=>client);
+    clientPromise = client.connect().then(() => client);
   }
   const client = await clientPromise;
   return client.db(DB_NAME);
 }
 
 async function sendRecoveryEmail(toEmail, username, password) {
+  // lazy require nodemailer so the module is optional
+  let nodemailer;
+  try {
+    nodemailer = require("nodemailer");
+  } catch (err) {
+    console.warn("nodemailer não disponível; pulando envio de e-mail", err && err.message);
+    return;
+  }
+
   if (!process.env.SMTP_HOST) {
     console.warn("SMTP não configurado, pulando envio de e-mail");
     return;
   }
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: parseInt(process.env.SMTP_PORT || "587",10),
-    secure: process.env.SMTP_SECURE === "true",
-    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
-  });
-  const body = `Segue seus dados de acesso:\nUsuário: ${username}\nSenha: ${password}\n\n(Projeto acadêmico - senha em texto claro)`;
-  await transporter.sendMail({ from: process.env.SMTP_FROM || process.env.SMTP_USER, to: toEmail, subject: "Recuperação de senha - Registro KM", text: body });
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || "587", 10),
+      secure: process.env.SMTP_SECURE === "true",
+      auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+    });
+
+    const body = `Segue seus dados de acesso:\nUsuário: ${username}\nSenha: ${password}\n\n(Projeto acadêmico - senha em texto claro)`;
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      to: toEmail,
+      subject: "Recuperação de senha - Registro KM",
+      text: body
+    });
+  } catch (err) {
+    console.error("Erro ao enviar e-mail de recuperação:", err);
+  }
 }
 
 module.exports = async (req, res) => {
@@ -70,6 +90,10 @@ module.exports = async (req, res) => {
     res.status(405).end('Method Not Allowed');
   } catch(err) {
     console.error(err);
-    res.status(500).json({ error:'Erro interno' });
+    // detect specific errors
+    if (err.message && err.message.includes("MONGODB_URI")) {
+      return res.status(500).json({ error: "Configuração MONGODB_URI ausente ou inválida no ambiente." });
+    }
+    return res.status(500).json({ error:'Erro interno' });
   }
 };
