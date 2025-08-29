@@ -98,23 +98,3 @@
     color: #333;
 }
 
-/* Wrapper do card do login, centralizado vertical e horizontalmente */
-.auth-card-wrapper {
-  display: flex;
-  flex-direction: column; /* empilha card e footer corretamente */
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  min-height: calc(100vh - 60px); /* 60px aproximados do footer */
-  background: var(--bg);
-}
-
-
-/* Remove margens internas do card que eram para container externo */
-.auth-card {
-  margin: 0; 
-  max-width: 420px;
-  width: 100%;
-  padding: 24px 18px 18px 18px;
-  box-sizing: border-box;
-}
