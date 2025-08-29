@@ -37,6 +37,31 @@ async function getCollectionForRequest(req) {
   return db.collection(collName);
 }
 
+// ---- helper: garantir string YYYY-MM-DD
+function toYMD(value) {
+  if (!value) return new Date().toISOString().slice(0, 10);
+  const s = String(value);
+  // se vier "2025-08-29T00:00:00.000Z" -> corta os 10 primeiros
+  if (s.length >= 10 && s[4] === "-" && s[7] === "-") return s.slice(0, 10);
+  try {
+    return new Date(s).toISOString().slice(0, 10);
+  } catch {
+    return new Date().toISOString().slice(0, 10);
+  }
+}
+
+// fallback parser for environments that don't set req.body
+async function parseBodyFallback(req) {
+  return new Promise((resolve) => {
+    let data = "";
+    req.on && req.on("data", chunk => data += chunk);
+    req.on && req.on("end", () => {
+      try { resolve(data ? JSON.parse(data) : {}); } catch (e) { resolve({}); }
+    });
+    req.on && req.on("error", () => resolve({}));
+  });
+}
+
 module.exports = async (req, res) => {
   res.setHeader("Content-Type", "application/json");
   try {
@@ -53,27 +78,31 @@ module.exports = async (req, res) => {
         }
       }
       if (q.ultimo === 'true' || q.ultimo === true) {
-        const docs = await collection.find().sort({ data: -1 }).limit(1).toArray();
+        const docs = await collection.find().sort({ data: -1, createdAt: -1 }).limit(1).toArray();
         return res.json(docs[0] || null);
       }
-      // list all
-      const docs = await collection.find().sort({ data: -1 }).toArray();
+      // list all (ordenar por data desc e createdAt desc)
+      const docs = await collection.find().sort({ data: -1, createdAt: -1 }).toArray();
       return res.json(docs);
     }
 
     if (req.method === "POST") {
       const body = req.body || await parseBodyFallback(req);
+
+      const dataStr = toYMD(body.data);
+      const kmSaida = (body.kmSaida !== undefined && body.kmSaida !== null) ? Number(body.kmSaida) : null;
+      const kmChegada = (body.kmChegada !== undefined && body.kmChegada !== null) ? Number(body.kmChegada) : null;
+
       const doc = {
-        data: body.data ? new Date(body.data) : new Date(),
-        kmSaida: body.kmSaida !== undefined ? body.kmSaida : null,
-        kmChegada: body.kmChegada !== undefined ? body.kmChegada : null,
-        kmTotal: null,
-        nome: body.nome || null,
-        obs: body.obs || null
+        data: dataStr,                                   // <-- string YYYY-MM-DD
+        kmSaida,
+        kmChegada,
+        kmTotal: (kmChegada !== null && kmSaida !== null) ? (Number(kmChegada) - Number(kmSaida)) : null,
+        local: (body.local !== undefined ? body.local : (body.nome !== undefined ? body.nome : null)), // <-- salva local
+        observacoes: (body.observacoes !== undefined ? body.observacoes : (body.obs !== undefined ? body.obs : null)), // <-- salva observações
+        createdAt: new Date()
       };
-      if (doc.kmChegada !== null && doc.kmSaida !== null) {
-        doc.kmTotal = Number(doc.kmChegada) - Number(doc.kmSaida);
-      }
+
       const result = await collection.insertOne(doc);
       return res.status(201).json({ insertedId: result.insertedId });
     }
@@ -81,21 +110,27 @@ module.exports = async (req, res) => {
     if (req.method === "PUT") {
       const body = req.body || await parseBodyFallback(req);
       if (!body.id) return res.status(400).json({ error: "ID obrigatório" });
-      // build update object
-      let update = {};
-      if (body.data) update.data = new Date(body.data);
-      if (body.kmSaida !== undefined) update.kmSaida = body.kmSaida || null;
-      if (body.kmChegada !== undefined) update.kmChegada = body.kmChegada || null;
-      if (body.nome !== undefined) update.nome = body.nome;
-      if (body.obs !== undefined) update.obs = body.obs;
 
-      // recalc kmTotal if possible
+      let update = {};
+      if (body.data) update.data = toYMD(body.data);        // <-- mantém como string
+      if (body.kmSaida !== undefined) update.kmSaida = (body.kmSaida !== null && body.kmSaida !== "") ? Number(body.kmSaida) : null;
+      if (body.kmChegada !== undefined) update.kmChegada = (body.kmChegada !== null && body.kmChegada !== "") ? Number(body.kmChegada) : null;
+      if (body.local !== undefined || body.nome !== undefined) {
+        update.local = (body.local !== undefined) ? body.local : body.nome;
+      }
+      if (body.observacoes !== undefined || body.obs !== undefined) {
+        update.observacoes = (body.observacoes !== undefined) ? body.observacoes : body.obs;
+      }
+
+      // recalc kmTotal se kmSaida/ kmChegada tiverem mudado
       if (update.kmChegada !== undefined || update.kmSaida !== undefined) {
         const existing = await collection.findOne({ _id: new ObjectId(body.id) });
         const kmSaida = (update.kmSaida !== undefined) ? update.kmSaida : existing.kmSaida;
         const kmChegada = (update.kmChegada !== undefined) ? update.kmChegada : existing.kmChegada;
         update.kmTotal = (kmChegada !== null && kmSaida !== null) ? Number(kmChegada) - Number(kmSaida) : null;
       }
+
+      update.updatedAt = new Date();
 
       await collection.updateOne({ _id: new ObjectId(body.id) }, { $set: update });
       return res.json({ message: "Atualizado" });
@@ -119,15 +154,3 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: "Erro interno: " + (err && err.message ? err.message : "unknown") });
   }
 };
-
-// fallback parser for environments that don't set req.body
-async function parseBodyFallback(req) {
-  return new Promise((resolve) => {
-    let data = "";
-    req.on && req.on("data", chunk => data += chunk);
-    req.on && req.on("end", () => {
-      try { resolve(data ? JSON.parse(data) : {}); } catch (e) { resolve({}); }
-    });
-    req.on && req.on("error", () => resolve({}));
-  });
-}

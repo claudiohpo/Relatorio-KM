@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Botões principais
   document.getElementById("btnVoltar").addEventListener("click", () => {
-    window.location.href = "index.html";
+    window.location.href = "app.html";
   });
   document
     .getElementById("btnBaixarRelatorioCSV")
