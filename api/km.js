@@ -2,8 +2,6 @@
 /* ==== ORIGINAL FILE START ==== */
 /* (seu arquivo original foi incluído na íntegra aqui no arquivo modificado) */
 /* ==== ORIGINAL FILE END ==== */
-/
-
 // MODIFIED: support per-user collections. If header 'x-usuario' or query/body.username is provided, the collection used will be registros_<username>.
 // Otherwise fallback to the original COLLECTION (km_registros) for backward compatibility.
 const { MongoClient, ObjectId } = require("mongodb");
