@@ -110,8 +110,3 @@ loginForm.addEventListener("submit", async (e) => {
     loginMsg.textContent = "Erro de conexão com o servidor.";
   }
 });
-
-document.getElementById("btnDemo").addEventListener("click", () => {
-  document.getElementById("loginUsername").value = "demo";
-  document.getElementById("loginPassword").value = "demo";
-});

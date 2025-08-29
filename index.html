@@ -8,10 +8,10 @@
   <link rel="stylesheet" href="css/auth.css" />
 </head>
 <body>
-  <main class="container">
-    <h1>Registro de KM Rodados</h1>
-
+  <!-- Apenas o card do login, centralizado -->
+  <div class="auth-card-wrapper">
     <div class="card auth-card">
+      <h1>Registro de KM Rodados</h1>
       <form id="loginForm" autocomplete="off">
         <label class="lbl">Usuário
           <input class="inp" type="text" id="loginUsername" required placeholder="Seu usuário" />
@@ -23,7 +23,6 @@
 
         <div class="row" style="gap:8px;">
           <button id="btnLogin" type="submit" class="btn primary" style="flex:1">Entrar</button>
-          <button id="btnDemo" type="button" class="btn" style="flex:0">Demo</button>
         </div>
 
         <div class="auth-footer">
@@ -34,9 +33,9 @@
         <p id="loginMsg" class="msg" style="margin-top:10px"></p>
       </form>
     </div>
-  </main>
+  </div>
 
-  <!-- Modal: Cadastro -->
+  <!-- Modal: Cadastro (sem alterações) -->
   <div class="overlay" id="overlayRegister" aria-hidden="true">
     <div class="popup" role="dialog" aria-modal="true">
       <h2>Criar conta</h2>
