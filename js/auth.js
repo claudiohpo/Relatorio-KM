@@ -128,3 +128,42 @@ loginForm.addEventListener("submit", async (e) => {
     loginMsg.textContent = "Erro de conexão com o servidor.";
   }
 });
+
+// Password toggle: attach to any .password-toggle button that sits next to an input[data-password-toggle]
+(function setupPasswordToggles(){
+  const eyeSVG = '...';     // SVG do olho
+  const eyeOffSVG = '...';  // SVG olho-off (usado quando a senha está visível)
+
+  document.addEventListener('click', function(e){
+    if (e.target && (e.target.classList.contains('password-toggle') || e.target.closest('.password-toggle'))) {
+      const btn = e.target.classList.contains('password-toggle') ? e.target : e.target.closest('.password-toggle');
+      const wrapper = btn.closest('.password-wrapper');
+      if (!wrapper) return;
+      const input = wrapper.querySelector('input[data-password-toggle]');
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.setAttribute('aria-pressed','true');
+        btn.setAttribute('aria-label','Ocultar senha');
+        btn.innerHTML = eyeOffSVG;
+      } else {
+        input.type = 'password';
+        btn.setAttribute('aria-pressed','false');
+        btn.setAttribute('aria-label','Mostrar senha');
+        btn.innerHTML = eyeSVG;
+      }
+    }
+  });
+
+  document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.password-wrapper').forEach(wrapper=>{
+      const btn = wrapper.querySelector('.password-toggle');
+      const input = wrapper.querySelector('input[data-password-toggle]');
+      if (btn && input) {
+        btn.innerHTML = eyeSVG;
+        btn.setAttribute('aria-pressed', 'false');
+      }
+    });
+  });
+})();
+

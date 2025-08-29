@@ -104,4 +104,36 @@
     color: #fff;
 }
 
+/* Password toggle styles */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.password-wrapper .inp {
+  padding-right: 44px; /* espaço para o botão */
+}
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  height: 28px;
+  width: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+  color: #444;
+}
+.password-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+.password-toggle:active,
+.password-toggle:focus {
+  transform: translateY(0.5px);
+}
+
 
