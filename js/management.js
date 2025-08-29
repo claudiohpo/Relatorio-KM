@@ -256,6 +256,7 @@ async function salvarEdicao(e) {
     data,
     chamado,
     local,
+    nome: local,           // compatibilidade
     observacoes,
     obs: observacoes,
     kmSaida,
