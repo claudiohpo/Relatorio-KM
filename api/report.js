@@ -2,19 +2,36 @@ const { MongoClient } = require("mongodb");
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const DB_NAME = process.env.DB_NAME || "km_db";
-const COLLECTION = process.env.COLLECTION || "usuarios";
+const GLOBAL_COLLECTION = process.env.COLLECTION || "usuarios";  // Renomeei para clareza
 
 let clientPromise = null;
 
-async function getCollection() {
+async function getDb() {
   if (!MONGODB_URI) throw new Error("MONGODB_URI não definido");
   if (!clientPromise) {
     const client = new MongoClient(MONGODB_URI);
     clientPromise = client.connect().then(() => client);
   }
   const client = await clientPromise;
-  const db = client.db(DB_NAME);
-  return db.collection(COLLECTION);
+  return client.db(DB_NAME);
+}
+
+function sanitizeUsername(u) {
+  if (!u) return null;
+  const s = String(u).toLowerCase().trim();
+  if (!/^[a-z0-9_\-]+$/.test(s)) return null;
+  return s;
+}
+
+async function getCollectionForRequest(req) {
+  const db = await getDb();
+  const headerUser = req.headers ? (req.headers['x-usuario'] || req.headers['x-user'] || req.headers['usuario']) : null;
+  const username = sanitizeUsername(headerUser);
+  if (!username) {
+    return db.collection(GLOBAL_COLLECTION);
+  }
+  const collName = `registros_${username}`;
+  return db.collection(collName);
 }
 
 function toCsv(rows, headers) {
@@ -30,7 +47,7 @@ module.exports = async (req, res) => {
   try {
     if (req.method !== "GET") return res.status(405).end("Method Not Allowed");
 
-    const col = await getCollection();
+    const col = await getCollectionForRequest(req);  // Agora dinâmico, como em api/km.js
     const { from, to, format, local } = req.query;
     const filter = {};
     
