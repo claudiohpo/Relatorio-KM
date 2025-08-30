@@ -166,6 +166,19 @@
     position: relative;
 }
 
+/* Centraliza título e parágrafo do modal "Senha recuperada" em todas as telas */
+#overlayRecoverResult .popup h2 {
+    text-align: center;
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+#overlayRecoverResult .popup p {
+    text-align: center;
+    margin: 0;
+}
+
+
 /* MOBILE */
 @media (max-width: 520px) {
     .auth-card {
@@ -260,6 +273,25 @@
         text-align: center;
         margin: 0;
         /* evita margens extras */
+    }
+
+    /* sobrescreve o comportamento grid para o modal que mostra a senha */
+    #overlayRecoverResult .popup .actions {
+        display: flex;
+        /* usa flex para centrar facilmente */
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        padding-top: 6px;
+    }
+
+    /* controla a largura do botão OK dentro desse modal (opcional) */
+    #overlayRecoverResult .popup .actions .btn {
+        flex: 0 1 auto;
+        min-width: 120px;
+        max-width: 240px;
+        width: auto;
     }
 
 
