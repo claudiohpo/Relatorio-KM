@@ -264,6 +264,7 @@ h1 {
 #user-footer {
   position: static;  /* ou remova position */
   margin-top: 12px;    /* espaçamento acima e abaixo */
+  bottom: 10px;
   right: 15px;
   text-align: right;
   font-style: italic;
