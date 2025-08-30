@@ -192,15 +192,12 @@ footer .footer-inner {
   footer .footer-inner { padding: 0 6px; }
 }
 
-/* font-style: italic;
-  font-size: 14px;
-  color: #555; */
-
 #user-footer {
   position: absolute;      /* fixa dentro do container */
   bottom: 10px;            /* 10px do fundo */
   right: 15px;             /* canto direito */
   font-style: italic;      /* itálico */
-  margin-top: 5px; /* espaço abaixo do título */
+  font-size: 0.9em;        /* menor que texto normal */
+  color: #555;             /* cinza discreto */
 }
 
