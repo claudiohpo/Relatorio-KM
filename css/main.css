@@ -141,6 +141,11 @@ footer a:hover {
         padding: 12px;
     }
 
+    #user-footer {
+    text-align: right;   /* no mobile, deixa alinhado à esquerda */
+    margin-top: 8px;
+    }
+
     .container {
         margin: 12px 0 6px;
         padding: 14px;
@@ -193,10 +198,11 @@ footer .footer-inner {
 }
 
 #user-footer {
-  position: absolute;      /* fixa dentro do container */
+  /* position: absolute;      fixa dentro do container */
   bottom: 10px;            /* 10px do fundo */
   right: 15px;             /* canto direito */
   font-style: italic;      /* itálico */
+  text-align: right;
   font-size: 0.9em;        /* menor que texto normal */
   color: #555;             /* cinza discreto */
 }
