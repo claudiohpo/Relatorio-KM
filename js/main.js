@@ -104,6 +104,17 @@ btnSalvar.addEventListener("click", async (e) => {
   }
 });
 
+window.addEventListener("DOMContentLoaded", () => {
+  const username = localStorage.getItem("km_username");
+  if (username) {
+    const footer = document.getElementById("user-footer");
+    if (footer) {
+      footer.textContent = `Usuário logado: ${username}`;
+    }
+  }
+});
+
+
 // Botão de Manutenção
 const btnManutencao = document.getElementById("btnManutencao");
 if (btnManutencao) {
