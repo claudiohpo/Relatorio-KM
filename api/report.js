@@ -28,7 +28,7 @@ function sanitizeUsername(u) {
 // Função para obter a coleção correta com base no cabeçalho da requisição
 async function getCollectionForRequest(req) { 
   const db = await getDb();
-  const headerUser = req.headers ? (req.headers['x-usuario'] || req.headers['x-user'] || req.headers['usuario']) : null;
+  const headerUser = req.headers ? (req.headers['usuario']) : null;
   const username = sanitizeUsername(headerUser);
   if (!username) {
     return db.collection(GLOBAL_COLLECTION);

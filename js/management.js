@@ -11,7 +11,7 @@ function fetchWithUser(url, opts = {}) {
   opts = opts || {};
   opts.headers = opts.headers || {};
 
-  if (username) opts.headers['X-Usuario'] = username;
+  if (username) opts.headers['usuario'] = username;
   if (opts.body && !opts.headers['Content-Type']) {
     opts.headers['Content-Type'] = 'application/json';
   }
@@ -292,7 +292,7 @@ async function salvarEdicao(e) {
   }
 }
 
-// Baixa o relatório em CSV baixarRelatorioCompletoCSV
+// Baixa o relatório em CSV
 async function baixarRelatorioCSV() {
   try {
     const dataInicio = document.getElementById("filtroDataInicio").value;
@@ -322,7 +322,7 @@ async function baixarRelatorioCSV() {
   }
 }
 
-// Baixa o relatório em XLS baixarRelatorioCompletoXLS
+// Baixa o relatório em XLS
 async function baixarRelatorioXLS() {
   try {
     let dados = aplicarFiltrosInterno(registros).map((r) => ({
