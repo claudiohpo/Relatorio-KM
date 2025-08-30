@@ -77,6 +77,7 @@ textarea {
     gap: 10px;
     align-items: center;
     margin-top: 6px;
+    justify-content: center;
 }
 
 button {
@@ -145,6 +146,14 @@ footer a:hover {
     text-align: right;   /* no mobile, deixa alinhado à esquerda */
     margin-top: 8px;
     }
+
+    .actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 8px;
+    justify-items: center;
+    }
+
 
     .container {
         margin: 12px 0 6px;
