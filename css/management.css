@@ -201,6 +201,11 @@ h1 {
         width: 100%;
     }
 
+    #user-footer {
+    text-align: right;   /* no mobile, deixa alinhado à esquerda */
+    margin-top: 8px;
+    }
+
     .btn-filtro,
     .btn-limpar {
         width: 100%;
@@ -257,10 +262,10 @@ h1 {
 }
 
 #user-footer {
-  position: absolute;      /* fixa dentro do container */
-  bottom: 10px;            /* 10px do fundo */
-  right: 15px;             /* canto direito */
-  font-style: italic;      /* itálico */
-  font-size: 0.9em;        /* menor que texto normal */
-  color: #555;             /* cinza discreto */
+  position: static;  /* ou remova position */
+  margin: 12px 0;    /* espaçamento acima e abaixo */
+  text-align: right;
+  font-style: italic;
+  font-size: 0.9em;
+  color: #555;
 }
