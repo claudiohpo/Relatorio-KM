@@ -21,22 +21,21 @@
 
         <label class="lbl">Senha
           <div class="password-wrapper">
-            <input class="inp" type="password" id="loginPassword" required placeholder="Sua senha"
+            <input class="inp" type="password" id="loginPassword" required placeholder="Sua senha" /
               data-password-toggle="true">
             <button type="button" class="password-toggle" aria-label="Mostrar senha" aria-pressed="false"></button>
           </div>
-        </label>
 
-        <div class="row" style="gap:8px;">
-          <button id="btnLogin" type="submit" class="btn primary" style="flex:1">Entrar</button>
-        </div>
+          <div class="row" style="gap:8px;">
+            <button id="btnLogin" type="submit" class="btn primary" style="flex:1">Entrar</button>
+          </div>
 
-        <div class="auth-footer">
-          <span class="link-like" id="openRegister">Criar conta</span> ·
-          <span class="link-like" id="openRecover">Recuperar senha</span>
-        </div>
+          <div class="auth-footer">
+            <span class="link-like" id="openRegister">Criar conta</span> ·
+            <span class="link-like" id="openRecover">Recuperar senha</span>
+          </div>
 
-        <p id="loginMsg" class="msg" style="margin-top:10px"></p>
+          <p id="loginMsg" class="msg" style="margin-top:10px"></p>
       </form>
     </div>
   </div>
@@ -54,15 +53,13 @@
         </label>
         <label class="lbl">Senha
           <div class="password-wrapper">
-            <input class="inp" type="password" id="regPassword" placeholder="Sua senha" required /
-              data-password-toggle="true">
+            <input class="inp" type="password" id="regPassword" placeholder="Sua senha" required / data-password-toggle="true">
             <button type="button" class="password-toggle" aria-label="Mostrar senha" aria-pressed="false"></button>
           </div>
         </label>
         <label class="lbl">Confirmar senha
           <div class="password-wrapper">
-            <input class="inp" type="password" id="regPassword2" placeholder="Confirme sua senha" required /
-              data-password-toggle="true">
+            <input class="inp" type="password" id="regPassword2" placeholder="Confirme sua senha" required / data-password-toggle="true">
             <button type="button" class="password-toggle" aria-label="Mostrar senha" aria-pressed="false"></button>
           </div>
         </label>
@@ -79,42 +76,41 @@
   </div>
 
   <!-- Modal: Recuperar Senha -->
-  <div class="overlay" id="overlayRecover" aria-hidden="true">
-    <div class="popup" role="dialog" aria-modal="true">
-      <h2>Recuperar senha</h2>
-      <form id="recoverForm">
-        <label class="lbl">Usuário
-          <input class="inp" type="text" id="recUsername" placeholder="Nome de usuário" required />
-        </label>
-        <label class="lbl">Email
-          <input class="inp" type="email" id="recEmail" placeholder="Seu email cadastrado" required />
-        </label>
+<div class="overlay" id="overlayRecover" aria-hidden="true">
+  <div class="popup" role="dialog" aria-modal="true">
+    <h2>Recuperar senha</h2>
+    <form id="recoverForm">
+      <label class="lbl">Usuário
+        <input class="inp" type="text" id="recUsername" placeholder="Nome de usuário" required />
+      </label>
+      <label class="lbl">Email
+        <input class="inp" type="email" id="recEmail" placeholder="Seu email cadastrado" required />
+      </label>
 
-        <div class="actions">
-          <button type="button" id="recCancel" class="btn cancel">Cancelar</button>
-          <button type="submit" id="recSubmit" class="btn primary">Recuperar</button>
-        </div>
-
-        <p id="recMsg" class="msg"></p>
-      </form>
-    </div>
-  </div>
-
-  <!-- Modal: Senha Recuperada -->
-  <div class="overlay" id="overlayRecovered" aria-hidden="true">
-    <div class="popup" role="dialog" aria-modal="true">
-      <h2>Senha recuperada</h2>
-      <p id="recoveredPassword" style="word-break: break-all;"></p>
-      <div class="actions" style="justify-content:center;">
-        <button type="button" id="recoveredOk" class="btn primary">OK</button>
+      <div class="actions">
+        <button type="button" id="recCancel" class="btn cancel">Cancelar</button>
+        <button type="submit" id="recSubmit" class="btn primary">Recuperar</button>
       </div>
+
+      <p id="recMsg" class="msg"></p>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Senha Recuperada -->
+<div class="overlay" id="overlayRecovered" aria-hidden="true">
+  <div class="popup" role="dialog" aria-modal="true">
+    <h2>Senha recuperada</h2>
+    <p id="recoveredPassword" style="word-break: break-all;"></p>
+    <div class="actions" style="justify-content:center;">
+      <button type="button" id="recoveredOk" class="btn primary">OK</button>
     </div>
   </div>
+</div>
 
   <footer>
     <div class="footer-inner">
-      © 2025 - Desenvolvido por <a href="https://github.com/claudiohpo" target="_blank" rel="noopener">Cláudio
-        Oliveira</a>
+      © 2025 - Desenvolvido por <a href="https://github.com/claudiohpo" target="_blank" rel="noopener">Cláudio Oliveira</a>
     </div>
   </footer>
 
