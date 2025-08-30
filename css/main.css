@@ -148,12 +148,22 @@ footer a:hover {
     }
 
     .actions {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 colunas de largura igual */
-    gap: 8px;
-    justify-items: center;  /* centraliza cada botão dentro da coluna */
-    width: 100%;
+    display: flex;
+    justify-content: center;   /* centraliza todos os botões */
+    flex-wrap: wrap;           /* permite quebra de linha se necessário */
+    gap: 10px;                 /* espaço entre os botões */
     }
+
+    .actions button {
+        white-space: nowrap;       /* evita que o texto quebre */
+        flex: 1 1 120px;           /* largura mínima de 120px, cresce se houver espaço */
+        max-width: 150px;          /* opcional: limita largura máxima */
+        height: 40px;              /* garante altura uniforme */
+        display: flex;             /* centraliza o texto vertical e horizontalmente */
+        align-items: center;
+        justify-content: center;
+    }
+
 
     .container {
         margin: 12px 0 6px;
