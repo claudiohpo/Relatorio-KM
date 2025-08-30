@@ -2,10 +2,11 @@ const { MongoClient } = require("mongodb");
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const DB_NAME = process.env.DB_NAME || "km_db";
-const GLOBAL_COLLECTION = process.env.COLLECTION || "usuarios";  // Renomeei para clareza
+const GLOBAL_COLLECTION = process.env.COLLECTION || "usuarios";
 
 let clientPromise = null;
 
+// Função para obter a conexão com o banco de dados
 async function getDb() {
   if (!MONGODB_URI) throw new Error("MONGODB_URI não definido");
   if (!clientPromise) {
@@ -16,6 +17,7 @@ async function getDb() {
   return client.db(DB_NAME);
 }
 
+// Função para limpar o nome de usuário
 function sanitizeUsername(u) {
   if (!u) return null;
   const s = String(u).toLowerCase().trim();
@@ -23,7 +25,8 @@ function sanitizeUsername(u) {
   return s;
 }
 
-async function getCollectionForRequest(req) {
+// Função para obter a coleção correta com base no cabeçalho da requisição
+async function getCollectionForRequest(req) { 
   const db = await getDb();
   const headerUser = req.headers ? (req.headers['x-usuario'] || req.headers['x-user'] || req.headers['usuario']) : null;
   const username = sanitizeUsername(headerUser);
@@ -43,6 +46,7 @@ function toCsv(rows, headers) {
   return lines.join("\n");
 }
 
+// Função para processar a solicitação
 module.exports = async (req, res) => {
   try {
     if (req.method !== "GET") return res.status(405).end("Method Not Allowed");

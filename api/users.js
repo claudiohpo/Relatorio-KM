@@ -1,4 +1,3 @@
-// api/users.js - handler robusto para register/login
 const { MongoClient } = require("mongodb");
 
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -7,28 +6,29 @@ const USERS_COLLECTION = process.env.USERS_COLLECTION || "usuarios";
 
 let clientPromise = null;
 
+// Função para obter a conexão com o banco de dados
 async function getDb() {
   if (!MONGODB_URI) throw new Error("MONGODB_URI não definido");
   if (!clientPromise) {
-    const client = new MongoClient(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+    const client = new MongoClient(MONGODB_URI); //, { useNewUrlParser: true, useUnifiedTopology: true }
     clientPromise = client.connect().then(() => client);
   }
   const client = await clientPromise;
   return client.db(DB_NAME);
 }
 
-// fallback to read raw body when req.body is not set (serverless environments)
+// Função para ler o corpo da requisição em ambientes sem suporte a req.body
 async function readRawBody(req) {
   return new Promise((resolve) => {
     let data = "";
     req.on && req.on("data", (chunk) => (data += chunk));
     req.on && req.on("end", () => resolve(data || null));
     req.on && req.on("error", () => resolve(null));
-    // If no streaming methods (some envs), return null
-    setTimeout(() => resolve(null), 50);
+    //setTimeout(() => resolve(null), 50);
   });
 }
 
+// Função para processar a solicitação
 module.exports = async (req, res) => {
   // garantir JSON em todas as respostas
   res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
       return res.end(JSON.stringify({ error: "Method Not Allowed. Use POST com action." }));
     }
 
-    // body: prefira req.body se disponível; senão leia raw e parse
+    // prefirir req.body se disponível; senão leia raw e parse
     let body = req.body && Object.keys(req.body).length ? req.body : null;
     if (!body) {
       const raw = await readRawBody(req);
@@ -47,7 +47,6 @@ module.exports = async (req, res) => {
         try {
           body = JSON.parse(raw);
         } catch (e) {
-          // não é JSON válido - retornar erro
           res.statusCode = 400;
           return res.end(JSON.stringify({ error: "Corpo inválido. Envie JSON válido." }));
         }
@@ -55,9 +54,6 @@ module.exports = async (req, res) => {
         body = {};
       }
     }
-
-    // Log minimal para debug (sem expor senhas nos logs em produção; aqui é útil enquanto debugamos)
-    console.log("api/users - recebido body:", JSON.stringify(Object.assign({}, body, { password: body.password ? "[REDACTED]" : undefined })));
 
     const action = body.action;
     if (!action) {
@@ -111,10 +107,6 @@ module.exports = async (req, res) => {
     res.statusCode = 400;
     return res.end(JSON.stringify({ error: "Action desconhecida." }));
   } catch (err) {
-    // Log detalhado para debugging (você pode remover stack em produção)
-    console.error("api/users error:", err && err.stack ? err.stack : err);
-
-    // retorna JSON com mensagem curta + detalhe para debugging
     res.statusCode = 500;
     const msg = (err && err.message) ? err.message : "Erro interno";
     return res.end(JSON.stringify({ error: "Erro interno", detail: msg }));
