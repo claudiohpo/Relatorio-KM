@@ -6,8 +6,6 @@ const overlayRegister = document.getElementById("overlayRegister");
 const registerForm = document.getElementById("registerForm");
 
 function showOverlay(el){ el.classList.add("show"); el.setAttribute("aria-hidden","false"); }
-const firstInput = el.querySelector('input');
-  if(firstInput) firstInput.blur();
 function hideOverlay(el){ el.classList.remove("show"); el.setAttribute("aria-hidden","true"); }
 
 openRegister.addEventListener("click", () => showOverlay(overlayRegister));
