@@ -34,7 +34,9 @@ module.exports = async (req, res) => {
   try {
     if (req.method !== "POST") {
       res.statusCode = 405;
-      return res.end(JSON.stringify({ error: "Method Not Allowed. Use POST com action." }));
+      return res.end(
+        JSON.stringify({ error: "Method Not Allowed. Use POST com action." })
+      );
     }
 
     // prefirir req.body se disponível; senão leia raw e parse
@@ -46,7 +48,9 @@ module.exports = async (req, res) => {
           body = JSON.parse(raw);
         } catch (e) {
           res.statusCode = 400;
-          return res.end(JSON.stringify({ error: "Corpo inválido. Envie JSON válido." }));
+          return res.end(
+            JSON.stringify({ error: "Corpo inválido. Envie JSON válido." })
+          );
         }
       } else {
         body = {};
@@ -56,7 +60,11 @@ module.exports = async (req, res) => {
     const action = body.action;
     if (!action) {
       res.statusCode = 400;
-      return res.end(JSON.stringify({ error: "Campo 'action' obrigatório (register | login)." }));
+      return res.end(
+        JSON.stringify({
+          error: "Campo 'action' obrigatório (register | login).",
+        })
+      );
     }
 
     const db = await getDb();
@@ -72,7 +80,11 @@ module.exports = async (req, res) => {
       const usernameNormalized = String(username).trim().toLowerCase();
       if (!/^[a-z0-9_\-]+$/.test(usernameNormalized)) {
         res.statusCode = 400;
-        return res.end(JSON.stringify({ error: "Nome de usuário inválido. Use letras, números, '_' ou '-'." }));
+        return res.end(
+          JSON.stringify({
+            error: "Nome de usuário inválido. Use letras, números, '_' ou '-'.",
+          })
+        );
       }
 
       const existing = await users.findOne({ username: usernameNormalized });
@@ -96,17 +108,40 @@ module.exports = async (req, res) => {
       const user = await users.findOne({ username: usernameNormalized });
       if (!user || user.password !== password) {
         res.statusCode = 401;
-        return res.end(JSON.stringify({ error: "Usuário ou senha inválidos." }));
+        return res.end(
+          JSON.stringify({ error: "Usuário ou senha inválidos." })
+        );
       }
       res.statusCode = 200;
       return res.end(JSON.stringify({ message: "OK" }));
+    }
+
+    if (action === "recover") {
+      const { username, email } = body;
+      if (!username || !email) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: "Informe usuário e email." }));
+      }
+
+      const usernameNormalized = String(username).trim().toLowerCase();
+      const user = await users.findOne({ username: usernameNormalized, email });
+      if (!user) {
+        res.statusCode = 404;
+        return res.end(
+          JSON.stringify({ error: "Usuário ou email informado está errado." })
+        );
+      }
+
+      // Retorna a senha em texto (como solicitado)
+      res.statusCode = 200;
+      return res.end(JSON.stringify({ password: user.password }));
     }
 
     res.statusCode = 400;
     return res.end(JSON.stringify({ error: "Action desconhecida." }));
   } catch (err) {
     res.statusCode = 500;
-    const msg = (err && err.message) ? err.message : "Erro interno";
+    const msg = err && err.message ? err.message : "Erro interno";
     return res.end(JSON.stringify({ error: "Erro interno", detail: msg }));
   }
 };
