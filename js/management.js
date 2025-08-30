@@ -11,7 +11,7 @@ function fetchWithUser(url, opts = {}) {
   opts = opts || {};
   opts.headers = opts.headers || {};
 
-  if (username) opts.headers['usuario'] = username;
+  if (username) opts.headers['X-Usuario'] = username;
   if (opts.body && !opts.headers['Content-Type']) {
     opts.headers['Content-Type'] = 'application/json';
   }
