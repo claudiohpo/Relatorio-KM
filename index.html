@@ -32,7 +32,7 @@
 
           <div class="auth-footer">
             <span class="link-like" id="openRegister">Criar conta</span> ·
-            <span class="link-like" id="openRecover">Recuperar senha (em breve)</span>
+            <span class="link-like" id="openRecover">Recuperar senha</span>
           </div>
 
           <p id="loginMsg" class="msg" style="margin-top:10px"></p>
@@ -72,6 +72,41 @@
 
         <p id="regMsg" class="msg"></p>
       </form>
+    </div>
+  </div>
+
+  <!-- Modal: Recuperar senha (solicitação) -->
+  <div class="overlay" id="overlayRecover" aria-hidden="true">
+    <div class="popup" role="dialog" aria-modal="true">
+      <h2>Recuperar senha</h2>
+      <form id="recoverForm">
+        <label class="lbl">Usuário
+          <input class="inp" type="text" id="recUsername" placeholder="Nome de usuário" required />
+        </label>
+        <label class="lbl">Email cadastrado
+          <input class="inp" type="email" id="recEmail" placeholder="Email usado no cadastro" required />
+        </label>
+
+        <div class="actions">
+          <button type="button" id="recCancel" class="btn cancel">Cancelar</button>
+          <button type="submit" id="recSubmit" class="btn primary">Recuperar</button>
+        </div>
+
+        <p id="recMsg" class="msg"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Recuperação - resultado (mostra a senha) -->
+  <div class="overlay" id="overlayRecoverResult" aria-hidden="true">
+    <div class="popup" role="dialog" aria-modal="true">
+      <h2>Senha recuperada</h2>
+      <p>Senha do usuário <strong id="recResultUser"></strong>:</p>
+      <pre id="recResultPassword" style="padding:12px; background:#f5f5f5; border-radius:6px; word-break:break-all;"></pre>
+
+      <div class="actions" style="justify-content:center; margin-top:12px;">
+        <button type="button" id="recResultOk" class="btn primary">OK</button>
+      </div>
     </div>
   </div>
   

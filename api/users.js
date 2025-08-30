@@ -62,6 +62,33 @@ module.exports = async (req, res) => {
     const db = await getDb();
     const users = db.collection(USERS_COLLECTION);
 
+    // Recuperação de senha
+    if (action === "recover") {
+      const { username, email } = body;
+      if (!username || !email) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: "Preencha usuário e email." }));
+      }
+
+      const usernameNormalized = String(username).trim().toLowerCase();
+      const user = await users.findOne({ username: usernameNormalized });
+      if (!user) {
+        res.statusCode = 404;
+        return res.end(JSON.stringify({ error: "Usuário ou email informado está errado." }));
+      }
+
+      const storedEmail = (user.email || "").trim().toLowerCase();
+      if (storedEmail !== String(email).trim().toLowerCase()) {
+        res.statusCode = 404;
+        return res.end(JSON.stringify({ error: "Usuário ou email informado está errado." }));
+      }
+
+      // Retorna a senha
+      res.statusCode = 200;
+      return res.end(JSON.stringify({ password: user.password }));
+    }
+
+    // Registro de novo usuário
     if (action === "register") {
       const { username, email, password } = body;
       if (!username || !email || !password) {

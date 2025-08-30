@@ -5,11 +5,17 @@ const openRecover = document.getElementById("openRecover");
 const overlayRegister = document.getElementById("overlayRegister");
 const registerForm = document.getElementById("registerForm");
 
+// novos elementos (recuperação)
+const overlayRecover = document.getElementById("overlayRecover");
+const recoverForm = document.getElementById("recoverForm");
+const overlayRecoverResult = document.getElementById("overlayRecoverResult");
+
 function showOverlay(el){ el.classList.add("show"); el.setAttribute("aria-hidden","false"); }
 function hideOverlay(el){ el.classList.remove("show"); el.setAttribute("aria-hidden","true"); }
 
 openRegister.addEventListener("click", () => showOverlay(overlayRegister));
-openRecover.addEventListener("click", () => { alert("Recuperação de senha será implementada em breve."); });
+// openRecover.addEventListener("click", () => { alert("Recuperação de senha será implementada em breve."); });
+openRecover.addEventListener("click", () => showOverlay(overlayRecover));
 
 document.getElementById("regCancel").addEventListener("click", () => hideOverlay(overlayRegister));
 
@@ -125,6 +131,71 @@ loginForm.addEventListener("submit", async (e) => {
     loginMsg.style.color = "red";
     loginMsg.textContent = "Erro de conexão com o servidor.";
   }
+});
+
+// ---- Recuperação de senha ----
+document.getElementById("recCancel").addEventListener("click", () => {
+  // limpar campos e mensagem
+  document.getElementById("recUsername").value = "";
+  document.getElementById("recEmail").value = "";
+  document.getElementById("recMsg").textContent = "";
+  hideOverlay(overlayRecover);
+});
+
+recoverForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const username = document.getElementById("recUsername").value.trim();
+  const email = document.getElementById("recEmail").value.trim();
+  const msgEl = document.getElementById("recMsg");
+
+  msgEl.style.color = "#333";
+  msgEl.textContent = "Consultando...";
+
+  if (!username || !email) {
+    msgEl.style.color = "red";
+    msgEl.textContent = "Preencha usuário e email.";
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({ action: "recover", username, email })
+    });
+
+    const body = await parseResponse(res);
+
+    if (!res.ok) {
+      msgEl.style.color = "red";
+      // mensagem amigável definida pelo servidor ou genérica
+      msgEl.textContent = body.error || `Erro ${res.status}`;
+      console.error("Recuperação falhou:", body);
+      return;
+    }
+
+    // sucesso: body.password contém a senha
+    const senha = body.password || "";
+    hideOverlay(overlayRecover);
+
+    // preenche e mostra o overlay de resultado
+    document.getElementById("recResultUser").textContent = username;
+    document.getElementById("recResultPassword").textContent = senha;
+    showOverlay(overlayRecoverResult);
+
+  } catch (err) {
+    console.error("Erro fetch /api/users recover:", err);
+    msgEl.style.color = "red";
+    msgEl.textContent = "Erro de conexão com o servidor.";
+  }
+});
+
+document.getElementById("recResultOk").addEventListener("click", () => {
+  // fecha pop-up de resultado e limpa campos
+  hideOverlay(overlayRecoverResult);
+  document.getElementById("recUsername").value = "";
+  document.getElementById("recEmail").value = "";
+  document.getElementById("recMsg").textContent = "";
 });
 
 // SVGs usados no botão
