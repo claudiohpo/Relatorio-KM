@@ -188,8 +188,4 @@
     padding-right: 40px;   /* mantém espaço para botão de toggle */
   }
 
-  .password-toggle {
-    height: 26px;
-    width: 32px;
-  }
 }
