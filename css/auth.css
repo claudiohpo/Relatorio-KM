@@ -87,9 +87,10 @@
 
 .actions {
     display: flex;
-    gap: 8px;
-    justify-content: flex-end;
-    margin-top: 12px;
+    gap: 10px;
+    align-items: center;
+    margin-top: 6px;
+    justify-content: center;
 }
 
 .msg {
@@ -133,4 +134,62 @@
 .password-toggle:active,
 .password-toggle:focus {
   transform: translateY(0.5px);
+}
+
+/* MOBILE */
+@media (max-width: 520px) {
+  .auth-card {
+    width: 94%;
+    margin: 12px auto;
+    padding: 14px;
+  }
+
+  .popup {
+    width: 94%;
+    padding: 14px;
+  }
+
+  .row {
+    flex-direction: column;  /* inputs e botões em coluna */
+    align-items: stretch;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .inp {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .btn {
+    width: 100%;         /* botões ocupam toda largura disponível */
+    text-align: center;
+    padding: 10px 0;
+    font-size: 14px;
+    flex: none;          /* impede crescimento desigual */
+  }
+
+  .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* 2 botões por linha */
+        gap: 8px;
+        width: 100%;
+    }
+
+  .msg {
+    font-size: 12px;
+  }
+
+  .auth-footer {
+    font-size: 13px;
+  }
+
+  .password-wrapper .inp {
+    padding-right: 40px;   /* mantém espaço para botão de toggle */
+  }
+
+  .password-toggle {
+    height: 26px;
+    width: 32px;
+  }
 }
