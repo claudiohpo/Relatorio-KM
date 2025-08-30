@@ -149,11 +149,11 @@ footer a:hover {
 
     .actions {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-template-columns: repeat(3, 1fr); /* 3 colunas de largura igual */
     gap: 8px;
-    justify-items: center;
+    justify-items: center;  /* centraliza cada botão dentro da coluna */
+    width: 100%;
     }
-
 
     .container {
         margin: 12px 0 6px;
