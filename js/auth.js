@@ -10,14 +10,22 @@ const overlayRecover = document.getElementById("overlayRecover");
 const recoverForm = document.getElementById("recoverForm");
 const overlayRecoverResult = document.getElementById("overlayRecoverResult");
 
-function showOverlay(el){ el.classList.add("show"); el.setAttribute("aria-hidden","false"); }
-function hideOverlay(el){ el.classList.remove("show"); el.setAttribute("aria-hidden","true"); }
+function showOverlay(el) {
+  el.classList.add("show");
+  el.setAttribute("aria-hidden", "false");
+}
+function hideOverlay(el) {
+  el.classList.remove("show");
+  el.setAttribute("aria-hidden", "true");
+}
 
 openRegister.addEventListener("click", () => showOverlay(overlayRegister));
 // openRecover.addEventListener("click", () => { alert("Recuperação de senha será implementada em breve."); });
 openRecover.addEventListener("click", () => showOverlay(overlayRecover));
 
-document.getElementById("regCancel").addEventListener("click", () => hideOverlay(overlayRegister));
+document
+  .getElementById("regCancel")
+  .addEventListener("click", () => hideOverlay(overlayRegister));
 
 // Função para tratar a resposta da API
 async function parseResponse(res) {
@@ -56,8 +64,11 @@ registerForm.addEventListener("submit", async (e) => {
   try {
     const res = await fetch("/api/users", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify({ action: "register", username, email, password })
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ action: "register", username, email, password }),
     });
 
     const body = await parseResponse(res);
@@ -71,7 +82,7 @@ registerForm.addEventListener("submit", async (e) => {
 
     msgEl.style.color = "green";
     msgEl.textContent = "Cadastro concluído. Faça login.";
-    setTimeout(()=> hideOverlay(overlayRegister), 1000);
+    setTimeout(() => hideOverlay(overlayRegister), 1000);
   } catch (err) {
     console.error("Erro fetch /api/users register:", err);
     msgEl.style.color = "red";
@@ -96,8 +107,11 @@ loginForm.addEventListener("submit", async (e) => {
   try {
     const res = await fetch("/api/users", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify({ action: "login", username, password })
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ action: "login", username, password }),
     });
 
     const body = await parseResponse(res);
@@ -114,14 +128,17 @@ loginForm.addEventListener("submit", async (e) => {
 
     // redireciona para página original se fornecida
     const params = new URLSearchParams(window.location.search);
-    const redirect = params.get('redirect');
+    const redirect = params.get("redirect");
     if (redirect) {
       try {
         const decoded = decodeURIComponent(redirect);
         window.location.href = decoded;
         return;
       } catch (err) {
-        console.warn("Erro ao decodificar redirect, redirecionando para app.html", err);
+        console.warn(
+          "Erro ao decodificar redirect, redirecionando para app.html",
+          err
+        );
       }
     }
 
@@ -160,8 +177,11 @@ recoverForm.addEventListener("submit", async (e) => {
   try {
     const res = await fetch("/api/users", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Accept": "application/json" },
-      body: JSON.stringify({ action: "recover", username, email })
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ action: "recover", username, email }),
     });
 
     const body = await parseResponse(res);
@@ -174,15 +194,28 @@ recoverForm.addEventListener("submit", async (e) => {
       return;
     }
 
+    // // sucesso: body.password contém a senha
+    // const senha = body.password || "";
+    // hideOverlay(overlayRecover);
+
+    // // preenche e mostra o overlay de resultado
+    // document.getElementById("recResultUser").textContent = username;
+    // document.getElementById("recResultPassword").textContent = senha;
+    // showOverlay(overlayRecoverResult);
+
     // sucesso: body.password contém a senha
     const senha = body.password || "";
     hideOverlay(overlayRecover);
 
     // preenche e mostra o overlay de resultado
     document.getElementById("recResultUser").textContent = username;
-    document.getElementById("recResultPassword").textContent = senha;
-    showOverlay(overlayRecoverResult);
 
+    // preenche o input (mantendo type="password" por padrão)
+    const resultInput = document.getElementById("recResultPassword");
+    resultInput.type = "password";
+    resultInput.value = senha;
+
+    showOverlay(overlayRecoverResult);
   } catch (err) {
     console.error("Erro fetch /api/users recover:", err);
     msgEl.style.color = "red";
@@ -190,13 +223,25 @@ recoverForm.addEventListener("submit", async (e) => {
   }
 });
 
+// document.getElementById("recResultOk").addEventListener("click", () => {
+//   // fecha pop-up de resultado e limpa campos
+//   hideOverlay(overlayRecoverResult);
+//   document.getElementById("recUsername").value = "";
+//   document.getElementById("recEmail").value = "";
+//   document.getElementById("recMsg").textContent = "";
+// });
+
 document.getElementById("recResultOk").addEventListener("click", () => {
-  // fecha pop-up de resultado e limpa campos
   hideOverlay(overlayRecoverResult);
+
+  // limpa campos de recuperação e o campo de resultado
   document.getElementById("recUsername").value = "";
   document.getElementById("recEmail").value = "";
   document.getElementById("recMsg").textContent = "";
+  const resultInput = document.getElementById("recResultPassword");
+  if (resultInput) resultInput.value = "";
 });
+
 
 // SVGs usados no botão
 const svgEyeOpen = `
@@ -218,58 +263,57 @@ const svgEyeClosed = `
   - usa aria-pressed/aria-label para acessibilidade
 */
 (function setupPasswordToggles() {
-  const inputs = document.querySelectorAll('input[data-password-toggle]');
+  const inputs = document.querySelectorAll("input[data-password-toggle]");
 
-  inputs.forEach(input => {
+  inputs.forEach((input) => {
     // garantir que o input esteja dentro de um .password-wrapper
-    let wrapper = input.closest('.password-wrapper');
+    let wrapper = input.closest(".password-wrapper");
     if (!wrapper) {
       // criar wrapper e mover input para dentro
-      wrapper = document.createElement('div');
-      wrapper.className = 'password-wrapper';
+      wrapper = document.createElement("div");
+      wrapper.className = "password-wrapper";
       input.parentNode.insertBefore(wrapper, input);
       wrapper.appendChild(input);
     }
 
     // procurar botão existente, se não existir criar
-    let btn = wrapper.querySelector('.password-toggle');
+    let btn = wrapper.querySelector(".password-toggle");
     if (!btn) {
-      btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'password-toggle';
-      btn.setAttribute('aria-label', 'Mostrar senha');
-      btn.setAttribute('aria-pressed', 'false');
+      btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "password-toggle";
+      btn.setAttribute("aria-label", "Mostrar senha");
+      btn.setAttribute("aria-pressed", "false");
       wrapper.appendChild(btn);
     }
 
     // inicializar ícone (olho aberto -> senha oculta por padrão)
     btn.innerHTML = svgEyeOpen;
-    btn.setAttribute('aria-pressed', 'false');
-    btn.setAttribute('aria-label', 'Mostrar senha');
+    btn.setAttribute("aria-pressed", "false");
+    btn.setAttribute("aria-label", "Mostrar senha");
 
     // clique no botão alterna input.type e ícone
-    btn.addEventListener('click', function () {
-      const isPassword = input.type === 'password';
+    btn.addEventListener("click", function () {
+      const isPassword = input.type === "password";
       if (isPassword) {
-        input.type = 'text';
+        input.type = "text";
         btn.innerHTML = svgEyeClosed; // ícone olho fechado (senha visível)
-        btn.setAttribute('aria-pressed', 'true');
-        btn.setAttribute('aria-label', 'Ocultar senha');
+        btn.setAttribute("aria-pressed", "true");
+        btn.setAttribute("aria-label", "Ocultar senha");
       } else {
-        input.type = 'password';
+        input.type = "password";
         btn.innerHTML = svgEyeOpen; // ícone olho aberto (senha oculta)
-        btn.setAttribute('aria-pressed', 'false');
-        btn.setAttribute('aria-label', 'Mostrar senha');
+        btn.setAttribute("aria-pressed", "false");
+        btn.setAttribute("aria-label", "Mostrar senha");
       }
     });
 
     // função para manter o foco no botão após clicar
-    btn.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ') {
+    btn.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         btn.click();
       }
     });
   });
 })();
-

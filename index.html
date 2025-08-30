@@ -53,13 +53,15 @@
         </label>
         <label class="lbl">Senha
           <div class="password-wrapper">
-            <input class="inp" type="password" id="regPassword" placeholder="Sua senha" required / data-password-toggle="true">
+            <input class="inp" type="password" id="regPassword" placeholder="Sua senha" required /
+              data-password-toggle="true">
             <button type="button" class="password-toggle" aria-label="Mostrar senha" aria-pressed="false"></button>
           </div>
         </label>
         <label class="lbl">Confirmar senha
           <div class="password-wrapper">
-            <input class="inp" type="password" id="regPassword2" placeholder="Confirme sua senha" required / data-password-toggle="true">
+            <input class="inp" type="password" id="regPassword2" placeholder="Confirme sua senha" required /
+              data-password-toggle="true">
             <button type="button" class="password-toggle" aria-label="Mostrar senha" aria-pressed="false"></button>
           </div>
         </label>
@@ -101,18 +103,28 @@
   <div class="overlay" id="overlayRecoverResult" aria-hidden="true">
     <div class="popup" role="dialog" aria-modal="true">
       <h2>Senha recuperada</h2>
-      <p>Senha do usuário <strong id="recResultUser"></strong>:</p>
-      <pre id="recResultPassword" style="padding:12px; background:#f5f5f5; border-radius:6px; word-break:break-all;"></pre>
+      <p style="text-align:center;">Senha do usuário <strong id="recResultUser"></strong>:</p>
+
+      <!-- container que parece um "pre", mas é um input password para ter botão de olho -->
+      <div class="rec-result-wrapper" style="display:flex; justify-content:center; margin-top:8px;">
+        <div class="password-wrapper" style="width: 90%; max-width: 420px;">
+          <input class="inp rec-result-input" id="recResultPassword" type="password" readonly
+            aria-label="Senha recuperada" data-password-toggle="true" />
+          <!-- o botão .password-toggle será reutilizado pelo script existente -->
+        </div>
+      </div>
 
       <div class="actions" style="justify-content:center; margin-top:12px;">
         <button type="button" id="recResultOk" class="btn primary">OK</button>
       </div>
     </div>
   </div>
-  
+
+
   <footer>
     <div class="footer-inner">
-      © 2025 - Desenvolvido por <a href="https://github.com/claudiohpo" target="_blank" rel="noopener">Cláudio Oliveira</a>
+      © 2025 - Desenvolvido por <a href="https://github.com/claudiohpo" target="_blank" rel="noopener">Cláudio
+        Oliveira</a>
     </div>
   </footer>
 
