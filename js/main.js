@@ -8,6 +8,22 @@ function fetchWithUser(url, opts = {}) {
   return fetch(url, opts);
 }
 
+(function () {
+  try {
+    const username = sessionStorage.getItem('km_username');
+    if (!username) {
+      try {
+        localStorage.removeItem('km_username');
+      } catch (e) {}
+      const redirect = encodeURIComponent(location.pathname + location.search + location.hash);
+      window.location.replace('/index.html?redirect=' + redirect);
+    }
+  } catch (e) {
+    window.location.replace('/index.html?redirect=' + encodeURIComponent(location.pathname));
+  }
+})();
+
+
 const BACKEND_URL = ""; // deixar vazio para usar mesmo domínio (/api/*)
 
 const form = document.getElementById("kmForm");

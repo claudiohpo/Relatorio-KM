@@ -15,6 +15,22 @@ function fetchWithUser(url, opts = {}) {
   return fetch(url, opts);
 }
 
+(function () {
+  try {
+    const username = sessionStorage.getItem('km_username');
+    if (!username) {
+      try {
+        localStorage.removeItem('km_username');
+      } catch (e) {}
+      const redirect = encodeURIComponent(location.pathname + location.search + location.hash);
+      window.location.replace('/index.html?redirect=' + redirect);
+    }
+  } catch (e) {
+    window.location.replace('/index.html?redirect=' + encodeURIComponent(location.pathname));
+  }
+})();
+
+
 // Verifica sessão ao iniciar (caso o guard inline falhe por algum motivo)
 if (!sessionStorage.getItem('km_username')) {
   try { localStorage.removeItem('km_username'); } catch (e) {}
@@ -353,19 +369,3 @@ async function baixarRelatorioCompletoXLS() {
     alert("Erro ao gerar relatório em XLSX.");
   }
 }
-
-// //<!-- Guard: exige sessão (sessionStorage). Se não existir, redireciona para index.html -->
-  
-//     (function () {
-//       try {
-//         const username = sessionStorage.getItem('km_username');
-//         if (!username) {
-//           try { localStorage.removeItem('km_username'); } catch (e) {}
-//           const redirect = encodeURIComponent(location.pathname + location.search + location.hash);
-//           window.location.replace('/index.html?redirect=' + redirect);
-//         }
-//       } catch (e) {
-//         window.location.replace('/index.html?redirect=' + encodeURIComponent(location.pathname));
-//       }
-//     })();
- 
