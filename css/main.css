@@ -198,7 +198,8 @@ footer .footer-inner {
 }
 
 #user-footer {
-  /* position: absolute;      fixa dentro do container */
+  position: absolute;      /*fixa dentro do container*/
+  margin-top: 12px;
   bottom: 10px;            /* 10px do fundo */
   right: 15px;             /* canto direito */
   font-style: italic;      /* itálico */
