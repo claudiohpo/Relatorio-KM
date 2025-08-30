@@ -170,13 +170,13 @@
   }
 
   .actions {
-        display: grid;
-        grid-template-columns: 1fr 1fr; /* 2 botões por linha */
-        gap: 8px;
-        width: 100%;
-        justify-content: center;
-        align-items: center;
-    }
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 botões por linha */
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+  }
 
   .msg {
     font-size: 12px;
@@ -188,6 +188,23 @@
 
   .password-wrapper .inp {
     padding-right: 40px;   /* mantém espaço para botão de toggle */
+  }
+
+  .overlay#overlayRecover .popup .actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;   /* centraliza horizontalmente */
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding-top: 6px;
+    flex-wrap: nowrap;
+  }
+
+  .overlay#overlayRecover .popup .actions .btn {
+    flex: 0 1 44%;            /* cada botão ~44% da largura */
+    max-width: 180px;
+    min-width: 120px;
   }
 
 }
