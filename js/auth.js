@@ -2,16 +2,37 @@ const loginForm = document.getElementById("loginForm");
 const loginMsg = document.getElementById("loginMsg");
 const openRegister = document.getElementById("openRegister");
 const openRecover = document.getElementById("openRecover");
+
 const overlayRegister = document.getElementById("overlayRegister");
 const registerForm = document.getElementById("registerForm");
+
+const overlayRecover = document.getElementById("overlayRecover");
+const recoverForm = document.getElementById("recoverForm");
+const recMsg = document.getElementById("recMsg");
+
+const overlayRecovered = document.getElementById("overlayRecovered");
+const recoveredPasswordEl = document.getElementById("recoveredPassword");
+
 
 function showOverlay(el){ el.classList.add("show"); el.setAttribute("aria-hidden","false"); }
 function hideOverlay(el){ el.classList.remove("show"); el.setAttribute("aria-hidden","true"); }
 
+// openRecover.addEventListener("click", () => showOverlay(overlayRecover));
+// document.getElementById("recCancel").addEventListener("click", () => hideOverlay(overlayRecover));
+// document.getElementById("recoveredOk").addEventListener("click", () => hideOverlay(overlayRecovered));
+
+// openRegister.addEventListener("click", () => showOverlay(overlayRegister));
+// openRecover.addEventListener("click", () => { alert("Recuperação de senha será implementada em breve."); });
+
+// document.getElementById("regCancel").addEventListener("click", () => hideOverlay(overlayRegister));
+
 openRegister.addEventListener("click", () => showOverlay(overlayRegister));
-openRecover.addEventListener("click", () => { alert("Recuperação de senha será implementada em breve."); });
+openRecover.addEventListener("click", () => showOverlay(overlayRecover));
 
 document.getElementById("regCancel").addEventListener("click", () => hideOverlay(overlayRegister));
+document.getElementById("recCancel").addEventListener("click", () => hideOverlay(overlayRecover));
+document.getElementById("recoveredOk").addEventListener("click", () => hideOverlay(overlayRecovered));
+
 
 // Função para tratar a resposta da API
 async function parseResponse(res) {
@@ -201,4 +222,64 @@ const svgEyeClosed = `
     });
   });
 })();
+
+recoverForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const username = document.getElementById("recUsername").value.trim();
+  const email = document.getElementById("recEmail").value.trim();
+  recMsg.style.color = "#333";
+  recMsg.textContent = "Verificando...";
+
+  if (!username || !email) {
+    recMsg.style.color = "red";
+    recMsg.textContent = "Preencha usuário e email.";
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "recover", username, email })
+    });
+
+    const body = await parseResponse(res);
+
+    if (!res.ok) {
+      recMsg.style.color = "red";
+      recMsg.textContent = body.error || `Erro ${res.status}`;
+      return;
+    }
+
+    // sucesso: mostra a senha
+    hideOverlay(overlayRecover);
+    recoveredPasswordEl.textContent = `Sua senha é: ${body.password}`;
+    showOverlay(overlayRecovered);
+
+  } catch (err) {
+    console.error("Erro fetch /api/users recover:", err);
+    recMsg.style.color = "red";
+    recMsg.textContent = "Erro de conexão com o servidor.";
+  }
+});
+
+
+if (action === "recover") {
+  const { username, email } = body;
+  if (!username || !email) {
+    res.statusCode = 400;
+    return res.end(JSON.stringify({ error: "Informe usuário e email." }));
+  }
+
+  const usernameNormalized = String(username).trim().toLowerCase();
+  const user = await users.findOne({ username: usernameNormalized, email });
+  if (!user) {
+    res.statusCode = 404;
+    return res.end(JSON.stringify({ error: "Usuário ou email informado está errado." }));
+  }
+
+  // retorna a senha em texto (como solicitado)
+  res.statusCode = 200;
+  return res.end(JSON.stringify({ password: user.password }));
+}
 
