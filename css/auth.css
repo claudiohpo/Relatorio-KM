@@ -178,6 +178,14 @@
     margin: 0;
 }
 
+/* Centraliza o título do modal "Recuperar senha" em todas as telas */
+#overlayRecover .popup h2 {
+  text-align: center;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+
 
 /* MOBILE */
 @media (max-width: 520px) {
