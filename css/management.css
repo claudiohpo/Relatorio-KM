@@ -255,3 +255,12 @@ h1 {
     word-break: break-word;
   }
 }
+
+#user-footer {
+  position: absolute;      /* fixa dentro do container */
+  bottom: 10px;            /* 10px do fundo */
+  right: 15px;             /* canto direito */
+  font-style: italic;      /* itálico */
+  font-size: 0.9em;        /* menor que texto normal */
+  color: #555;             /* cinza discreto */
+}

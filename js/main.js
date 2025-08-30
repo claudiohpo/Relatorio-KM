@@ -114,7 +114,6 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-
 // Botão de Manutenção
 const btnManutencao = document.getElementById("btnManutencao");
 if (btnManutencao) {

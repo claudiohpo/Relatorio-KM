@@ -292,6 +292,16 @@ async function salvarEdicao(e) {
   }
 }
 
+window.addEventListener("DOMContentLoaded", () => {
+    const username = sessionStorage.getItem("km_username") || localStorage.getItem("km_username");
+  if (username) {
+    const footer = document.getElementById("user-footer");
+    if (footer) {
+      footer.textContent = `${username}`;
+    }
+  }
+});
+
 // Baixa o relatório em CSV
 async function baixarRelatorioCSV() {
   try {
