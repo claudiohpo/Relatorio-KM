@@ -109,7 +109,7 @@ window.addEventListener("DOMContentLoaded", () => {
   if (username) {
     const footer = document.getElementById("user-footer");
     if (footer) {
-      footer.textContent = `Usuário logado: ${username}`;
+      footer.textContent = ${username}`;
     }
   }
 });
