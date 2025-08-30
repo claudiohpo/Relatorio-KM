@@ -286,7 +286,7 @@
         padding-top: 6px;
     }
 
-    /* controla a largura do botão OK dentro desse modal (opcional) */
+    /* controla a largura do botão OK dentro desse modal */
     #overlayRecoverResult .popup .actions .btn {
         flex: 0 1 auto;
         min-width: 120px;
