@@ -262,10 +262,12 @@ h1 {
 }
 
 #user-footer {
-  position: static;  /* ou remova position */
-  margin: 12px 0;    /* espaçamento acima e abaixo */
+  position: absolute;      /*fixa dentro do container*/
+  margin-top: 12px;
+  bottom: 10px;            /* 10px do fundo */
+  right: 15px;             /* canto direito */
+  font-style: italic;      /* itálico */
   text-align: right;
-  font-style: italic;
-  font-size: 0.9em;
-  color: #555;
+  font-size: 0.9em;        /* menor que texto normal */
+  color: #555;             /* cinza discreto */
 }
