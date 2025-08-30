@@ -150,7 +150,7 @@ footer a:hover {
     .actions {
     display: flex;
     justify-content: center;   /* centraliza todos os botões */
-    flex-wrap: wrap;           /* permite quebra de linha se necessário */
+    flex-wrap: nowrap;           
     gap: 10px;                 /* espaço entre os botões */
     }
 
