@@ -1,4 +1,3 @@
-/* css/auth.css - styles for login/register modals */
 :root {
     --card: #ffffff;
     --accent: #2b7cff;
@@ -135,5 +134,3 @@
 .password-toggle:focus {
   transform: translateY(0.5px);
 }
-
-

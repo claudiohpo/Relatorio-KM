@@ -1,5 +1,10 @@
-// js/main.js - usa sessionStorage para sessão e fetchWithUser
-// helper to call backend with X-Usuario header (adicionar no topo de main.js e management.js)
+const BACKEND_URL = ""; // deixar vazio para usar mesmo domínio (/api/*)
+
+const form = document.getElementById("kmForm");
+const msg = document.getElementById("msg");
+const btnSalvar = document.getElementById("btnSalvar");
+
+// Função para chamar o backend com o cabeçalho X-Usuario
 function fetchWithUser(url, opts = {}) {
   const username = sessionStorage.getItem('km_username');
   opts = opts || {};
@@ -7,13 +12,6 @@ function fetchWithUser(url, opts = {}) {
   if (username) opts.headers['X-Usuario'] = username;
   return fetch(url, opts);
 }
-
-
-const BACKEND_URL = ""; // deixar vazio para usar mesmo domínio (/api/*)
-
-const form = document.getElementById("kmForm");
-const msg = document.getElementById("msg");
-const btnSalvar = document.getElementById("btnSalvar");
 
 // Função para carregar o último registro e preencher KM Saída
 async function carregarUltimoRegistro() {
@@ -66,7 +64,7 @@ btnSalvar.addEventListener("click", async (e) => {
   const observacoes = document.getElementById("observacoes").value.trim();
   const kmChegada = kmChegadaInput === "" ? null : Number(kmChegadaInput);
 
-  // Montar payload incluindo campos duplicados (nome/obs) para compatibilidade com backend
+  // Construir payload para envio
   const payload = {
     data,
     chamado,
@@ -106,6 +104,7 @@ btnSalvar.addEventListener("click", async (e) => {
   }
 });
 
+// Botão de Manutenção
 const btnManutencao = document.getElementById("btnManutencao");
 if (btnManutencao) {
   btnManutencao.addEventListener("click", () => {
@@ -113,6 +112,7 @@ if (btnManutencao) {
   });
 }
 
+// Botão de Sair
 const btnSair = document.getElementById("btnSair");
 btnSair.addEventListener("click", () => {
   // Remove sessão e qualquer vestígio em localStorage

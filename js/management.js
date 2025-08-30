@@ -1,6 +1,10 @@
-// js/management.js - usa sessionStorage para sessão e fetchWithUser
+// Variáveis globais
+let registroSelecionado = null;
+let registros = [];
+let paginaAtual = 1;
+const registrosPorPagina = 10;
 
-// ----------------- HELPER FETCH -----------------
+
 // Centraliza chamada ao backend, adicionando usuário logado e Content-Type
 function fetchWithUser(url, opts = {}) {
   const username = sessionStorage.getItem('km_username');
@@ -15,34 +19,25 @@ function fetchWithUser(url, opts = {}) {
   return fetch(url, opts);
 }
 
-
-// Verifica sessão ao iniciar (caso o guard inline falhe por algum motivo)
+// Verifica sessão ao iniciar (caso o guard inline falhe)
 if (!sessionStorage.getItem('km_username')) {
   try { localStorage.removeItem('km_username'); } catch (e) {}
   const redirect = encodeURIComponent(location.pathname + location.search + location.hash);
   window.location.replace('/index.html?redirect=' + redirect);
 }
 
-// ----------------- VARIÁVEIS GLOBAIS -----------------
-let registroSelecionado = null;
-let registros = [];
-let paginaAtual = 1;
-const registrosPorPagina = 10;
-
-// ----------------- INICIALIZAÇÃO -----------------
+// Inicialização
 document.addEventListener("DOMContentLoaded", function () {
   carregarRegistros();
 
-  // Botões principais
+  // Botões de navegação
   document.getElementById("btnVoltar").addEventListener("click", () => {
     window.location.href = "app.html";
   });
-  document.getElementById("btnBaixarRelatorioCSV").addEventListener("click", baixarRelatorioCompletoCSV);
-  document.getElementById("btnBaixarRelatorioXLS").addEventListener("click", baixarRelatorioCompletoXLS);
+  document.getElementById("btnBaixarRelatorioCSV").addEventListener("click", baixarRelatorioCSV);
+  document.getElementById("btnBaixarRelatorioXLS").addEventListener("click", baixarRelatorioXLS);
   document.getElementById("btnAplicarFiltros").addEventListener("click", aplicarFiltros);
   document.getElementById("btnLimparFiltros").addEventListener("click", limparFiltros);
-
-  // Paginação
   document.getElementById("btnAnterior").addEventListener("click", () => {
     if (paginaAtual > 1) {
       paginaAtual--;
@@ -65,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("btnCancelarEdicao").addEventListener("click", fecharModalEdicao);
   document.getElementById("formEditar").addEventListener("submit", salvarEdicao);
 
-  // Botões fora da tabela
+  // Botão de Edição
   document.getElementById("btnEditar").addEventListener("click", () => {
     if (!registroSelecionado) {
       alert("Selecione um registro para editar!");
@@ -74,6 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
     abrirModalEdicao(registroSelecionado);
   });
 
+  // Botão de Exclusão
   document.getElementById("btnExcluir").addEventListener("click", () => {
     if (!registroSelecionado) {
       alert("Selecione um registro para excluir!");
@@ -83,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 
-// ----------------- FILTROS -----------------
+// Limpar filtros
 function limparFiltros() {
   document.getElementById("filtroDataInicio").value = "";
   document.getElementById("filtroDataFim").value = "";
@@ -93,6 +89,7 @@ function limparFiltros() {
   exibirRegistros();
 }
 
+// Carrega registros do backend
 async function carregarRegistros() {
   try {
     const response = await fetchWithUser("/api/km");
@@ -105,7 +102,7 @@ async function carregarRegistros() {
       registro.kmTotal = (registro.kmChegada || 0) - (registro.kmSaida || 0);
     });
 
-    // Ordena por data (desc) e depois por createdAt
+    // Ordena registros por data (ordem decrescente) e por createdAt (ordem decrescente)
     registros.sort((a, b) => {
       const dateComparison = new Date(b.data) - new Date(a.data);
       if (dateComparison !== 0) return dateComparison;
@@ -119,7 +116,7 @@ async function carregarRegistros() {
   }
 }
 
-// ----------------- EXIBIÇÃO -----------------
+// Exibe os registros na tabela
 function exibirRegistros() {
   const tbody = document.querySelector("#tabelaRegistros tbody");
   tbody.innerHTML = "";
@@ -165,11 +162,13 @@ function exibirRegistros() {
   });
 }
 
+// Aplica filtros
 function aplicarFiltros() {
   paginaAtual = 1;
   exibirRegistros();
 }
 
+// Aplica filtros internos
 function aplicarFiltrosInterno(registros) {
   const dataInicio = document.getElementById("filtroDataInicio").value;
   const dataFim = document.getElementById("filtroDataFim").value;
@@ -184,6 +183,7 @@ function aplicarFiltrosInterno(registros) {
   });
 }
 
+// Formata a data no formato DD/MM/YYYY
 function formatarData(data) {
   if (!data) return "";
   const partes = (typeof data === "string" ? data : "").split("-");
@@ -191,17 +191,19 @@ function formatarData(data) {
   return data;
 }
 
-// ----------------- EXCLUSÃO -----------------
+// Abre o modal de exclusão
 function abrirModalExclusao(id) {
   registroSelecionado = id;
   document.getElementById("modalExcluir").style.display = "flex";
 }
 
+// Fecha o modal de exclusão
 function fecharModalExclusao() {
   registroSelecionado = null;
   document.getElementById("modalExcluir").style.display = "none";
 }
 
+// Confirma a exclusão do registro
 async function confirmarExclusao() {
   if (!registroSelecionado) return;
 
@@ -220,7 +222,7 @@ async function confirmarExclusao() {
   }
 }
 
-// ----------------- EDIÇÃO -----------------
+// Abre o modal de edição
 function abrirModalEdicao(id) {
   const registro = registros.find((r) => String(r._id) === String(id));
   if (!registro) return;
@@ -236,10 +238,12 @@ function abrirModalEdicao(id) {
   document.getElementById("modalEditar").style.display = "flex";
 }
 
+// Fecha o modal de edição
 function fecharModalEdicao() {
   document.getElementById("modalEditar").style.display = "none";
 }
 
+// Salva as edições feitas no registro
 async function salvarEdicao(e) {
   e.preventDefault();
 
@@ -288,13 +292,13 @@ async function salvarEdicao(e) {
   }
 }
 
-// ----------------- RELATÓRIOS -----------------
-async function baixarRelatorioCompletoCSV() {
+// Baixa o relatório em CSV baixarRelatorioCompletoCSV
+async function baixarRelatorioCSV() {
   try {
     const dataInicio = document.getElementById("filtroDataInicio").value;
     const dataFim = document.getElementById("filtroDataFim").value;
     const local = document.getElementById("filtroLocal").value;
-    const username = sessionStorage.getItem('km_username'); // ✅ usuário logado
+    const username = sessionStorage.getItem('km_username'); // De acordo com usuário logado
 
     let query = `?format=csv${username ? `&username=${username}` : ""}`;
     if (dataInicio) query += `&from=${dataInicio}`;
@@ -318,8 +322,8 @@ async function baixarRelatorioCompletoCSV() {
   }
 }
 
-
-async function baixarRelatorioCompletoXLS() {
+// Baixa o relatório em XLS baixarRelatorioCompletoXLS
+async function baixarRelatorioXLS() {
   try {
     let dados = aplicarFiltrosInterno(registros).map((r) => ({
       Data: formatarData(r.data),

@@ -10,7 +10,7 @@ let clientPromise = null;
 async function getDb() {
   if (!MONGODB_URI) throw new Error("MONGODB_URI não definido");
   if (!clientPromise) {
-    const client = new MongoClient(MONGODB_URI); //, { useNewUrlParser: true, useUnifiedTopology: true }
+    const client = new MongoClient(MONGODB_URI);
     clientPromise = client.connect().then(() => client);
   }
   const client = await clientPromise;
@@ -24,13 +24,11 @@ async function readRawBody(req) {
     req.on && req.on("data", (chunk) => (data += chunk));
     req.on && req.on("end", () => resolve(data || null));
     req.on && req.on("error", () => resolve(null));
-    //setTimeout(() => resolve(null), 50);
   });
 }
 
 // Função para processar a solicitação
 module.exports = async (req, res) => {
-  // garantir JSON em todas as respostas
   res.setHeader("Content-Type", "application/json; charset=utf-8");
 
   try {

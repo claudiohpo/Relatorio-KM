@@ -1,6 +1,3 @@
-// js/auth.js - login and register (melhor tratamento de resposta)
-// Atualizado: grava sessão em sessionStorage e respeita redirect param
-
 const loginForm = document.getElementById("loginForm");
 const loginMsg = document.getElementById("loginMsg");
 const openRegister = document.getElementById("openRegister");
@@ -16,8 +13,8 @@ openRecover.addEventListener("click", () => { alert("Recuperação de senha ser�
 
 document.getElementById("regCancel").addEventListener("click", () => hideOverlay(overlayRegister));
 
+// Função para tratar a resposta da API
 async function parseResponse(res) {
-  // tenta JSON; se falhar, retorna texto como { error: text }
   const text = await res.text().catch(() => "");
   try {
     return text ? JSON.parse(text) : {};
@@ -26,6 +23,7 @@ async function parseResponse(res) {
   }
 }
 
+// Função para registrar um novo usuário
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const username = document.getElementById("regUsername").value.trim();
@@ -75,6 +73,7 @@ registerForm.addEventListener("submit", async (e) => {
   }
 });
 
+// Função para login
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const username = document.getElementById("loginUsername").value.trim();
@@ -111,7 +110,6 @@ loginForm.addEventListener("submit", async (e) => {
     const params = new URLSearchParams(window.location.search);
     const redirect = params.get('redirect');
     if (redirect) {
-      // decode caso o redirect tenha sido codificado
       try {
         const decoded = decodeURIComponent(redirect);
         window.location.href = decoded;
@@ -129,7 +127,7 @@ loginForm.addEventListener("submit", async (e) => {
   }
 });
 
-// SVGs usados no botão (strings)
+// SVGs usados no botão
 const svgEyeOpen = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
   <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z"/>
@@ -192,12 +190,9 @@ const svgEyeClosed = `
         btn.setAttribute('aria-pressed', 'false');
         btn.setAttribute('aria-label', 'Mostrar senha');
       }
-
-      // manter foco no input após clicar no botão (opcional)
-      //input.focus();
     });
 
-    // opcional: evitar submissão do formulário ao pressionar enter no botão
+    // função para manter o foco no botão após clicar
     btn.addEventListener('keydown', function (e) {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
