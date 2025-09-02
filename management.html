@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -12,6 +13,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png" />
   <link rel="manifest" href="/images/site.webmanifest" />
 </head>
+
 <body>
   <!-- Guard: exige sessão (sessionStorage). Se não existir, redireciona para index.html -->
   <script>
@@ -19,7 +21,7 @@
       try {
         const username = sessionStorage.getItem('km_username');
         if (!username) {
-          try { localStorage.removeItem('km_username'); } catch (e) {}
+          try { localStorage.removeItem('km_username'); } catch (e) { }
           const redirect = encodeURIComponent(location.pathname + location.search + location.hash);
           window.location.replace('/index.html?redirect=' + redirect);
         }
@@ -140,16 +142,18 @@
         </form>
       </div>
     </div>
-    
+
   </main>
 
   <footer>
     <div class="footer-inner">
-      © 2025 - Desenvolvido por <a href="https://github.com/claudiohpo" target="_blank" rel="noopener">Cláudio Oliveira</a>
+      © 2025 - Desenvolvido por <a href="https://github.com/claudiohpo" target="_blank" rel="noopener">Cláudio
+        Oliveira</a>
     </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="js/management.js"></script>
 </body>
+
 </html>
