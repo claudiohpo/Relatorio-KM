@@ -180,16 +180,16 @@
 
 /* Centraliza o título do modal "Recuperar senha" em todas as telas */
 #overlayRecover .popup h2 {
-  text-align: center;
-  margin-top: 0.25rem;
-  margin-bottom: 0.5rem;
+    text-align: center;
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
 }
 
 /* Centraliza todos os títulos dos modais */
 .overlay .popup h2 {
-  text-align: center;
-  margin-top: 0.25rem;
-  margin-bottom: 0.5rem;
+    text-align: center;
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
 }
 
 
@@ -311,25 +311,56 @@
     }
 
     .auth-card {
-    margin: 0 auto;
-  }
+        margin: 0 auto;
+    }
 
 
+    /* fixa o footer na base da viewport */
+    footer {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 999;
+        background: var(--bg, #f7f8fb);
+        /* opcional: usar cor de fundo similar ao body */
+        border-top: 1px solid #e3e6ee;
+        padding: 10px 12px;
+        box-sizing: border-box;
+    }
+
+    /* mantém o conteúdo do footer alinhado e com a largura desejada */
+    footer .footer-inner {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 0 6px;
+    }
+
+    /* evita que o conteúdo principal (card) seja coberto pelo footer */
+    /* o valor 72px é uma boa base — aumente ou diminua conforme a altura do footer */
+    body {
+        padding-bottom: calc(72px + env(safe-area-inset-bottom));
+        /* compatível com iPhone notch */
+    }
 }
 
 /* --- CENTERED LOGIN CARD  --- */
 .auth-card-wrapper {
-  /* permite que o wrapper ocupe o espaço vertical entre topo e footer */
-  flex: 1 0 auto;
-  width: 100%;
-  display: flex;
-  align-items: center;    /* centra verticalmente o card */
-  justify-content: center;/* centra horizontalmente o card */
-  padding: 20px 12px;     /* espaço nas laterais / top/bottom */
-  box-sizing: border-box;
+    /* permite que o wrapper ocupe o espaço vertical entre topo e footer */
+    flex: 1 0 auto;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    /* centra verticalmente o card */
+    justify-content: center;
+    /* centra horizontalmente o card */
+    padding: 20px 12px;
+    /* espaço nas laterais / top/bottom */
+    box-sizing: border-box;
 }
 
 /* evita margem vertical que empurra o card para cima */
 .auth-card {
-  margin: 0 auto;         /* horizontal: centraliza; vertical: sem empurrões */
+    margin: 0 auto;
+    /* horizontal: centraliza; vertical: sem empurrões */
 }
