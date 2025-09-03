@@ -108,6 +108,12 @@ module.exports = async (req, res) => {
         return res.end(JSON.stringify({ error: "Usuário já existe." }));
       }
 
+      const existingEmail = await users.findOne({ email: email.trim().toLowerCase() });
+      if (existingEmail) {
+        res.statusCode = 409;
+        return res.end(JSON.stringify({ error: "Email já está em uso." }));
+      }
+
       await users.insertOne({ username: usernameNormalized, email, password });
       res.statusCode = 201;
       return res.end(JSON.stringify({ message: "Usuário criado." }));
