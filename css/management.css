@@ -116,6 +116,8 @@ h1 {
   flex-wrap: wrap;
   margin-top: 10px;
   justify-content: center;
+  align-self: center;
+  flex: 0 0 100%;
 }
 
 /* paginação */
