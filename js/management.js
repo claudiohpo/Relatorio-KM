@@ -347,32 +347,45 @@ window.addEventListener("DOMContentLoaded", () => {
 // Baixa o relatório em CSV
 async function baixarRelatorioCSV() {
   try {
-    const dataInicio = document.getElementById("filtroDataInicio").value;
-    const dataFim = document.getElementById("filtroDataFim").value;
-    const local = document.getElementById("filtroLocal").value;
-    const username = sessionStorage.getItem("km_username"); // De acordo com usuário logado
+    // Aplica os mesmos filtros do XLS (cliente) para garantir consistência
+    const dadosFiltrados = aplicarFiltrosInterno(registros).map((r) => ({
+      Data: formatarData(r.data),
+      Chamado: r.chamado || "",
+      Local: r.local || "",
+      "KM Saída": r.kmSaida != null ? r.kmSaida : "",
+      "KM Chegada": r.kmChegada != null ? r.kmChegada : "",
+      "KM Total": r.kmTotal != null ? r.kmTotal : "",
+      Observações: r.observacoes || "",
+    }));
 
-    let query = `?format=csv${username ? `&username=${username}` : ""}`;
-    if (dataInicio) query += `&from=${dataInicio}`;
-    if (dataFim) query += `&to=${dataFim}`;
-    if (local) query += `&local=${encodeURIComponent(local)}`;
+    if (!dadosFiltrados || dadosFiltrados.length === 0) {
+      alert("Nenhum registro disponível para exportar.");
+      return;
+    }
 
-    const response = await fetchWithUser(`/api/report${query}`);
-    if (!response.ok) throw new Error("Erro ao baixar relatório");
+    const headers = Object.keys(dadosFiltrados[0]);
+    const esc = (v) => '"' + (v == null ? "" : String(v).replace(/"/g, '""')) + '"';
+    const lines = [headers.join(",")];
+    for (const row of dadosFiltrados) {
+      lines.push(headers.map((h) => esc(row[h])).join(","));
+    }
+    const csv = lines.join("\r\n");
 
-    const csv = await response.text();
-    const blob = new Blob([csv], { type: "text/csv" });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = "relatorio_km_completo.csv";
+    document.body.appendChild(a);
     a.click();
+    a.remove();
     URL.revokeObjectURL(url);
   } catch (error) {
     console.error("Erro:", error);
     alert("Erro ao baixar relatório.");
   }
 }
+
 
 // Baixa o relatório em XLS
 async function baixarRelatorioXLS() {
