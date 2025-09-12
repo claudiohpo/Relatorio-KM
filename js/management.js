@@ -282,7 +282,7 @@ async function salvarEdicao(e) {
   const chamado = document.getElementById("editChamado").value;
   const local = document.getElementById("editLocal").value;
   const kmSaida = parseInt(document.getElementById("editKmSaida").value);
-  const kmChegada = parseInt(document.getElementById("editKmChegada").value);
+  const kmChegadaInput = parseInt(document.getElementById("editKmChegada").value);
   const observacoes = document.getElementById("editObservacoes").value;
 
   if (!id) {
@@ -291,8 +291,8 @@ async function salvarEdicao(e) {
   }
 
   // Verifica se kmChegada foi preenchido
-  if (kmChegada !== "") {
-    const kmChegadaNum = Number(kmChegada);
+  if (kmChegadaInput !== "") {
+    const kmChegadaNum = Number(kmChegadaInput);
 
     // Só valida kmChegada se for um número válido
     if (!isNaN(kmChegadaNum) && kmChegadaNum < kmSaida) {
@@ -301,6 +301,8 @@ async function salvarEdicao(e) {
       return;
     }
   }
+
+  const kmChegada = kmChegadaInput === "" ? null : Number(kmChegadaInput);
 
   const dadosAtualizados = {
     id,
