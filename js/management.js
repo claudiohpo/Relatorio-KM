@@ -352,7 +352,20 @@ async function baixarRelatorioCSV() {
     // Aplica os mesmos filtros do XLS (cliente) para garantir consistência
     //const dadosFiltrados = aplicarFiltrosInterno(registros).map((r) => ({ //substituido pa função que traz em ordem crescente
     const dadosFiltrados = aplicarFiltrosInterno(registros)
-      .sort((a, b) => new Date(a.data) - new Date(b.data)) // ordena por data crescente
+      .sort((a, b) => {
+        // 1. Criado em: do mais antigo para o mais novo
+        const createdDiff = new Date(a.createdAt) - new Date(b.createdAt);
+        if (createdDiff !== 0) return createdDiff;
+
+        // 2. Data do evento: do mais antigo para o mais novo
+        const dateDiff = new Date(a.data) - new Date(b.data);
+        if (dateDiff !== 0) return dateDiff;
+
+        // 3. Continuidade: pelo kminicial se existir, senão kmSaida
+        const kmIniA = a.kminicial != null ? a.kminicial : a.kmSaida;
+        const kmIniB = b.kminicial != null ? b.kminicial : b.kmSaida;
+        return kmIniA - kmIniB;
+      })
       .map((r) => ({
         Data: formatarData(r.data),
         Chamado: r.chamado || "",
