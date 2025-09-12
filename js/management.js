@@ -421,7 +421,20 @@ async function baixarRelatorioXLS() {
 
     //Traz os dados por ordem do mais velho para o mais novo
     let dados = aplicarFiltrosInterno(registros)
-      .sort((a, b) => new Date(a.data) - new Date(b.data)) // ordena por data crescente
+      .sort((a, b) => {
+        // 1. Ordena por createdAt (do mais antigo para o mais novo)
+        const c = new Date(a.createdAt) - new Date(b.createdAt);
+        if (c !== 0) return c;
+
+        // 2. Ordena por data do evento (do mais antigo para o mais novo)
+        const d = new Date(a.data) - new Date(b.data);
+        if (d !== 0) return d;
+
+        // 3. Ordena pela continuidade (kminicial ou kmSaida)
+        const ka = a.kminicial != null ? a.kminicial : a.kmSaida;
+        const kb = b.kminicial != null ? b.kminicial : b.kmSaida;
+        return ka - kb;
+      })
       .map((r) => ({
         Data: formatarData(r.data),
         Chamado: r.chamado || "",
