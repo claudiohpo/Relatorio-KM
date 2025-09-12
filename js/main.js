@@ -37,11 +37,12 @@ btnSalvar.addEventListener("click", async (e) => {
   e.preventDefault();
   msg.textContent = "";
 
-  const form = document.getElementById("kmForm");
-  if (!form.checkValidity()) {
-    form.reportValidity();
-    return;
-  }
+  // //Ativa as validações do HTML5 (não vou usar por enquanto)
+  // const form = document.getElementById("kmForm");
+  // if (!form.checkValidity()) {
+  //   form.reportValidity();
+  //   return;
+  // }
 
   const data = document.getElementById("data").value;
   const chamado = document.getElementById("chamado").value.trim();
