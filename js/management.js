@@ -282,7 +282,9 @@ async function salvarEdicao(e) {
   const chamado = document.getElementById("editChamado").value;
   const local = document.getElementById("editLocal").value;
   const kmSaida = parseInt(document.getElementById("editKmSaida").value);
-  const kmChegadaInput = parseInt(document.getElementById("editKmChegada").value);
+  const kmChegadaInput = parseInt(
+    document.getElementById("editKmChegada").value
+  );
   const observacoes = document.getElementById("editObservacoes").value;
 
   if (!id) {
@@ -348,15 +350,18 @@ window.addEventListener("DOMContentLoaded", () => {
 async function baixarRelatorioCSV() {
   try {
     // Aplica os mesmos filtros do XLS (cliente) para garantir consistência
-    const dadosFiltrados = aplicarFiltrosInterno(registros).map((r) => ({
-      Data: formatarData(r.data),
-      Chamado: r.chamado || "",
-      Local: r.local || "",
-      "KM Saída": r.kmSaida != null ? r.kmSaida : "",
-      "KM Chegada": r.kmChegada != null ? r.kmChegada : "",
-      "KM Total": r.kmTotal != null ? r.kmTotal : "",
-      Observações: r.observacoes || "",
-    }));
+    //const dadosFiltrados = aplicarFiltrosInterno(registros).map((r) => ({ //substituido pa função que traz em ordem crescente
+    const dadosFiltrados = aplicarFiltrosInterno(registros)
+      .sort((a, b) => new Date(a.data) - new Date(b.data)) // ordena por data crescente
+      .map((r) => ({
+        Data: formatarData(r.data),
+        Chamado: r.chamado || "",
+        Local: r.local || "",
+        "KM Saída": r.kmSaida != null ? r.kmSaida : "",
+        "KM Chegada": r.kmChegada != null ? r.kmChegada : "",
+        "KM Total": r.kmTotal != null ? r.kmTotal : "",
+        Observações: r.observacoes || "",
+      }));
 
     if (!dadosFiltrados || dadosFiltrados.length === 0) {
       alert("Nenhum registro disponível para exportar.");
@@ -364,7 +369,8 @@ async function baixarRelatorioCSV() {
     }
 
     const headers = Object.keys(dadosFiltrados[0]);
-    const esc = (v) => '"' + (v == null ? "" : String(v).replace(/"/g, '""')) + '"';
+    const esc = (v) =>
+      '"' + (v == null ? "" : String(v).replace(/"/g, '""')) + '"';
     const lines = [headers.join(",")];
     for (const row of dadosFiltrados) {
       lines.push(headers.map((h) => esc(row[h])).join(","));
@@ -375,7 +381,7 @@ async function baixarRelatorioCSV() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "relatorio_km_completo.csv";
+    a.download = "relatorio_km.csv";
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -386,19 +392,32 @@ async function baixarRelatorioCSV() {
   }
 }
 
-
 // Baixa o relatório em XLS
 async function baixarRelatorioXLS() {
   try {
-    let dados = aplicarFiltrosInterno(registros).map((r) => ({
-      Data: formatarData(r.data),
-      Chamado: r.chamado || "",
-      Local: r.local || "",
-      "KM Saída": r.kmSaida,
-      "KM Chegada": r.kmChegada,
-      "KM Total": r.kmTotal,
-      Observações: r.observacoes || "",
-    }));
+    // //Ordem do mais novo para o mais antigo - Conforme inserção no banco - Preservar para uso futuro
+    // let dados = aplicarFiltrosInterno(registros).map((r) => ({
+    //   Data: formatarData(r.data),
+    //   Chamado: r.chamado || "",
+    //   Local: r.local || "",
+    //   "KM Saída": r.kmSaida,
+    //   "KM Chegada": r.kmChegada,
+    //   "KM Total": r.kmTotal,
+    //   Observações: r.observacoes || "",
+    // }));
+
+    //Traz os dados por ordem do mais velho para o mais novo
+    let dados = aplicarFiltrosInterno(registros)
+      .sort((a, b) => new Date(a.data) - new Date(b.data)) // ordena por data crescente
+      .map((r) => ({
+        Data: formatarData(r.data),
+        Chamado: r.chamado || "",
+        Local: r.local || "",
+        "KM Saída": r.kmSaida,
+        "KM Chegada": r.kmChegada,
+        "KM Total": r.kmTotal,
+        Observações: r.observacoes || "",
+      }));
 
     if (dados.length === 0) {
       alert("Nenhum registro disponível para exportar.");
@@ -418,7 +437,7 @@ async function baixarRelatorioXLS() {
     }));
     worksheet["!cols"] = colWidths;
 
-    XLSX.writeFile(workbook, "relatorio_km_completo.xlsx");
+    XLSX.writeFile(workbook, "relatorio_km.xlsx");
   } catch (error) {
     console.error("Erro:", error);
     alert("Erro ao gerar relatório em XLSX.");
