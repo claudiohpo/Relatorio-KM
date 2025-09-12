@@ -4,26 +4,29 @@ let registros = [];
 let paginaAtual = 1;
 const registrosPorPagina = 10;
 
-
 // Centraliza chamada ao backend, adicionando usuário logado e Content-Type
 function fetchWithUser(url, opts = {}) {
-  const username = sessionStorage.getItem('km_username');
+  const username = sessionStorage.getItem("km_username");
   opts = opts || {};
   opts.headers = opts.headers || {};
 
-  if (username) opts.headers['X-Usuario'] = username;
-  if (opts.body && !opts.headers['Content-Type']) {
-    opts.headers['Content-Type'] = 'application/json';
+  if (username) opts.headers["X-Usuario"] = username;
+  if (opts.body && !opts.headers["Content-Type"]) {
+    opts.headers["Content-Type"] = "application/json";
   }
 
   return fetch(url, opts);
 }
 
 // Verifica sessão ao iniciar (caso o guard inline falhe)
-if (!sessionStorage.getItem('km_username')) {
-  try { localStorage.removeItem('km_username'); } catch (e) {}
-  const redirect = encodeURIComponent(location.pathname + location.search + location.hash);
-  window.location.replace('/index.html?redirect=' + redirect);
+if (!sessionStorage.getItem("km_username")) {
+  try {
+    localStorage.removeItem("km_username");
+  } catch (e) {}
+  const redirect = encodeURIComponent(
+    location.pathname + location.search + location.hash
+  );
+  window.location.replace("/index.html?redirect=" + redirect);
 }
 
 // Inicialização
@@ -34,10 +37,18 @@ document.addEventListener("DOMContentLoaded", function () {
   document.getElementById("btnVoltar").addEventListener("click", () => {
     window.location.href = "app.html";
   });
-  document.getElementById("btnBaixarRelatorioCSV").addEventListener("click", baixarRelatorioCSV);
-  document.getElementById("btnBaixarRelatorioXLS").addEventListener("click", baixarRelatorioXLS);
-  document.getElementById("btnAplicarFiltros").addEventListener("click", aplicarFiltros);
-  document.getElementById("btnLimparFiltros").addEventListener("click", limparFiltros);
+  document
+    .getElementById("btnBaixarRelatorioCSV")
+    .addEventListener("click", baixarRelatorioCSV);
+  document
+    .getElementById("btnBaixarRelatorioXLS")
+    .addEventListener("click", baixarRelatorioXLS);
+  document
+    .getElementById("btnAplicarFiltros")
+    .addEventListener("click", aplicarFiltros);
+  document
+    .getElementById("btnLimparFiltros")
+    .addEventListener("click", limparFiltros);
   document.getElementById("btnAnterior").addEventListener("click", () => {
     if (paginaAtual > 1) {
       paginaAtual--;
@@ -53,12 +64,20 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   // Modal de exclusão
-  document.getElementById("btnCancelarExclusao").addEventListener("click", fecharModalExclusao);
-  document.getElementById("btnConfirmarExclusao").addEventListener("click", confirmarExclusao);
+  document
+    .getElementById("btnCancelarExclusao")
+    .addEventListener("click", fecharModalExclusao);
+  document
+    .getElementById("btnConfirmarExclusao")
+    .addEventListener("click", confirmarExclusao);
 
   // Modal de edição
-  document.getElementById("btnCancelarEdicao").addEventListener("click", fecharModalEdicao);
-  document.getElementById("formEditar").addEventListener("submit", salvarEdicao);
+  document
+    .getElementById("btnCancelarEdicao")
+    .addEventListener("click", fecharModalEdicao);
+  document
+    .getElementById("formEditar")
+    .addEventListener("submit", salvarEdicao);
 
   // Botão de Edição
   document.getElementById("btnEditar").addEventListener("click", () => {
@@ -127,8 +146,13 @@ function exibirRegistros() {
   const fim = inicio + registrosPorPagina;
   const registrosPagina = registrosFiltrados.slice(inicio, fim);
 
-  const totalPaginas = Math.max(1, Math.ceil(registrosFiltrados.length / registrosPorPagina));
-  document.getElementById("infoPagina").textContent = `Página ${paginaAtual} de ${totalPaginas}`;
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(registrosFiltrados.length / registrosPorPagina)
+  );
+  document.getElementById(
+    "infoPagina"
+  ).textContent = `Página ${paginaAtual} de ${totalPaginas}`;
   document.getElementById("btnAnterior").disabled = paginaAtual <= 1;
   document.getElementById("btnProximo").disabled = paginaAtual >= totalPaginas;
 
@@ -142,7 +166,9 @@ function exibirRegistros() {
   registrosPagina.forEach((registro) => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td><input type="radio" name="registroSelecionado" value="${registro._id}"></td>
+      <td><input type="radio" name="registroSelecionado" value="${
+        registro._id
+      }"></td>
       <td>${formatarData(registro.data)}</td>
       <td>${registro.chamado || ""}</td>
       <td>${registro.local || ""}</td>
@@ -155,11 +181,13 @@ function exibirRegistros() {
   });
 
   // Captura seleção
-  document.querySelectorAll("input[name='registroSelecionado']").forEach((radio) => {
-    radio.addEventListener("change", () => {
-      registroSelecionado = radio.value;
+  document
+    .querySelectorAll("input[name='registroSelecionado']")
+    .forEach((radio) => {
+      radio.addEventListener("change", () => {
+        registroSelecionado = radio.value;
+      });
     });
-  });
 }
 
 // Aplica filtros
@@ -172,7 +200,9 @@ function aplicarFiltros() {
 function aplicarFiltrosInterno(registros) {
   const dataInicio = document.getElementById("filtroDataInicio").value;
   const dataFim = document.getElementById("filtroDataFim").value;
-  const local = (document.getElementById("filtroLocal").value || "").toLowerCase();
+  const local = (
+    document.getElementById("filtroLocal").value || ""
+  ).toLowerCase();
 
   return registros.filter((registro) => {
     if (dataInicio && registro.data < dataInicio) return false;
@@ -260,9 +290,16 @@ async function salvarEdicao(e) {
     return;
   }
 
-  if (!isNaN(kmChegada) && !isNaN(kmSaida) && kmChegada < kmSaida) {
-    alert("KM de chegada não pode ser menor que KM de saída!");
-    return;
+  // Verifica se kmChegada foi preenchido
+  if (kmChegada !== "") {
+    const kmChegadaNum = Number(kmChegada);
+
+    // Só valida kmChegada se for um número válido
+    if (!isNaN(kmChegadaNum) && kmChegadaNum < kmSaida) {
+      msg.style.color = "red";
+      msg.textContent = "KM chegada não pode ser menor que KM saída.";
+      return;
+    }
   }
 
   const dadosAtualizados = {
@@ -273,7 +310,8 @@ async function salvarEdicao(e) {
     observacoes,
     kmSaida,
     kmChegada,
-    kmTotal: (!isNaN(kmChegada) && !isNaN(kmSaida)) ? (kmChegada - kmSaida) : undefined,
+    kmTotal:
+      !isNaN(kmChegada) && !isNaN(kmSaida) ? kmChegada - kmSaida : undefined,
   };
 
   try {
@@ -293,7 +331,9 @@ async function salvarEdicao(e) {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-    const username = sessionStorage.getItem("km_username") || localStorage.getItem("km_username");
+  const username =
+    sessionStorage.getItem("km_username") ||
+    localStorage.getItem("km_username");
   if (username) {
     const footer = document.getElementById("user-footer");
     if (footer) {
@@ -308,7 +348,7 @@ async function baixarRelatorioCSV() {
     const dataInicio = document.getElementById("filtroDataInicio").value;
     const dataFim = document.getElementById("filtroDataFim").value;
     const local = document.getElementById("filtroLocal").value;
-    const username = sessionStorage.getItem('km_username'); // De acordo com usuário logado
+    const username = sessionStorage.getItem("km_username"); // De acordo com usuário logado
 
     let query = `?format=csv${username ? `&username=${username}` : ""}`;
     if (dataInicio) query += `&from=${dataInicio}`;
@@ -355,10 +395,11 @@ async function baixarRelatorioXLS() {
     XLSX.utils.book_append_sheet(workbook, worksheet, "Relatório KM");
 
     const colWidths = Object.keys(dados[0]).map((key) => ({
-      wch: Math.max(
-        key.length,
-        ...dados.map((r) => (r[key] ? r[key].toString().length : 0))
-      ) + 2,
+      wch:
+        Math.max(
+          key.length,
+          ...dados.map((r) => (r[key] ? r[key].toString().length : 0))
+        ) + 2,
     }));
     worksheet["!cols"] = colWidths;
 
