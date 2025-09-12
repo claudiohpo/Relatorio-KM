@@ -2,7 +2,7 @@ const { MongoClient } = require("mongodb");
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const DB_NAME = process.env.DB_NAME || "km_db";
-const GLOBAL_COLLECTION = process.env.COLLECTION || "usuarios";
+const GLOBAL_COLLECTION = process.env.COLLECTION || "km_registros";
 
 let clientPromise = null;
 
@@ -25,12 +25,18 @@ function sanitizeUsername(u) {
   return s;
 }
 
-// Função para obter a coleção correta com base no cabeçalho da requisição
 async function getCollectionForRequest(req) { 
   const db = await getDb();
   const headerUser = req.headers ? (req.headers['x-usuario'] || req.headers['x-user'] || req.headers['usuario']) : null;
   const username = sanitizeUsername(headerUser);
+
+  const method = (req && req.method) ? String(req.method).toUpperCase() : 'GET';
   if (!username) {
+    if (['POST', 'PUT', 'DELETE'].includes(method)) {
+      const err = new Error('Usuário não fornecido ou inválido; autenticação necessária');
+      err.code = 'NO_USER';
+      throw err;
+    }
     return db.collection(GLOBAL_COLLECTION);
   }
   const collName = `registros_${username}`;
@@ -43,67 +49,64 @@ function toCsv(rows, headers) {
   for (const r of rows) {
     lines.push(headers.map((h) => esc(r[h])).join(","));
   }
-  return lines.join("\n");
+  return lines.join("\r\n");
 }
 
-// Função para processar a solicitação
+// endpoint de relatório
 module.exports = async (req, res) => {
+  res.setHeader("Content-Type", "application/json");
   try {
-    if (req.method !== "GET") return res.status(405).end("Method Not Allowed");
-
-    const col = await getCollectionForRequest(req);  // Agora dinâmico, como em api/km.js
-    const { from, to, format, local } = req.query;
-    const filter = {};
-    
-    // Filtro por data
-    if (from || to) {
-      filter.data = {};
-      if (from) filter.data.$gte = from;
-      if (to) filter.data.$lte = to;
+    let col;  // Agora dinâmico, como em api/km.js
+    try {
+      col = await getCollectionForRequest(req);
+    } catch (err) {
+      if (err && err.code === 'NO_USER') return res.status(401).json({ error: err.message });
+      throw err;
     }
-    
-    // Filtro por local
-    if (local) {
-      filter.local = { $regex: local, $options: "i" }; // Busca case-insensitive
-    }
-    
-    const docs = await col.find(filter).sort({ data: 1 }).toArray();
 
-    if ((format || "csv").toLowerCase() === "csv") {
-      const headers = [
-        "data",
-        "chamado",
-        "local",
-        "kmSaida",
-        "kmChegada",
-        "kmTotal",
-        "observacoes",
-        "criadoEm",
-      ];
-      const rows = docs.map((d) => ({
-        data: d.data || "",
-        chamado: d.chamado || "",
-        local: d.local || "",
-        kmSaida: d.kmSaida ?? "",
-        kmChegada: d.kmChegada ?? "",
-        kmTotal: d.kmTotal ?? (d.kmChegada - d.kmSaida),
-        observacoes: d.observacoes || "",
-        criadoEm: d.createdAt
-          ? new Date(d.createdAt).toISOString()
-          : d.criadoEm || "",
-      }));
-      const csv = toCsv(rows, headers);
-      res.setHeader("Content-Type", "text/csv; charset=utf-8");
-      res.setHeader(
-        "Content-Disposition",
-        "attachment; filename=relatorio_km.csv"
-      );
-      return res.send(csv);
-    } else {
-      return res.json(docs);
+    const q = req.query || {};
+    try {
+      // filtro básico
+      const filter = {};
+      if (q.dataInicio || q.dataFim) {
+        const inicio = (q.dataInicio && /^\d{4}-\d{2}-\d{2}$/.test(q.dataInicio)) ? q.dataInicio : null;
+        const fim = (q.dataFim && /^\d{4}-\d{2}-\d{2}$/.test(q.dataFim)) ? q.dataFim : null;
+        if (inicio || fim) filter.data = {};
+        if (inicio) filter.data.$gte = inicio;
+        if (fim) filter.data.$lte = fim;
+      }
+      if (q.local) filter.local = { $regex: q.local, $options: "i" };
+
+      const docs = await col.find(filter).sort({ data: 1 }).toArray();
+
+      if (q.format && q.format.toLowerCase() === "csv") {
+        const headers = ["data", "kmSaida", "kmChegada", "kmTotal", "local", "chamado", "observacoes", "createdAt"];
+        const rows = docs.map(d => ({
+          data: d.data,
+          kmSaida: d.kmSaida,
+          kmChegada: d.kmChegada,
+          kmTotal: d.kmTotal,
+          local: d.local,
+          chamado: d.chamado || "",
+          observacoes: d.observacoes || "",
+          createdAt: d.createdAt ? (new Date(d.createdAt)).toISOString() : ""
+        }));
+        const csv = toCsv(rows, headers);
+        res.setHeader("Content-Type", "text/csv; charset=utf-8");
+        res.setHeader(
+          "Content-Disposition",
+          "attachment; filename=relatorio_km.csv"
+        );
+        return res.send(csv);
+      } else {
+        return res.json(docs);
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Erro interno" });
     }
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro interno" });
+    console.error("api/report error:", err);
+    return res.status(500).json({ error: "Erro interno: " + (err && err.message ? err.message : "unknown") });
   }
 };

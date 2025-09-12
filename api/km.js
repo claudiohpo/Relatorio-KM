@@ -2,7 +2,7 @@ const { MongoClient, ObjectId } = require("mongodb");
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const DB_NAME = process.env.DB_NAME || "km_db";
-const GLOBAL_COLLECTION = process.env.COLLECTION || "usuarios";
+const GLOBAL_COLLECTION = process.env.COLLECTION || "km_registros";
 
 let clientPromise = null;
 
@@ -33,30 +33,49 @@ async function getCollectionForRequest(req) {
   const queryUser = req.query ? req.query.username : null;
   const candidate = headerUser || bodyUser || queryUser || null;
   const username = sanitizeUsername(candidate);
+
+  // modo estrito: PROIBIR writes (POST/PUT/DELETE) se não houver username válido
+  const method = (req && req.method) ? String(req.method).toUpperCase() : 'GET';
   if (!username) {
+    if (['POST', 'PUT', 'DELETE'].includes(method)) {
+      const err = new Error('Usuário não fornecido ou inválido; autenticação necessária');
+      err.code = 'NO_USER';
+      throw err;
+    }
+    // para leituras sem usuário, usa a coleção global (fallback)
     return db.collection(GLOBAL_COLLECTION);
   }
+
   const collName = `registros_${username}`;
   return db.collection(collName);
 }
 
 // ---- Converter data para YYYY-MM-DD
 function toYMD(value) {
-  if (!value) return new Date().toISOString().slice(0, 10);
-  const s = String(value);
-  if (s.length >= 10 && s[4] === "-" && s[7] === "-") return s.slice(0, 10);
-  try {
-    return new Date(s).toISOString().slice(0, 10);
-  } catch {
-    return new Date().toISOString().slice(0, 10);
+  if (!value) return null;
+  // se já passou no frontend no formato YYYY-MM-DD, retorna
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  // aceita DD-MM-YYYY ou D-M-YYYY
+  const m = value.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (m) {
+    const d = m[1].padStart(2, '0');
+    const mo = m[2].padStart(2, '0');
+    return `${m[3]}-${mo}-${d}`;
   }
+  // tenta converter Date
+  const d = new Date(value);
+  if (!isNaN(d.getTime())) {
+    return d.toISOString().slice(0, 10);
+  }
+  return null;
 }
 
-// função para analisar o corpo da solicitação se req.body não estiver disponível
-async function parseBodyFallback(req) {
+// função para ler body (p/ ambientes sem body parser)
+function readBody(req) {
   return new Promise((resolve) => {
+    if (req.body) return resolve(req.body);
     let data = "";
-    req.on && req.on("data", chunk => data += chunk);
+    req.on && req.on("data", (chunk) => (data += chunk));
     req.on && req.on("end", () => {
       try { resolve(data ? JSON.parse(data) : {}); } catch (e) { resolve({}); }
     });
@@ -68,7 +87,13 @@ async function parseBodyFallback(req) {
 module.exports = async (req, res) => {
   res.setHeader("Content-Type", "application/json");
   try {
-    const collection = await getCollectionForRequest(req);
+    let collection;
+    try {
+      collection = await getCollectionForRequest(req);
+    } catch (err) {
+      if (err && err.code === 'NO_USER') return res.status(401).json({ error: err.message });
+      throw err;
+    }
 
     if (req.method === "GET") {
       const q = req.query || {};
@@ -84,14 +109,21 @@ module.exports = async (req, res) => {
         const docs = await collection.find().sort({ data: -1, createdAt: -1 }).limit(1).toArray();
         return res.json(docs[0] || null);
       }
-      const docs = await collection.find().sort({ data: -1, createdAt: -1 }).toArray();
+      // parâmetros de filtro (intervalo de datas, local, etc.)
+      const filter = {};
+      if (q.dataInicio || q.dataFim) {
+        const inicio = toYMD(q.dataInicio) || "1970-01-01";
+        const fim = toYMD(q.dataFim) || "2999-12-31";
+        filter.data = { $gte: inicio, $lte: fim };
+      }
+      if (q.local) filter.local = { $regex: q.local, $options: "i" };
+      const docs = await collection.find(filter).sort({ data: -1, createdAt: -1 }).toArray();
       return res.json(docs);
     }
 
     if (req.method === "POST") {
-      const body = req.body || await parseBodyFallback(req);
-
-      const dataStr = toYMD(body.data);
+      const body = await readBody(req);
+      const dataStr = toYMD(body.data) || toYMD(new Date());
       const kmSaida = (body.kmSaida !== undefined && body.kmSaida !== null) ? Number(body.kmSaida) : null;
       const kmChegada = (body.kmChegada !== undefined && body.kmChegada !== null) ? Number(body.kmChegada) : null;
 
@@ -109,28 +141,22 @@ module.exports = async (req, res) => {
       };
 
       const result = await collection.insertOne(doc);
-      return res.status(201).json({ insertedId: result.insertedId });
+      return res.json({ message: "Inserido", id: result.insertedId });
     }
 
     if (req.method === "PUT") {
-      const body = req.body || await parseBodyFallback(req);
+      const body = await readBody(req);
       if (!body.id) return res.status(400).json({ error: "ID obrigatório" });
+      const existing = await collection.findOne({ _id: new ObjectId(body.id) });
+      if (!existing) return res.status(404).json({ error: "Registro não encontrado" });
 
-      let update = {};
+      const update = {};
       if (body.data) update.data = toYMD(body.data);
-      if (body.kmSaida !== undefined) update.kmSaida = (body.kmSaida !== null && body.kmSaida !== "") ? Number(body.kmSaida) : null;
-      if (body.kmChegada !== undefined) update.kmChegada = (body.kmChegada !== null && body.kmChegada !== "") ? Number(body.kmChegada) : null;
+      if (body.kmSaida !== undefined) update.kmSaida = body.kmSaida === null ? null : Number(body.kmSaida);
+      if (body.kmChegada !== undefined) update.kmChegada = body.kmChegada === null ? null : Number(body.kmChegada);
       if (body.local !== undefined) update.local = body.local;
-      if (body.chamado !== undefined) update.chamado = body.chamado;   // <-- tratar no update também
+      if (body.chamado !== undefined) update.chamado = body.chamado;
       if (body.observacoes !== undefined) update.observacoes = body.observacoes;
-
-      if (update.kmChegada !== undefined || update.kmSaida !== undefined) {
-        const existing = await collection.findOne({ _id: new ObjectId(body.id) });
-        const kmSaida = (update.kmSaida !== undefined) ? update.kmSaida : existing.kmSaida;
-        const kmChegada = (update.kmChegada !== undefined) ? update.kmChegada : existing.kmChegada;
-        update.kmTotal = (kmChegada !== null && kmSaida !== null) ? Number(kmChegada) - Number(kmSaida) : null;
-      }
-
       update.updatedAt = new Date();
 
       await collection.updateOne({ _id: new ObjectId(body.id) }, { $set: update });
