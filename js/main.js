@@ -6,10 +6,10 @@ const btnSalvar = document.getElementById("btnSalvar");
 
 // Função para chamar o backend com o cabeçalho X-Usuario
 function fetchWithUser(url, opts = {}) {
-  const username = sessionStorage.getItem('km_username');
+  const username = sessionStorage.getItem("km_username");
   opts = opts || {};
   opts.headers = opts.headers || {};
-  if (username) opts.headers['X-Usuario'] = username;
+  if (username) opts.headers["X-Usuario"] = username;
   return fetch(url, opts);
 }
 
@@ -36,6 +36,12 @@ document.addEventListener("DOMContentLoaded", carregarUltimoRegistro);
 btnSalvar.addEventListener("click", async (e) => {
   e.preventDefault();
   msg.textContent = "";
+
+  const form = document.getElementById("kmForm");
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
 
   const data = document.getElementById("data").value;
   const chamado = document.getElementById("chamado").value.trim();
@@ -105,7 +111,9 @@ btnSalvar.addEventListener("click", async (e) => {
 });
 
 window.addEventListener("DOMContentLoaded", () => {
-    const username = sessionStorage.getItem("km_username") || localStorage.getItem("km_username");
+  const username =
+    sessionStorage.getItem("km_username") ||
+    localStorage.getItem("km_username");
   if (username) {
     const footer = document.getElementById("user-footer");
     if (footer) {
@@ -126,7 +134,11 @@ if (btnManutencao) {
 const btnSair = document.getElementById("btnSair");
 btnSair.addEventListener("click", () => {
   // Remove sessão e qualquer vestígio em localStorage
-  try { sessionStorage.removeItem('km_username'); } catch (e) {}
-  try { localStorage.removeItem('km_username'); } catch (e) {}
+  try {
+    sessionStorage.removeItem("km_username");
+  } catch (e) {}
+  try {
+    localStorage.removeItem("km_username");
+  } catch (e) {}
   window.location.href = "/index.html";
 });
