@@ -349,22 +349,16 @@ window.addEventListener("DOMContentLoaded", () => {
 // Baixa o relatório em CSV
 async function baixarRelatorioCSV() {
   try {
-    // Aplica os mesmos filtros do XLS (cliente) para garantir consistência
-    //const dadosFiltrados = aplicarFiltrosInterno(registros).map((r) => ({ //substituido pa função que traz em ordem crescente
+    // 1. Filtra e ordena registros como antes
     const dadosFiltrados = aplicarFiltrosInterno(registros)
       .sort((a, b) => {
-        // 1. Criado em: do mais antigo para o mais novo
-        const createdDiff = new Date(a.createdAt) - new Date(b.createdAt);
-        if (createdDiff !== 0) return createdDiff;
-
-        // 2. Data do evento: do mais antigo para o mais novo
-        const dateDiff = new Date(a.data) - new Date(b.data);
-        if (dateDiff !== 0) return dateDiff;
-
-        // 3. Continuidade: pelo kminicial se existir, senão kmSaida
-        const kmIniA = a.kminicial != null ? a.kminicial : a.kmSaida;
-        const kmIniB = b.kminicial != null ? b.kminicial : b.kmSaida;
-        return kmIniA - kmIniB;
+        const c = new Date(a.createdAt) - new Date(b.createdAt);
+        if (c !== 0) return c;
+        const d = new Date(a.data) - new Date(b.data);
+        if (d !== 0) return d;
+        const ka = a.kminicial != null ? a.kminicial : a.kmSaida;
+        const kb = b.kminicial != null ? b.kminicial : b.kmSaida;
+        return ka - kb;
       })
       .map((r) => ({
         Data: formatarData(r.data),
@@ -376,21 +370,26 @@ async function baixarRelatorioCSV() {
         Observações: r.observacoes || "",
       }));
 
-    if (!dadosFiltrados || dadosFiltrados.length === 0) {
+    if (!dadosFiltrados.length) {
       alert("Nenhum registro disponível para exportar.");
       return;
     }
 
+    // 2. Monta CSV usando ponto e vírgula
     const headers = Object.keys(dadosFiltrados[0]);
-    const esc = (v) =>
-      '"' + (v == null ? "" : String(v).replace(/"/g, '""')) + '"';
-    const lines = [headers.join(",")];
+    const esc = (v) => '"' + (v == null ? "" : String(v).replace(/"/g, '""')) + '"';
+    const sep = ";";
+    const lines = [headers.join(sep)];
     for (const row of dadosFiltrados) {
-      lines.push(headers.map((h) => esc(row[h])).join(","));
+      lines.push(headers.map((h) => esc(row[h])).join(sep));
     }
     const csv = lines.join("\r\n");
 
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    // 3. Adiciona BOM para Excel reconhecer UTF-8
+    const bom = "\uFEFF";
+    const blob = new Blob([bom + csv], { type: "text/csv;charset=utf-8;" });
+
+    // 4. Gatilho de download
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -399,6 +398,7 @@ async function baixarRelatorioCSV() {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
+
   } catch (error) {
     console.error("Erro:", error);
     alert("Erro ao baixar relatório.");
