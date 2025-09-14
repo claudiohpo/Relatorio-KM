@@ -1,7 +1,7 @@
 const { MongoClient } = require("mongodb");
 
 const MONGODB_URI = process.env.MONGODB_URI;
-const DB_NAME = process.env.DB_NAME || "km_testes";
+const DB_NAME = process.env.DB_NAME || "km_db";
 const USERS_COLLECTION = process.env.USERS_COLLECTION || "usuarios";
 
 let clientPromise = null;
