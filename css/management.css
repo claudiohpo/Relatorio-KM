@@ -189,6 +189,18 @@ h1 {
     overflow-y: auto;
 }
 
+/* Centraliza apenas o título */
+.modal-content h3 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+/* Justifica o texto do paragrafo */
+.modal-content p {
+  text-align: justify;
+}
+
+
 .modal-buttons {
     display: flex;
     justify-content: flex-end;
