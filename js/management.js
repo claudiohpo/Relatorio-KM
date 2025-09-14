@@ -71,6 +71,14 @@ document.addEventListener("DOMContentLoaded", function () {
     .getElementById("btnConfirmarExclusao")
     .addEventListener("click", confirmarExclusao);
 
+    // Modal de Limpeza da tabela toda
+  document
+    .getElementById("btnCancelarLimpeza")
+    .addEventListener("click", fecharModalExclusao);
+  document
+    .getElementById("btnConfirmarLimpeza")
+    .addEventListener("click", confirmarLimpeza);
+
   // Modal de edição
   document
     .getElementById("btnCancelarEdicao")
@@ -251,6 +259,26 @@ async function confirmarExclusao() {
     alert("Erro ao excluir registro.");
   }
 }
+
+// Confirma a limpeza de todos os dados do usuário logado
+async function confirmarLimpeza() {
+  try {
+    const response = await fetchWithUser(`/api/km`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) throw new Error("Erro ao excluir os registros");
+
+    alert("Todos os seus registros foram excluídos com sucesso!");
+    fecharModalApagarTudo();
+    carregarRegistros(); // Atualiza a interface após a exclusão
+  } catch (error) {
+    console.error("Erro:", error);
+    alert("Erro ao excluir os registros.");
+  }
+}
+
+
 
 // Abre o modal de edição
 function abrirModalEdicao(id) {
