@@ -43,6 +43,12 @@ document.addEventListener("DOMContentLoaded", function () {
   document
     .getElementById("btnBaixarRelatorioXLS")
     .addEventListener("click", baixarRelatorioXLS);
+
+    // Abre modal "Apagar Tabela" (limpeza total)
+document.getElementById("btnApagarTudo").addEventListener("click", () => {
+  abrirModalLimpeza(); // sem id
+});
+
   document
     .getElementById("btnAplicarFiltros")
     .addEventListener("click", aplicarFiltros);
@@ -74,7 +80,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Modal de Limpeza da tabela toda
   document
     .getElementById("btnCancelarLimpeza")
-    .addEventListener("click", fecharModalExclusao);
+    .addEventListener("click", fecharModalLimpeza);
   document
     .getElementById("btnConfirmarLimpeza")
     .addEventListener("click", confirmarLimpeza);
@@ -241,6 +247,20 @@ function fecharModalExclusao() {
   document.getElementById("modalExcluir").style.display = "none";
 }
 
+// Abre o modal de Limpeza (limpar toda a tabela do usuário)
+function abrirModalLimpeza() {
+  // limpeza total não precisa de registroSelecionado
+  registroSelecionado = null;
+  document.getElementById("modalApagarTudo").style.display = "flex";
+}
+
+
+// Fecha o modal de limpeza
+function fecharModalLimpeza() {
+  registroSelecionado = null;
+  document.getElementById("modalApagarTudo").style.display = "none";
+}
+
 // Confirma a exclusão do registro
 async function confirmarExclusao() {
   if (!registroSelecionado) return;
@@ -270,14 +290,13 @@ async function confirmarLimpeza() {
     if (!response.ok) throw new Error("Erro ao excluir os registros");
 
     alert("Todos os seus registros foram excluídos com sucesso!");
-    fecharModalApagarTudo();
+    fecharModalLimpeza();     // <<-- corrigido
     carregarRegistros(); // Atualiza a interface após a exclusão
   } catch (error) {
     console.error("Erro:", error);
     alert("Erro ao excluir os registros.");
   }
 }
-
 
 
 // Abre o modal de edição
