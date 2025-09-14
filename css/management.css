@@ -1,21 +1,26 @@
 /* container */
 .container {
     max-width: 1200px;
-    margin: 0 auto; /* centraliza o container */
+    margin: 0 auto;
+    /* centraliza o container */
     box-sizing: border-box;
 }
 
 /* wrapper responsivo para tabela */
 .table-responsive {
     width: 100%;
-    overflow-x: auto;                     /* torna a tabela rolável horizontalmente */
-    -webkit-overflow-scrolling: touch;    /* smooth scroll em mobile */
+    overflow-x: auto;
+    /* torna a tabela rolável horizontalmente */
+    -webkit-overflow-scrolling: touch;
+    /* smooth scroll em mobile */
 }
 
 /* tabela: largura natural do conteúdo (não encolhe) */
 .table-responsive table {
-    width: max-content;     /* tabela usa a largura necessária pelos conteúdos */
-    min-width: 100%;        /* garante que, no mínimo, ocupe a largura do container */
+    width: max-content;
+    /* tabela usa a largura necessária pelos conteúdos */
+    min-width: 100%;
+    /* garante que, no mínimo, ocupe a largura do container */
     border-collapse: collapse;
     margin: 20px 0;
 }
@@ -60,8 +65,8 @@ h1 {
 /* coluna de seleção */
 #tabelaRegistros td:first-child,
 #tabelaRegistros th:first-child {
-  width: 40px;
-  text-align: center;
+    width: 40px;
+    text-align: center;
 }
 
 /* ===== PADRÃO DE BOTÕES (Editar, Excluir, Filtro e Limpar) ===== */
@@ -69,21 +74,37 @@ h1 {
 .btn-excluir,
 .btn-filtro,
 .btn-limpar {
-  padding: 10px 14px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  white-space: nowrap;
-  min-width: 110px;     /* garante largura igual */
-  text-align: center;
-  transition: opacity 0.2s ease-in-out;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+    min-width: 110px;
+    /* garante largura igual */
+    text-align: center;
+    transition: opacity 0.2s ease-in-out;
 }
 
-.btn-editar  { background-color: #4CAF50; color: white; }
-.btn-excluir { background-color: #f44336; color: white; }
-.btn-filtro  { background-color: #1f6feb; color: white; }
-.btn-limpar  { background-color: #ff9800; color: white; }
+.btn-editar {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.btn-excluir {
+    background-color: #f44336;
+    color: white;
+}
+
+.btn-filtro {
+    background-color: #1f6feb;
+    color: white;
+}
+
+.btn-limpar {
+    background-color: #ff9800;
+    color: white;
+}
 
 .btn-editar:hover,
 .btn-excluir:hover,
@@ -111,13 +132,13 @@ h1 {
 
 /* container de botões de filtro */
 .botoes-filtro {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-  justify-content: center;
-  align-self: center;
-  flex: 0 0 100%;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    justify-content: center;
+    align-self: center;
+    flex: 0 0 100%;
 }
 
 /* paginação */
@@ -145,12 +166,12 @@ h1 {
 /* botoes rodape */
 .botoes-rodape {
     display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-  justify-content: center;
-  align-self: center;
-  flex: 0 0 100%;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    justify-content: center;
+    align-self: center;
+    flex: 0 0 100%;
 }
 
 .btn-voltar,
@@ -162,9 +183,18 @@ h1 {
     color: white;
 }
 
-.btn-voltar { background-color: #ff9800; }
-.btn-relatorio { background-color: #333; }
-.btn-apagartudo { background-color: #f44336; color: white; }
+.btn-voltar {
+    background-color: #ff9800;
+}
+
+.btn-relatorio {
+    background-color: #333;
+}
+
+.btn-apagartudo {
+    background-color: #f44336;
+    color: white;
+}
 
 .modal {
     display: none;
@@ -191,15 +221,15 @@ h1 {
 
 /* Centraliza apenas o título */
 .modal-content h3 {
-  text-align: center;
-  margin-bottom: 10px;
+    text-align: center;
+    margin-bottom: 10px;
 }
 
 /* Ajusta o texto */
 .modal-content p {
-  text-align: center;
-  max-width: 400px;
-  margin: 0 auto;
+    text-align: center;
+    max-width: 400px;
+    margin: 0 auto;
 }
 
 
@@ -212,19 +242,27 @@ h1 {
 
 /* ================== RESPONSIVIDADE ================== */
 @media (max-width: 768px) {
-    .filtros { flex-direction: column; align-items: stretch; }
-    .filtros label { width: 100%; }
+    .filtros {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filtros label {
+        width: 100%;
+    }
 
     .botoes-filtro {
         display: grid;
-        grid-template-columns: 1fr 1fr; /* 2 botões por linha */
+        grid-template-columns: 1fr 1fr;
+        /* 2 botões por linha */
         gap: 10px;
         width: 100%;
     }
 
     #user-footer {
-    text-align: right;   /* no mobile, deixa alinhado à esquerda */
-    margin-top: 8px;
+        text-align: right;
+        /* no mobile, deixa alinhado à esquerda */
+        margin-top: 8px;
     }
 
     .btn-filtro,
@@ -234,7 +272,8 @@ h1 {
 
     .actions {
         display: grid;
-        grid-template-columns: 1fr 1fr; /* 2 botões por linha */
+        grid-template-columns: 1fr 1fr;
+        /* 2 botões por linha */
         gap: 8px;
         width: 100%;
     }
@@ -244,33 +283,60 @@ h1 {
         width: 100%;
     }
 
-    .botoes-rodape { 
+    .botoes-rodape {
         display: grid;
-        grid-template-columns: 1fr 1fr; /* 2 botões por linha */
+        grid-template-columns: 1fr 1fr;
+        /* 2 botões por linha */
         gap: 10px;
-        width: 100%; 
+        width: 100%;
     }
 
-    .btn-voltar, .btn-relatorio, .btn-apagartudo { width: 100%; }
+    .btn-voltar,
+    .btn-relatorio,
+    .btn-apagartudo {
+        width: 100%;
+    }
 
-    .modal-content { width: 95%; padding: 15px; }
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+    }
 
-    th, td {
+    th,
+    td {
         padding: 8px 5px;
         font-size: 12px;
     }
 }
 
 @media (max-width: 520px) {
-    .container { padding: 10px; }
-    .filtros { gap: 10px; }
-    .pagination { flex-wrap: wrap; }
+    .container {
+        padding: 10px;
+    }
 
-    .modal-buttons { flex-direction: column; }
-    .modal-buttons button { width: 100%; }
+    .filtros {
+        gap: 10px;
+    }
 
-    .botoes-filtro { gap: 5px; }
-    .botoes-rodape { gap: 5px; }
+    .pagination {
+        flex-wrap: wrap;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+    }
+
+    .modal-buttons button {
+        width: 100%;
+    }
+
+    .botoes-filtro {
+        gap: 5px;
+    }
+
+    .botoes-rodape {
+        gap: 5px;
+    }
 
     .btn-filtro,
     .btn-limpar,
@@ -282,20 +348,23 @@ h1 {
 }
 
 @media (max-width: 420px) {
-  .table-responsive th,
-  .table-responsive td {
-    white-space: normal;
-    word-break: break-word;
-  }
+
+    .table-responsive th,
+    .table-responsive td {
+        white-space: normal;
+        word-break: break-word;
+    }
 }
 
 #user-footer {
-  position: static;  /* ou remova position */
-  margin-top: 12px;    /* espaçamento acima e abaixo */
-  bottom: 10px;
-  right: 15px;
-  text-align: right;
-  font-style: italic;
-  font-size: 0.9em;
-  color: #555;
+    position: static;
+    /* ou remova position */
+    margin-top: 12px;
+    /* espaçamento acima e abaixo */
+    bottom: 10px;
+    right: 15px;
+    text-align: right;
+    font-style: italic;
+    font-size: 0.9em;
+    color: #555;
 }

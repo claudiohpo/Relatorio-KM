@@ -44,10 +44,10 @@ document.addEventListener("DOMContentLoaded", function () {
     .getElementById("btnBaixarRelatorioXLS")
     .addEventListener("click", baixarRelatorioXLS);
 
-    // Abre modal "Apagar Tabela" (limpeza total)
-document.getElementById("btnApagarTudo").addEventListener("click", () => {
-  abrirModalLimpeza(); // sem id
-});
+  // Abre modal "Apagar Tabela" (limpeza total)
+  document.getElementById("btnApagarTudo").addEventListener("click", () => {
+    abrirModalLimpeza(); // sem id
+  });
 
   document
     .getElementById("btnAplicarFiltros")
@@ -77,7 +77,7 @@ document.getElementById("btnApagarTudo").addEventListener("click", () => {
     .getElementById("btnConfirmarExclusao")
     .addEventListener("click", confirmarExclusao);
 
-    // Modal de Limpeza da tabela toda
+  // Modal de Limpeza da tabela toda
   document
     .getElementById("btnCancelarLimpeza")
     .addEventListener("click", fecharModalLimpeza);
@@ -254,7 +254,6 @@ function abrirModalLimpeza() {
   document.getElementById("modalApagarTudo").style.display = "flex";
 }
 
-
 // Fecha o modal de limpeza
 function fecharModalLimpeza() {
   registroSelecionado = null;
@@ -300,22 +299,21 @@ async function confirmarExclusao() {
 
 async function confirmarLimpeza() {
   try {
-    const response = await fetchWithUser('/api/km?all=true', { method: 'DELETE' });
+    const response = await fetchWithUser("/api/km?all=true", {
+      method: "DELETE",
+    });
     if (!response.ok) {
-      const txt = await response.text().catch(()=>null);
-      throw new Error(`Status ${response.status} - ${txt || 'sem corpo'}`);
+      const txt = await response.text().catch(() => null);
+      throw new Error(`Status ${response.status} - ${txt || "sem corpo"}`);
     }
-    alert('Todos os seus registros foram excluídos com sucesso!');
+    alert("Todos os seus registros foram excluídos com sucesso!");
     fecharModalLimpeza();
     carregarRegistros();
   } catch (error) {
-    console.error('Erro:', error);
-    alert('Erro ao excluir os registros. Detalhe: ' + (error.message || error));
+    console.error("Erro:", error);
+    alert("Erro ao excluir os registros. Detalhe: " + (error.message || error));
   }
 }
-
-
-
 
 // Abre o modal de edição
 function abrirModalEdicao(id) {
@@ -442,7 +440,8 @@ async function baixarRelatorioCSV() {
 
     // 2. Monta CSV usando ponto e vírgula
     const headers = Object.keys(dadosFiltrados[0]);
-    const esc = (v) => '"' + (v == null ? "" : String(v).replace(/"/g, '""')) + '"';
+    const esc = (v) =>
+      '"' + (v == null ? "" : String(v).replace(/"/g, '""')) + '"';
     const sep = ";";
     const lines = [headers.join(sep)];
     for (const row of dadosFiltrados) {
@@ -463,7 +462,6 @@ async function baixarRelatorioCSV() {
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-
   } catch (error) {
     console.error("Erro:", error);
     alert("Erro ao baixar relatório.");
