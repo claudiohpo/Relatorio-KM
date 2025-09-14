@@ -163,16 +163,48 @@ module.exports = async (req, res) => {
       return res.json({ message: "Atualizado" });
     }
 
+    // if (req.method === "DELETE") {
+    //   const q = req.query || {};
+    //   if (!q.id) return res.status(400).json({ error: "ID obrigatório" });
+    //   try {
+    //     await collection.deleteOne({ _id: new ObjectId(q.id) });
+    //     return res.json({ message: "Registro excluído com sucesso" });
+    //   } catch {
+    //     return res.status(400).json({ error: "ID inválido" });
+    //   }
+    // }
+
     if (req.method === "DELETE") {
-      const q = req.query || {};
-      if (!q.id) return res.status(400).json({ error: "ID obrigatório" });
+  const q = req.query || {};
+  // aceita id via query ou body; aceita flag all (query ?all=true ou body { all: true })
+  const id = q.id || (req.body && req.body.id);
+  const allFlag = q.all === "true" || (req.body && req.body.all === true);
+
+  if (!id && !allFlag) {
+    return res.status(400).json({ error: "ID obrigatório ou use ?all=true" });
+  }
+
+  try {
+    if (id) {
       try {
-        await collection.deleteOne({ _id: new ObjectId(q.id) });
+        await collection.deleteOne({ _id: new ObjectId(id) });
         return res.json({ message: "Registro excluído com sucesso" });
-      } catch {
+      } catch (err) {
         return res.status(400).json({ error: "ID inválido" });
       }
     }
+
+    if (allFlag) {
+      // deleta todos os documentos desta collection (apenas da collection do usuário)
+      const result = await collection.deleteMany({});
+      return res.json({ message: "Todos os registros foram excluídos com sucesso", deletedCount: result.deletedCount });
+    }
+  } catch (err) {
+    console.error("Erro em DELETE /api/km:", err);
+    return res.status(500).json({ error: "Erro ao excluir registros: " + (err && err.message ? err.message : "unknown") });
+  }
+}
+
 
     res.setHeader("Allow", "GET,POST,PUT,DELETE");
     return res.status(405).json({ error: "Method Not Allowed" });

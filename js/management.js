@@ -300,27 +300,20 @@ async function confirmarExclusao() {
 
 async function confirmarLimpeza() {
   try {
-    console.log('[DEBUG] iniciar confirmarLimpeza — username=', sessionStorage.getItem('km_username'));
-    const response = await fetchWithUser('/api/km', { method: 'DELETE' });
-
-    console.log('[DEBUG] response.status =', response.status, 'ok =', response.ok);
-    // tenta ler como texto (evita exceção se não for JSON)
-    const text = await response.text();
-    console.log('[DEBUG] response.body =', text);
-
+    const response = await fetchWithUser('/api/km?all=true', { method: 'DELETE' });
     if (!response.ok) {
-      // inclui status e corpo no erro para diagnóstico
-      throw new Error(`Status ${response.status} - ${text || 'sem corpo'}`);
+      const txt = await response.text().catch(()=>null);
+      throw new Error(`Status ${response.status} - ${txt || 'sem corpo'}`);
     }
-
     alert('Todos os seus registros foram excluídos com sucesso!');
     fecharModalLimpeza();
     carregarRegistros();
   } catch (error) {
-    console.error('Erro ao confirmar limpeza:', error);
+    console.error('Erro:', error);
     alert('Erro ao excluir os registros. Detalhe: ' + (error.message || error));
   }
 }
+
 
 
 
