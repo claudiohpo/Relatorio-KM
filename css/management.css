@@ -164,7 +164,7 @@ h1 {
 
 .btn-voltar { background-color: #ff9800; }
 .btn-relatorio { background-color: #333; }
-.btn-apagartabela { background-color: #f44336; color: white; }
+.btn-apagartudo { background-color: #f44336; color: white; }
 
 .modal {
     display: none;
@@ -237,7 +237,7 @@ h1 {
         width: 100%; 
     }
 
-    .btn-voltar, .btn-relatorio { width: 100%; }
+    .btn-voltar, .btn-relatorio, .btn-apagartudo { width: 100%; }
 
     .modal-content { width: 95%; padding: 15px; }
 
