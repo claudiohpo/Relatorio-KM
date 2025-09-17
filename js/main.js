@@ -98,11 +98,9 @@ btnSalvar.addEventListener("click", async (e) => {
     msg.style.color = "green";
     msg.textContent = "Registro salvo com sucesso.";
 
-    const valorData = dataInput.value; //pega o valor da data no calendario
-
     form.reset();
 
-    dataInput.value = valorData; //devolve a data após reset do form
+    dataInput.value = data; // Restaura o valor da data capturado
 
     // Recarregar o último KM para o próximo registro
     await carregarUltimoRegistro();
