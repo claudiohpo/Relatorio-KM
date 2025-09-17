@@ -56,6 +56,7 @@ btnSalvar.addEventListener("click", async (e) => {
     return;
   }
 
+
   // Verifica se kmChegada foi preenchido
   if (kmChegadaInput !== "") {
     const kmChegadaNum = Number(kmChegadaInput);
@@ -111,7 +112,7 @@ btnSalvar.addEventListener("click", async (e) => {
   }
 });
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", () => { //Apagar isso aqui se der ruim
   const username =
     sessionStorage.getItem("km_username") ||
     localStorage.getItem("km_username");
@@ -121,6 +122,15 @@ window.addEventListener("DOMContentLoaded", () => {
       footer.textContent = `${username}`;
     }
   }
+
+  const dataInput = document.getElementById("data");
+    if (dataInput) {
+      const hoje = new Date();
+      const ano = hoje.getFullYear();
+      const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+      const dia = String(hoje.getDate()).padStart(2, "0");
+      dataInput.value = `${ano}-${mes}-${dia}`;
+    }
 });
 
 // Botão de Manutenção
