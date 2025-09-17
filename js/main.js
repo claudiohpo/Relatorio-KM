@@ -44,7 +44,18 @@ btnSalvar.addEventListener("click", async (e) => {
   //   return;
   // }
 
-  const data = document.getElementById("data").value;
+  // Preenche data atual (e define dataInput no escopo acessível)
+  const dataInput = document.getElementById("data");
+  if (dataInput) {
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+    const dia = String(hoje.getDate()).padStart(2, "0");
+    dataInput.value = `${ano}-${mes}-${dia}`;
+  }
+
+  // const data = document.getElementById("data").value; //antigo
+  const data = dataInput.value;
   const chamado = document.getElementById("chamado").value.trim();
   const local = document.getElementById("local").value.trim();
   const kmSaida = Number(document.getElementById("kmSaida").value);
@@ -55,7 +66,6 @@ btnSalvar.addEventListener("click", async (e) => {
     msg.textContent = "Preencha os campos obrigatórios corretamente.";
     return;
   }
-
 
   // Verifica se kmChegada foi preenchido
   if (kmChegadaInput !== "") {
@@ -115,7 +125,7 @@ btnSalvar.addEventListener("click", async (e) => {
   }
 });
 
-window.addEventListener("DOMContentLoaded", () => { 
+window.addEventListener("DOMContentLoaded", () => {
   const username =
     sessionStorage.getItem("km_username") ||
     localStorage.getItem("km_username");
@@ -127,13 +137,13 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   const dataInput = document.getElementById("data"); //Preenche com a data atual automaticamente
-    if (dataInput) {
-      const hoje = new Date();
-      const ano = hoje.getFullYear();
-      const mes = String(hoje.getMonth() + 1).padStart(2, "0");
-      const dia = String(hoje.getDate()).padStart(2, "0");
-      dataInput.value = `${ano}-${mes}-${dia}`;
-    }
+  if (dataInput) {
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+    const dia = String(hoje.getDate()).padStart(2, "0");
+    dataInput.value = `${ano}-${mes}-${dia}`;
+  }
 });
 
 // Botão de Manutenção
