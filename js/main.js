@@ -97,7 +97,12 @@ btnSalvar.addEventListener("click", async (e) => {
 
     msg.style.color = "green";
     msg.textContent = "Registro salvo com sucesso.";
+
+    const valorData = dataInput.value; //pega o valor da data no calendario
+
     form.reset();
+
+    dataInput.value = valorData; //devolve a data após reset do form
 
     // Recarregar o último KM para o próximo registro
     await carregarUltimoRegistro();
@@ -112,7 +117,7 @@ btnSalvar.addEventListener("click", async (e) => {
   }
 });
 
-window.addEventListener("DOMContentLoaded", () => { //Apagar isso aqui se der ruim
+window.addEventListener("DOMContentLoaded", () => { 
   const username =
     sessionStorage.getItem("km_username") ||
     localStorage.getItem("km_username");
@@ -123,7 +128,7 @@ window.addEventListener("DOMContentLoaded", () => { //Apagar isso aqui se der ru
     }
   }
 
-  const dataInput = document.getElementById("data");
+  const dataInput = document.getElementById("data"); //Preenche com a data atual automaticamente
     if (dataInput) {
       const hoje = new Date();
       const ano = hoje.getFullYear();
