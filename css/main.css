@@ -1,5 +1,5 @@
 :root {
-    --bg: #f7f8fb;
+    --bg: #b4b0b0;
     --card: #fff;
     --accent: #1f6feb;
     --muted: #666;
@@ -121,6 +121,7 @@ footer {
 
 footer .footer-inner {
     width: 100%;
+    color: #000000;
     max-width: 720px;
     box-sizing: border-box;
 }
