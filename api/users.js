@@ -106,7 +106,7 @@ function buildResetLink(req, username, token) {
 
 async function sendResetEmail({ to, username, link }) {
   const transporter = getMailTransporter();
-  const fromAddress = BREVO_MAIL_FROM || BREVO_SMTP_LOGIN;
+  const fromAddress = BREVO_MAIL_FROM; // || BREVO_SMTP_LOGIN;
   if (!fromAddress) {
     throw new Error("Remetente SMTP não configurado. Defina BREVO_MAIL_FROM.");
   }
@@ -269,7 +269,8 @@ module.exports = async (req, res) => {
       return res.end(
         JSON.stringify({
           message:
-            "Se os dados estiverem corretos, você receberá um email com o link para redefinir a senha.",
+            "Se os dados estiverem corretos, você receberá um email com o link para redefinir a senha.\n" +
+            "Caso não receba, verifique sua caixa de spam ou lixo eletrônico."
         })
       );
     }
