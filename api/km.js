@@ -237,7 +237,7 @@ module.exports = async (req, res) => {
       return res.json({ message: "Atualizado" });
     }
 
-    // if (req.method === "DELETE") {
+    // if (req.method === "DELETE") { // antigo
     //   const q = req.query || {};
     //   if (!q.id) return res.status(400).json({ error: "ID obrigatório" });
     //   try {
