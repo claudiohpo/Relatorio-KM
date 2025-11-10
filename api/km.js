@@ -28,6 +28,30 @@ function sanitizeUsername(u) {
   return s;
 }
 
+function normalizePlate(valor) {
+  if (valor === undefined || valor === null) {
+    return { value: null };
+  }
+  const texto = String(valor).trim();
+  if (!texto) {
+    return { value: null };
+  }
+  const limpo = texto.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (limpo.length !== 7) {
+    return {
+      error: "Placa inválida. Informe 7 caracteres no padrão Mercosul ou antigo.",
+    };
+  }
+  const mercosulRegex = /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
+  const antigoRegex = /^[A-Z]{3}[0-9]{4}$/;
+  if (!mercosulRegex.test(limpo) && !antigoRegex.test(limpo)) {
+    return {
+      error: "Placa inválida. Utilize formatos como AAA-1234 ou AAA1A23.",
+    };
+  }
+  return { value: limpo };
+}
+
 // Função para obter a coleção correta com base no nome de usuário
 async function getCollectionForRequest(req) {
   const db = await getDb();
@@ -154,6 +178,10 @@ module.exports = async (req, res) => {
         body.kmChegada !== undefined && body.kmChegada !== null
           ? Number(body.kmChegada)
           : null;
+      const placaResultado = normalizePlate(body.placa);
+      if (placaResultado.error) {
+        return res.status(400).json({ error: placaResultado.error });
+      }
 
       const now = new Date();
       const doc = {
@@ -166,7 +194,8 @@ module.exports = async (req, res) => {
             : null,
         local: body.local || null, // sempre "local"
         chamado: body.chamado || null, // <-- novo campo "chamado"
-        observacoes: body.observacoes || null, // sempre "observacoes"
+        observacoes: body.observacoes || null,
+        placa: placaResultado.value,
         createdAt: now,
         updatedAt: now,
       };
@@ -192,6 +221,13 @@ module.exports = async (req, res) => {
       if (body.local !== undefined) update.local = body.local;
       if (body.chamado !== undefined) update.chamado = body.chamado;
       if (body.observacoes !== undefined) update.observacoes = body.observacoes;
+      if (body.placa !== undefined) {
+        const placaResultado = normalizePlate(body.placa);
+        if (placaResultado.error) {
+          return res.status(400).json({ error: placaResultado.error });
+        }
+        update.placa = placaResultado.value;
+      }
       update.updatedAt = new Date();
 
       await collection.updateOne(

@@ -13,6 +13,30 @@ function fetchWithUser(url, opts = {}) {
   return fetch(url, opts);
 }
 
+function normalizarPlacaEntrada(valor) {
+  if (valor === undefined || valor === null) {
+    return { placa: null };
+  }
+  const texto = String(valor).trim();
+  if (!texto) {
+    return { placa: null };
+  }
+  const limpo = texto.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (limpo.length !== 7) {
+    return {
+      error: "Placa inválida. Informe 7 caracteres no padrão Mercosul ou antigo.",
+    };
+  }
+  const mercosulRegex = /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
+  const antigoRegex = /^[A-Z]{3}[0-9]{4}$/;
+  if (!mercosulRegex.test(limpo) && !antigoRegex.test(limpo)) {
+    return {
+      error: "Placa inválida. Utilize formatos como AAA-1234 ou AAA1A23.",
+    };
+  }
+  return { placa: limpo };
+}
+
 // Função para carregar o último registro e preencher KM Saída
 async function carregarUltimoRegistro() {
   try {
@@ -24,6 +48,12 @@ async function carregarUltimoRegistro() {
 
     if (ultimoRegistro && ultimoRegistro.kmChegada) {
       document.getElementById("kmSaida").value = ultimoRegistro.kmChegada;
+    }
+    const placaInput = document.getElementById("placa");
+    if (placaInput) {
+      placaInput.value = ultimoRegistro && ultimoRegistro.placa
+        ? ultimoRegistro.placa
+        : "";
     }
   } catch (error) {
     console.error("Erro ao carregar último registro:", error);
@@ -58,6 +88,7 @@ btnSalvar.addEventListener("click", async (e) => {
   const data = dataInput.value;
   const chamado = document.getElementById("chamado").value.trim();
   const local = document.getElementById("local").value.trim();
+  const placaValor = document.getElementById("placa").value.trim();
   const kmSaida = Number(document.getElementById("kmSaida").value);
   const kmChegadaInput = document.getElementById("kmChegada").value;
 
@@ -81,6 +112,14 @@ btnSalvar.addEventListener("click", async (e) => {
 
   const observacoes = document.getElementById("observacoes").value.trim();
   const kmChegada = kmChegadaInput === "" ? null : Number(kmChegadaInput);
+  const { placa: placaNormalizada, error: erroPlaca } = normalizarPlacaEntrada(
+    placaValor
+  );
+  if (erroPlaca) {
+    msg.style.color = "red";
+    msg.textContent = erroPlaca;
+    return;
+  }
 
   // Construir payload para envio
   const payload = {
@@ -88,6 +127,7 @@ btnSalvar.addEventListener("click", async (e) => {
     chamado,
     local,
     observacoes,
+    placa: placaNormalizada,
     kmSaida,
     kmChegada,
     criadoEm: new Date().toISOString(),
