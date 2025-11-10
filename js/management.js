@@ -574,3 +574,5 @@ async function baixarRelatorioXLS() {
     alert("Erro ao gerar relatório em XLSX.");
   }
 }
+
+//comentário de teste, git hub
