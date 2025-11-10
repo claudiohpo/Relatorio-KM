@@ -1,7 +1,7 @@
 {
   "functions": {
     "api/**/*.js": {
-      "runtime": "@vercel/node@1.16.4"
+      "runtime": "@vercel/node@1.15.4"
     }
   }
 }
