@@ -241,6 +241,20 @@
         align-items: center;
     }
 
+    #resetForm .actions {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+    }
+
+    #resetForm .actions .btn {
+        width: auto;
+        min-width: 160px;
+        flex: 0 0 auto;
+        padding: 10px 18px;
+    }
+
     .msg {
         font-size: 12px;
     }
