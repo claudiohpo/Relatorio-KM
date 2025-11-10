@@ -194,26 +194,19 @@ recoverForm.addEventListener("submit", async (e) => {
       return;
     }
 
-    // // sucesso: body.password contém a senha
-    // const senha = body.password || "";
-    // hideOverlay(overlayRecover);
+  // // Fluxo antigo (senha retornada) removido por razões de segurança
 
-    // // preenche e mostra o overlay de resultado
-    // document.getElementById("recResultUser").textContent = username;
-    // document.getElementById("recResultPassword").textContent = senha;
-    // showOverlay(overlayRecoverResult);
+  msgEl.textContent = "";
+  hideOverlay(overlayRecover);
 
-    // sucesso: body.password contém a senha
-    const senha = body.password || "";
-    hideOverlay(overlayRecover);
-
-    // preenche e mostra o overlay de resultado
-    document.getElementById("recResultUser").textContent = username;
-
-    // preenche o input (mantendo type="password" por padrão)
-    const resultInput = document.getElementById("recResultPassword");
-    resultInput.type = "password";
-    resultInput.value = senha;
+    const resultUserEl = document.getElementById("recResultUser");
+    if (resultUserEl) resultUserEl.textContent = username;
+    const resultMsgEl = document.getElementById("recResultMessage");
+    if (resultMsgEl) {
+      resultMsgEl.textContent =
+        body.message ||
+        "Solicitação registrada. Caso os dados estejam corretos, o administrador concluirá a redefinição.";
+    }
 
     showOverlay(overlayRecoverResult);
   } catch (err) {
@@ -238,8 +231,10 @@ document.getElementById("recResultOk").addEventListener("click", () => {
   document.getElementById("recUsername").value = "";
   document.getElementById("recEmail").value = "";
   document.getElementById("recMsg").textContent = "";
-  const resultInput = document.getElementById("recResultPassword");
-  if (resultInput) resultInput.value = "";
+  const resultUserEl = document.getElementById("recResultUser");
+  if (resultUserEl) resultUserEl.textContent = "";
+  const resultMsgEl = document.getElementById("recResultMessage");
+  if (resultMsgEl) resultMsgEl.textContent = "";
 });
 
 

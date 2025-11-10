@@ -107,19 +107,12 @@
     </div>
   </div>
 
-  <!-- Modal: Recuperação - resultado (mostra a senha) -->
+  <!-- Modal: Recuperação - resultado (mensagem) -->
   <div class="overlay" id="overlayRecoverResult" aria-hidden="true">
     <div class="popup" role="dialog" aria-modal="true">
-      <h2>Senha recuperada</h2>
-      <p style="text-align:center;">Senha do usuário <strong id="recResultUser"></strong>:</p>
-
-      <!-- container do input password para ter botão de olho -->
-      <div class="rec-result-wrapper" style="display:flex; justify-content:center; margin-top:8px;">
-        <div class="password-wrapper" style="width: 90%; max-width: 420px;">
-          <input class="inp rec-result-input" id="recResultPassword" type="password" readonly
-            aria-label="Senha recuperada" data-password-toggle="true" />
-        </div>
-      </div>
+      <h2>Recuperação de senha</h2>
+      <p style="text-align:center;">Solicitação registrada para o usuário <strong id="recResultUser"></strong>.</p>
+      <p id="recResultMessage" class="msg" style="text-align:center; margin-top:12px;"></p>
 
       <div class="actions" style="justify-content:center; margin-top:12px;">
         <button type="button" id="recResultOk" class="btn primary">OK</button>

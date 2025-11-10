@@ -325,24 +325,6 @@ async function confirmarExclusao() {
   }
 }
 
-// // Confirma a limpeza de todos os dados do usuário logado
-// async function confirmarLimpeza() {
-//   try {
-//     const response = await fetchWithUser(`/api/km`, {
-//       method: "DELETE",
-//     });
-
-//     if (!response.ok) throw new Error("Erro ao excluir os registros");
-
-//     alert("Todos os seus registros foram excluídos com sucesso!");
-//     fecharModalLimpeza();     // <<-- corrigido
-//     carregarRegistros(); // Atualiza a interface após a exclusão
-//   } catch (error) {
-//     console.error("Erro:", error);
-//     alert("Erro ao excluir os registros.");
-//   }
-// }
-
 async function confirmarLimpeza() {
   try {
     const response = await fetchWithUser("/api/km?all=true", {

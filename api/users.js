@@ -1,4 +1,5 @@
 const { MongoClient } = require("mongodb");
+const bcrypt = require("bcryptjs");
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const DB_NAME = process.env.DB_NAME || "km_db";
@@ -95,9 +96,13 @@ module.exports = async (req, res) => {
         );
       }
 
-      // Retorna a senha
       res.statusCode = 200;
-      return res.end(JSON.stringify({ password: user.password }));
+      return res.end(
+        JSON.stringify({
+          message:
+            "Solicitação registrada. Por segurança, contate o administrador para redefinir a senha.",
+        })
+      );
     }
 
     // Registro de novo usuário
@@ -124,15 +129,24 @@ module.exports = async (req, res) => {
         return res.end(JSON.stringify({ error: "Usuário já existe." }));
       }
 
+      const emailNormalized = String(email).trim().toLowerCase();
       const existingEmail = await users.findOne({
-        email: email.trim().toLowerCase(),
+        email: emailNormalized,
       });
       if (existingEmail) {
         res.statusCode = 409;
         return res.end(JSON.stringify({ error: "Email já está em uso." }));
       }
 
-      await users.insertOne({ username: usernameNormalized, email, password });
+      const hashedPassword = bcrypt.hashSync(String(password), 12);
+
+      await users.insertOne({
+        username: usernameNormalized,
+        email: emailNormalized,
+        password: hashedPassword,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
       res.statusCode = 201;
       return res.end(JSON.stringify({ message: "Usuário criado." }));
     }
@@ -145,7 +159,24 @@ module.exports = async (req, res) => {
       }
       const usernameNormalized = String(username).trim().toLowerCase();
       const user = await users.findOne({ username: usernameNormalized });
-      if (!user || user.password !== password) {
+      let senhaCorreta = false;
+      if (user && user.password) {
+        const storedPassword = String(user.password);
+        const isHash = /^\$2[aby]\$/.test(storedPassword);
+        if (isHash) {
+          senhaCorreta = bcrypt.compareSync(String(password), storedPassword);
+        } else {
+          senhaCorreta = storedPassword === String(password);
+          if (senhaCorreta) {
+            const novoHash = bcrypt.hashSync(String(password), 12);
+            await users.updateOne(
+              { _id: user._id },
+              { $set: { password: novoHash, updatedAt: new Date() } }
+            );
+          }
+        }
+      }
+      if (!senhaCorreta) {
         res.statusCode = 401;
         return res.end(
           JSON.stringify({ error: "Usuário ou senha inválidos." })
