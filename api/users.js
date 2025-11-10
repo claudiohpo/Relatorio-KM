@@ -106,7 +106,7 @@ function buildResetLink(req, username, token) {
 
 async function sendResetEmail({ to, username, link }) {
   const transporter = getMailTransporter();
-  const fromAddress = BREVO_MAIL_FROM; // || BREVO_SMTP_LOGIN;
+  const fromAddress = BREVO_MAIL_FROM || BREVO_SMTP_LOGIN;
   if (!fromAddress) {
     throw new Error("Remetente SMTP não configurado. Defina BREVO_MAIL_FROM.");
   }

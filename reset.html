@@ -20,12 +20,17 @@
       <h1>Redefinir senha</h1>
       <p id="resetStatus" class="msg"></p>
       <form id="resetForm" style="display:none;">
-        <label class="lbl">Nova senha
-          <input class="inp" type="password" id="resetPassword" required />
-        </label>
-        <label class="lbl">Confirmar nova senha
-          <input class="inp" type="password" id="resetPasswordConfirm" required />
-        </label>
+        <label class="lbl" for="resetPassword">Nova senha</label>
+        <div class="password-wrapper">
+          <input class="inp" type="password" id="resetPassword" required data-password-toggle="true" />
+          <button type="button" class="password-toggle" aria-label="Mostrar senha" aria-pressed="false"></button>
+        </div>
+
+        <label class="lbl" for="resetPasswordConfirm">Confirmar nova senha</label>
+        <div class="password-wrapper">
+          <input class="inp" type="password" id="resetPasswordConfirm" required data-password-toggle="true" />
+          <button type="button" class="password-toggle" aria-label="Mostrar senha" aria-pressed="false"></button>
+        </div>
 
         <div class="actions">
           <button type="submit" class="btn primary" id="resetSubmit">Atualizar senha</button>
