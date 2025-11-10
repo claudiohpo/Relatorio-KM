@@ -10,10 +10,11 @@ let clientPromise = null;
 async function getDb() {
   if (!MONGODB_URI) throw new Error("MONGODB_URI não definido");
   if (!clientPromise) {
-    const client = new MongoClient(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    // const client = new MongoClient(MONGODB_URI, {
+    //   useNewUrlParser: true,
+    //   useUnifiedTopology: true,
+    // });
+    const client = new MongoClient(MONGODB_URI);
     clientPromise = client.connect().then(() => client);
   }
   const client = await clientPromise;
