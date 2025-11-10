@@ -18,6 +18,30 @@ function fetchWithUser(url, opts = {}) {
   return fetch(url, opts);
 }
 
+function normalizarPlacaEntrada(valor) {
+  if (valor === undefined || valor === null) {
+    return { placa: null };
+  }
+  const texto = String(valor).trim();
+  if (!texto) {
+    return { placa: null };
+  }
+  const limpo = texto.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  if (limpo.length !== 7) {
+    return {
+      error: "Placa inválida. Informe 7 caracteres no padrão Mercosul ou antigo.",
+    };
+  }
+  const mercosulRegex = /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
+  const antigoRegex = /^[A-Z]{3}[0-9]{4}$/;
+  if (!mercosulRegex.test(limpo) && !antigoRegex.test(limpo)) {
+    return {
+      error: "Placa inválida. Utilize formatos como AAA-1234 ou AAA1A23.",
+    };
+  }
+  return { placa: limpo };
+}
+
 // Verifica sessão ao iniciar (caso o guard inline falhe)
 if (!sessionStorage.getItem("km_username")) {
   try {
@@ -189,6 +213,7 @@ function exibirRegistros() {
       <td>${registro.kmSaida || ""}</td>
       <td>${registro.kmChegada || ""}</td>
       <td>${registro.kmTotal || 0}</td>
+      <td>${registro.placa || ""}</td>
       <td>${registro.observacoes || ""}</td>
     `;
     tbody.appendChild(tr);
@@ -326,6 +351,7 @@ function abrirModalEdicao(id) {
   document.getElementById("editLocal").value = registro.local || "";
   document.getElementById("editKmSaida").value = registro.kmSaida || "";
   document.getElementById("editKmChegada").value = registro.kmChegada || "";
+  document.getElementById("editPlaca").value = registro.placa || "";
   document.getElementById("editObservacoes").value = registro.observacoes || "";
 
   document.getElementById("modalEditar").style.display = "flex";
@@ -344,11 +370,16 @@ async function salvarEdicao(e) {
   const data = document.getElementById("editData").value;
   const chamado = document.getElementById("editChamado").value;
   const local = document.getElementById("editLocal").value;
-  const kmSaida = parseInt(document.getElementById("editKmSaida").value);
-  const kmChegadaInput = parseInt(
-    document.getElementById("editKmChegada").value
-  );
+  const kmSaida = Number(document.getElementById("editKmSaida").value);
+  const kmChegadaStr = document.getElementById("editKmChegada").value;
+  const kmChegadaInformado = kmChegadaStr.trim();
+  const kmChegada = kmChegadaInformado === "" ? null : Number(kmChegadaStr);
+  const placaValor = document.getElementById("editPlaca").value.trim();
   const observacoes = document.getElementById("editObservacoes").value;
+  const msgEl = document.querySelector("#formEditar #msg");
+  if (msgEl) {
+    msgEl.textContent = "";
+  }
 
   if (!id) {
     alert("ID do registro ausente.");
@@ -356,18 +387,28 @@ async function salvarEdicao(e) {
   }
 
   // Verifica se kmChegada foi preenchido
-  if (kmChegadaInput !== "") {
-    const kmChegadaNum = Number(kmChegadaInput);
-
-    // Só valida kmChegada se for um número válido
-    if (!isNaN(kmChegadaNum) && kmChegadaNum < kmSaida) {
-      msg.style.color = "red";
-      msg.textContent = "KM chegada não pode ser menor que KM saída.";
+  if (kmChegadaInformado !== "") {
+    if (!isNaN(kmChegada) && !isNaN(kmSaida) && kmChegada < kmSaida) {
+      if (msgEl) {
+        msgEl.style.color = "red";
+        msgEl.textContent = "KM chegada não pode ser menor que KM saída.";
+      }
       return;
     }
   }
 
-  const kmChegada = kmChegadaInput === "" ? null : Number(kmChegadaInput);
+  const { placa: placaNormalizada, error: erroPlaca } = normalizarPlacaEntrada(
+    placaValor
+  );
+  if (erroPlaca) {
+    if (msgEl) {
+      msgEl.style.color = "red";
+      msgEl.textContent = erroPlaca;
+    } else {
+      alert(erroPlaca);
+    }
+    return;
+  }
 
   const dadosAtualizados = {
     id,
@@ -377,6 +418,7 @@ async function salvarEdicao(e) {
     observacoes,
     kmSaida,
     kmChegada,
+    placa: placaNormalizada,
     kmTotal:
       !isNaN(kmChegada) && !isNaN(kmSaida) ? kmChegada - kmSaida : undefined,
   };
