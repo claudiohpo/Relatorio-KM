@@ -11,8 +11,8 @@ const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 60 * 1000; // 1 minuto
 const PASSWORD_RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hora
 
-const BREVO_SMTP_HOST = process.env.BREVO_SMTP_HOST || "smtp-relay.brevo.com";
-const BREVO_SMTP_PORT = parseInt(process.env.BREVO_SMTP_PORT || "587", 10);
+const BREVO_SMTP_HOST = process.env.BREVO_SMTP_HOST;
+const BREVO_SMTP_PORT = parseInt(process.env.BREVO_SMTP_PORT, 10);
 const BREVO_SMTP_LOGIN = process.env.BREVO_SMTP_LOGIN || "";
 const BREVO_SMTP_PASSWORD = process.env.BREVO_SMTP_PASSWORD || "";
 const BREVO_MAIL_FROM =
