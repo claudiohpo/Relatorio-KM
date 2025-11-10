@@ -288,7 +288,7 @@ recoverForm.addEventListener("submit", async (e) => {
     if (resultMsgEl) {
       resultMsgEl.textContent =
         body.message ||
-        "Solicitação registrada. Caso os dados estejam corretos, o administrador concluirá a redefinição.";
+        "Se os dados estiverem corretos, você receberá um email com o link para redefinir sua senha.";
     }
 
     showOverlay(overlayRecoverResult);

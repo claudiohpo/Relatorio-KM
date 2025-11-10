@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Registro de KM Rodados</title>
   <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/auth.css" />
   <link rel="icon" type="image/png" href="/images/favicon-96x96.png" sizes="96x96" />
   <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
   <link rel="shortcut icon" href="/images/favicon.ico" />
@@ -75,6 +76,7 @@
       <div class="actions">
         <button type="button" id="btnSalvar">Salvar</button>
         <button type="button" id="btnManutencao">Relatório / Manutenção</button>
+        <button type="button" id="btnTrocarSenha">Trocar Senha</button>
         <button type="button" id="btnSair">Sair</button>
       </div>
 
@@ -82,6 +84,30 @@
     </form>
     <div id="user-footer"></div>
   </main>
+
+  <div class="overlay" id="overlayChangePassword" aria-hidden="true">
+    <div class="popup" role="dialog" aria-modal="true">
+      <h2>Trocar senha</h2>
+      <form id="changePasswordForm">
+        <label class="lbl">Senha atual
+          <input class="inp" type="password" id="changePwdCurrent" required />
+        </label>
+        <label class="lbl">Nova senha
+          <input class="inp" type="password" id="changePwdNew" required />
+        </label>
+        <label class="lbl">Confirmar nova senha
+          <input class="inp" type="password" id="changePwdConfirm" required />
+        </label>
+
+        <div class="actions">
+          <button type="button" class="btn cancel" id="changePwdCancel">Cancelar</button>
+          <button type="submit" class="btn primary" id="changePwdSubmit">Atualizar</button>
+        </div>
+
+        <p id="changePasswordMsg" class="msg"></p>
+      </form>
+    </div>
+  </div>
 
   <footer>
     <div class="footer-inner">

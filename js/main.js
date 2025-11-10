@@ -3,6 +3,11 @@ const BACKEND_URL = ""; // deixar vazio para usar mesmo domínio (/api/*)
 const form = document.getElementById("kmForm");
 const msg = document.getElementById("msg");
 const btnSalvar = document.getElementById("btnSalvar");
+const btnTrocarSenha = document.getElementById("btnTrocarSenha");
+const overlayChangePassword = document.getElementById("overlayChangePassword");
+const changePasswordForm = document.getElementById("changePasswordForm");
+const changePasswordMsg = document.getElementById("changePasswordMsg");
+const changePwdCancel = document.getElementById("changePwdCancel");
 
 // Função para chamar o backend com o cabeçalho X-Usuario
 function fetchWithUser(url, opts = {}) {
@@ -11,6 +16,16 @@ function fetchWithUser(url, opts = {}) {
   opts.headers = opts.headers || {};
   if (username) opts.headers["X-Usuario"] = username;
   return fetch(url, opts);
+}
+
+async function parseJsonResponse(res) {
+  const text = await res.text().catch(() => "");
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    return { error: text };
+  }
 }
 
 function normalizarPlacaEntrada(valor) {
@@ -191,6 +206,141 @@ const btnManutencao = document.getElementById("btnManutencao");
 if (btnManutencao) {
   btnManutencao.addEventListener("click", () => {
     window.location.href = "/management.html";
+  });
+}
+
+function showChangePasswordModal() {
+  if (!overlayChangePassword) return;
+  if (changePasswordForm) {
+    changePasswordForm.reset();
+  }
+  if (changePasswordMsg) {
+    changePasswordMsg.textContent = "";
+    changePasswordMsg.style.color = "#333";
+  }
+  overlayChangePassword.classList.add("show");
+  overlayChangePassword.setAttribute("aria-hidden", "false");
+  const currentInput = document.getElementById("changePwdCurrent");
+  if (currentInput) {
+    currentInput.focus();
+  }
+}
+
+function hideChangePasswordModal() {
+  if (!overlayChangePassword) return;
+  overlayChangePassword.classList.remove("show");
+  overlayChangePassword.setAttribute("aria-hidden", "true");
+  if (changePasswordForm) {
+    changePasswordForm.reset();
+  }
+  if (changePasswordMsg) {
+    changePasswordMsg.textContent = "";
+  }
+}
+
+if (btnTrocarSenha && overlayChangePassword) {
+  btnTrocarSenha.addEventListener("click", () => {
+    showChangePasswordModal();
+  });
+}
+
+if (changePwdCancel) {
+  changePwdCancel.addEventListener("click", (event) => {
+    event.preventDefault();
+    hideChangePasswordModal();
+  });
+}
+
+if (overlayChangePassword) {
+  overlayChangePassword.addEventListener("click", (event) => {
+    if (event.target === overlayChangePassword) {
+      hideChangePasswordModal();
+    }
+  });
+}
+
+if (changePasswordForm) {
+  changePasswordForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!changePasswordMsg) return;
+
+    const currentInput = document.getElementById("changePwdCurrent");
+    const newInput = document.getElementById("changePwdNew");
+    const confirmInput = document.getElementById("changePwdConfirm");
+
+    const currentPassword = currentInput ? currentInput.value : "";
+    const newPassword = newInput ? newInput.value : "";
+    const confirmPassword = confirmInput ? confirmInput.value : "";
+
+    changePasswordMsg.style.color = "#333";
+    changePasswordMsg.textContent = "Validando...";
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      changePasswordMsg.style.color = "red";
+      changePasswordMsg.textContent = "Preencha todos os campos.";
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      changePasswordMsg.style.color = "red";
+      changePasswordMsg.textContent = "Nova senha e confirmação não conferem.";
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      changePasswordMsg.style.color = "red";
+      changePasswordMsg.textContent = "A nova senha deve ter pelo menos 6 caracteres.";
+      return;
+    }
+
+    if (newPassword === currentPassword) {
+      changePasswordMsg.style.color = "red";
+      changePasswordMsg.textContent = "A nova senha deve ser diferente da atual.";
+      return;
+    }
+
+    const username = sessionStorage.getItem("km_username");
+    if (!username) {
+      changePasswordMsg.style.color = "red";
+      changePasswordMsg.textContent = "Sessão expirada. Faça login novamente.";
+      return;
+    }
+
+    changePasswordMsg.style.color = "#333";
+    changePasswordMsg.textContent = "Atualizando senha...";
+
+    try {
+      const res = await fetchWithUser("/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "change-password",
+          username,
+          currentPassword,
+          newPassword,
+        }),
+      });
+
+      const body = await parseJsonResponse(res);
+
+      if (!res.ok) {
+        changePasswordMsg.style.color = "red";
+        changePasswordMsg.textContent = body.error || `Erro ${res.status}`;
+        return;
+      }
+
+      changePasswordMsg.style.color = "green";
+      changePasswordMsg.textContent = body.message || "Senha atualizada com sucesso.";
+      changePasswordForm.reset();
+
+      setTimeout(() => {
+        hideChangePasswordModal();
+      }, 1500);
+    } catch (error) {
+      console.error("Falha ao trocar senha:", error);
+      changePasswordMsg.style.color = "red";
+      changePasswordMsg.textContent = "Erro de conexão com o servidor.";
+    }
   });
 }
 

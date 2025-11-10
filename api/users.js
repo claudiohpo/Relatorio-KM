@@ -1,5 +1,7 @@
 const { MongoClient } = require("mongodb");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 
 const MONGODB_URI = process.env.MONGODB_URI;
 const DB_NAME = process.env.DB_NAME || "km_db";
@@ -7,8 +9,138 @@ const USERS_COLLECTION = process.env.USERS_COLLECTION || "usuarios";
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 60 * 1000; // 1 minuto
+const PASSWORD_RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 hora
+
+const BREVO_SMTP_HOST = process.env.BREVO_SMTP_HOST || "smtp-relay.brevo.com";
+const BREVO_SMTP_PORT = parseInt(process.env.BREVO_SMTP_PORT || "587", 10);
+const BREVO_SMTP_LOGIN = process.env.BREVO_SMTP_LOGIN || "";
+const BREVO_SMTP_PASSWORD = process.env.BREVO_SMTP_PASSWORD || "";
+const BREVO_MAIL_FROM =
+  process.env.BREVO_MAIL_FROM || process.env.BREVO_SMTP_LOGIN || "";
+const APP_BASE_URL = process.env.APP_BASE_URL || "";
 
 let clientPromise = null;
+
+let mailTransporter = null;
+
+function getMailTransporter() {
+  if (mailTransporter) return mailTransporter;
+  if (!BREVO_SMTP_LOGIN || !BREVO_SMTP_PASSWORD) {
+    throw new Error(
+      "SMTP não configurado. Defina BREVO_SMTP_LOGIN e BREVO_SMTP_PASSWORD."
+    );
+  }
+
+  mailTransporter = nodemailer.createTransport({
+    host: BREVO_SMTP_HOST,
+    port: BREVO_SMTP_PORT,
+    secure: BREVO_SMTP_PORT === 465,
+    auth: {
+      user: BREVO_SMTP_LOGIN,
+      pass: BREVO_SMTP_PASSWORD,
+    },
+  });
+
+  return mailTransporter;
+}
+
+function isBcryptHash(value) {
+  return /^\$2[aby]\$/.test(String(value || ""));
+}
+
+async function verifyUserPassword(usersCollection, user, candidatePassword) {
+  const storedPassword = String(user.password || "");
+  const candidate = String(candidatePassword || "");
+
+  if (!storedPassword) {
+    return false;
+  }
+
+  if (isBcryptHash(storedPassword)) {
+    return bcrypt.compareSync(candidate, storedPassword);
+  }
+
+  const match = storedPassword === candidate;
+  if (match) {
+    const novoHash = bcrypt.hashSync(candidate, 12);
+    await usersCollection.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          password: novoHash,
+          updatedAt: new Date(),
+        },
+      }
+    );
+  }
+  return match;
+}
+
+function hashToken(token) {
+  return crypto.createHash("sha256").update(String(token)).digest("hex");
+}
+
+function resolveBaseUrl(req) {
+  if (APP_BASE_URL) {
+    return APP_BASE_URL.replace(/\/$/, "");
+  }
+
+  const host = req.headers.host || "localhost";
+  const forwardedProto = req.headers["x-forwarded-proto"];
+  const isLocalhost = /localhost|127\.0\.0\.1/.test(host);
+  const protocol = forwardedProto
+    ? String(forwardedProto).split(",")[0]
+    : isLocalhost
+    ? "http"
+    : "https";
+
+  return `${protocol}://${host}`.replace(/\/$/, "");
+}
+
+function buildResetLink(req, username, token) {
+  const baseUrl = resolveBaseUrl(req);
+  return `${baseUrl}/reset.html?token=${encodeURIComponent(
+    token
+  )}&u=${encodeURIComponent(username)}`;
+}
+
+async function sendResetEmail({ to, username, link }) {
+  const transporter = getMailTransporter();
+  const fromAddress = BREVO_MAIL_FROM || BREVO_SMTP_LOGIN;
+  if (!fromAddress) {
+    throw new Error("Remetente SMTP não configurado. Defina BREVO_MAIL_FROM.");
+  }
+
+  const subject = "Redefinição de senha - Sistema de Controle de KM";
+  const textBody =
+    `Olá ${username},\n\n` +
+    `Recebemos uma solicitação para redefinir a senha da sua conta. ` +
+    `Se você fez essa solicitação, clique no link abaixo dentro de 1 hora:\n\n` +
+    `${link}\n\n` +
+    `Se você não solicitou a redefinição, ignore este email.`;
+
+  const htmlBody = `
+    <p>Olá <strong>${username}</strong>,</p>
+    <p>Recebemos uma solicitação para redefinir a senha da sua conta.</p>
+    <p>Se você fez essa solicitação, clique no botão abaixo dentro de 1 hora:</p>
+    <p style="text-align:center; margin:24px 0;">
+      <a href="${link}" style="background:#2b7cff;color:#fff;padding:12px 18px;border-radius:6px;text-decoration:none;display:inline-block;">
+        Redefinir senha
+      </a>
+    </p>
+    <p>Se o botão não funcionar, copie e cole o link no seu navegador:</p>
+    <p><a href="${link}">${link}</a></p>
+    <p>Se você não solicitou esta redefinição, pode ignorar este email.</p>
+  `;
+
+  await transporter.sendMail({
+    from: fromAddress,
+    to,
+    subject,
+    text: textBody,
+    html: htmlBody,
+  });
+}
 
 // Função para obter a conexão com o banco de dados
 async function getDb() {
@@ -91,11 +223,45 @@ module.exports = async (req, res) => {
         );
       }
 
-      const storedEmail = (user.email || "").trim().toLowerCase();
-      if (storedEmail !== String(email).trim().toLowerCase()) {
+      const storedEmailNormalized = (user.email || "").trim().toLowerCase();
+      if (storedEmailNormalized !== String(email).trim().toLowerCase()) {
         res.statusCode = 404;
         return res.end(
           JSON.stringify({ error: "Usuário ou email informado está errado." })
+        );
+      }
+
+      const tokenRaw = crypto.randomBytes(32).toString("hex");
+      const tokenHash = hashToken(tokenRaw);
+      const expiry = Date.now() + PASSWORD_RESET_TOKEN_TTL_MS;
+
+      await users.updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            resetTokenHash: tokenHash,
+            resetTokenExpiry: expiry,
+            updatedAt: new Date(),
+          },
+        }
+      );
+
+      const resetLink = buildResetLink(req, user.username, tokenRaw);
+
+      try {
+        await sendResetEmail({
+          to: user.email,
+          username: user.username,
+          link: resetLink,
+        });
+      } catch (emailError) {
+        console.error("Erro ao enviar email de redefinição:", emailError);
+        res.statusCode = 500;
+        return res.end(
+          JSON.stringify({
+            error:
+              "Não foi possível enviar o email de redefinição. Tente novamente mais tarde.",
+          })
         );
       }
 
@@ -103,9 +269,90 @@ module.exports = async (req, res) => {
       return res.end(
         JSON.stringify({
           message:
-            "Solicitação registrada. Por segurança, contate o administrador para redefinir a senha.",
+            "Se os dados estiverem corretos, você receberá um email com o link para redefinir a senha.",
         })
       );
+    }
+
+    if (action === "verify-reset-token") {
+      const { username, token } = body;
+      if (!username || !token) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: "Token inválido." }));
+      }
+
+      const usernameNormalized = String(username).trim().toLowerCase();
+      const user = await users.findOne({ username: usernameNormalized });
+
+      if (!user || !user.resetTokenHash || !user.resetTokenExpiry) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: "Token inválido ou expirado." }));
+      }
+
+      const expectedHash = String(user.resetTokenHash);
+      const providedHash = hashToken(token);
+      const expiry = Number(user.resetTokenExpiry || 0);
+
+      if (!expectedHash || expectedHash !== providedHash || expiry < Date.now()) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: "Token inválido ou expirado." }));
+      }
+
+      res.statusCode = 200;
+      return res.end(JSON.stringify({ message: "Token válido." }));
+    }
+
+    if (action === "reset-password") {
+      const { username, token, newPassword } = body;
+      if (!username || !token || !newPassword) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: "Dados incompletos." }));
+      }
+
+      if (String(newPassword).length < 6) {
+        res.statusCode = 400;
+        return res.end(
+          JSON.stringify({
+            error: "A nova senha deve conter pelo menos 6 caracteres.",
+          })
+        );
+      }
+
+      const usernameNormalized = String(username).trim().toLowerCase();
+      const user = await users.findOne({ username: usernameNormalized });
+
+      if (!user || !user.resetTokenHash || !user.resetTokenExpiry) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: "Token inválido ou expirado." }));
+      }
+
+      const expectedHash = String(user.resetTokenHash);
+      const providedHash = hashToken(token);
+      const expiry = Number(user.resetTokenExpiry || 0);
+
+      if (!expectedHash || expectedHash !== providedHash || expiry < Date.now()) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: "Token inválido ou expirado." }));
+      }
+
+      const hashedPassword = bcrypt.hashSync(String(newPassword), 12);
+
+      await users.updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            password: hashedPassword,
+            resetTokenHash: null,
+            resetTokenExpiry: null,
+            failedLoginAttempts: 0,
+            lockedUntil: null,
+            updatedAt: new Date(),
+          },
+        }
+      );
+
+      res.statusCode = 200;
+      return res.end(JSON.stringify({ message: "Senha redefinida com sucesso." }));
     }
 
     // Registro de novo usuário
@@ -157,6 +404,72 @@ module.exports = async (req, res) => {
       return res.end(JSON.stringify({ message: "Usuário criado." }));
     }
 
+    if (action === "change-password") {
+      const headerUser = String(req.headers["x-usuario"] || "").trim().toLowerCase();
+      const { username, currentPassword, newPassword } = body;
+
+      const usernameNormalized = String(username || "").trim().toLowerCase();
+
+      if (!headerUser || !usernameNormalized || headerUser !== usernameNormalized) {
+        res.statusCode = 403;
+        return res.end(
+          JSON.stringify({ error: "Usuário inválido para troca de senha." })
+        );
+      }
+
+      if (!currentPassword || !newPassword) {
+        res.statusCode = 400;
+        return res.end(JSON.stringify({ error: "Dados incompletos." }));
+      }
+
+      if (String(newPassword).length < 6) {
+        res.statusCode = 400;
+        return res.end(
+          JSON.stringify({
+            error: "A nova senha deve conter pelo menos 6 caracteres.",
+          })
+        );
+      }
+
+      if (String(currentPassword) === String(newPassword)) {
+        res.statusCode = 400;
+        return res.end(
+          JSON.stringify({ error: "A nova senha deve ser diferente da atual." })
+        );
+      }
+
+      const user = await users.findOne({ username: usernameNormalized });
+      if (!user) {
+        res.statusCode = 404;
+        return res.end(JSON.stringify({ error: "Usuário não encontrado." }));
+      }
+
+      const senhaCorreta = await verifyUserPassword(users, user, currentPassword);
+      if (!senhaCorreta) {
+        res.statusCode = 401;
+        return res.end(JSON.stringify({ error: "Senha atual incorreta." }));
+      }
+
+      const hashedPassword = bcrypt.hashSync(String(newPassword), 12);
+
+      await users.updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            password: hashedPassword,
+            resetTokenHash: null,
+            resetTokenExpiry: null,
+            failedLoginAttempts: 0,
+            lockedUntil: null,
+            updatedAt: new Date(),
+          },
+        }
+      );
+
+      res.statusCode = 200;
+      return res.end(JSON.stringify({ message: "Senha atualizada com sucesso." }));
+    }
+
     if (action === "login") {
       const { username, password } = body;
       if (!username || !password) {
@@ -201,27 +514,7 @@ module.exports = async (req, res) => {
         user.failedLoginAttempts = 0;
       }
 
-      let senhaCorreta = false;
-      const storedPassword = String(user.password || "");
-      const isHash = /^\$2[aby]\$/.test(storedPassword);
-
-      if (isHash) {
-        senhaCorreta = bcrypt.compareSync(String(password), storedPassword);
-      } else {
-        senhaCorreta = storedPassword === String(password);
-        if (senhaCorreta) {
-          const novoHash = bcrypt.hashSync(String(password), 12);
-          await users.updateOne(
-            { _id: user._id },
-            {
-              $set: {
-                password: novoHash,
-                updatedAt: new Date(),
-              },
-            }
-          );
-        }
-      }
+      const senhaCorreta = await verifyUserPassword(users, user, password);
 
       if (!senhaCorreta) {
         const novasTentativas = Number(user.failedLoginAttempts || 0) + 1;
