@@ -42,6 +42,12 @@ function normalizarPlacaEntrada(valor) {
   return { placa: limpo };
 }
 
+function sanitizarPlacaBusca(valor) {
+  if (valor == null) return "";
+  const texto = String(valor).toUpperCase().replace(/[^A-Z0-9]/g, "");
+  return texto.slice(0, 8);
+}
+
 // Verifica sessão ao iniciar (caso o guard inline falhe)
 if (!sessionStorage.getItem("km_username")) {
   try {
@@ -79,6 +85,13 @@ document.addEventListener("DOMContentLoaded", function () {
   document
     .getElementById("btnLimparFiltros")
     .addEventListener("click", limparFiltros);
+  const filtroPlacaEl = document.getElementById("filtroPlaca");
+  if (filtroPlacaEl) {
+    filtroPlacaEl.addEventListener("input", () => {
+      const limpo = sanitizarPlacaBusca(filtroPlacaEl.value);
+      if (filtroPlacaEl.value !== limpo) filtroPlacaEl.value = limpo;
+    });
+  }
   document.getElementById("btnAnterior").addEventListener("click", () => {
     if (paginaAtual > 1) {
       paginaAtual--;
@@ -141,6 +154,8 @@ function limparFiltros() {
   document.getElementById("filtroDataInicio").value = "";
   document.getElementById("filtroDataFim").value = "";
   document.getElementById("filtroLocal").value = "";
+  const filtroPlaca = document.getElementById("filtroPlaca");
+  if (filtroPlaca) filtroPlaca.value = "";
 
   paginaAtual = 1;
   exibirRegistros();
@@ -242,12 +257,18 @@ function aplicarFiltrosInterno(registros) {
   const local = (
     document.getElementById("filtroLocal").value || ""
   ).toLowerCase();
+  const placaInput = document.getElementById("filtroPlaca");
+  const placaFiltro = sanitizarPlacaBusca(placaInput ? placaInput.value : "");
 
   return registros.filter((registro) => {
     if (dataInicio && registro.data < dataInicio) return false;
     if (dataFim && registro.data > dataFim) return false;
     const campoLocal = (registro.local || "").toLowerCase();
     if (local && !campoLocal.includes(local)) return false;
+    if (placaFiltro) {
+      const placaRegistro = sanitizarPlacaBusca(registro.placa || "");
+      if (placaRegistro !== placaFiltro) return false;
+    }
     return true;
   });
 }
@@ -574,5 +595,3 @@ async function baixarRelatorioXLS() {
     alert("Erro ao gerar relatório em XLSX.");
   }
 }
-
-//comentário de teste, git hub
