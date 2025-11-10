@@ -1,5 +1,6 @@
 const loginForm = document.getElementById("loginForm");
 const loginMsg = document.getElementById("loginMsg");
+const btnLogin = document.getElementById("btnLogin");
 const openRegister = document.getElementById("openRegister");
 const openRecover = document.getElementById("openRecover");
 const overlayRegister = document.getElementById("overlayRegister");
@@ -10,6 +11,9 @@ const overlayRecover = document.getElementById("overlayRecover");
 const recoverForm = document.getElementById("recoverForm");
 const overlayRecoverResult = document.getElementById("overlayRecoverResult");
 
+let loginLockTimer = null;
+let loginLockedUntil = null;
+
 function showOverlay(el) {
   el.classList.add("show");
   el.setAttribute("aria-hidden", "false");
@@ -17,6 +21,60 @@ function showOverlay(el) {
 function hideOverlay(el) {
   el.classList.remove("show");
   el.setAttribute("aria-hidden", "true");
+}
+
+// --- contador regressivo para bloqueio de login ---
+function stopLockCountdown() {
+  if (loginLockTimer) {
+    clearInterval(loginLockTimer);
+    loginLockTimer = null;
+  }
+  loginLockedUntil = null;
+  if (btnLogin) btnLogin.disabled = false;
+}
+
+function startLockCountdown(lockedUntilMs) {
+  if (!loginMsg) return;
+
+  if (loginLockTimer) {
+    clearInterval(loginLockTimer);
+    loginLockTimer = null;
+  }
+
+  const lockedUntil = Number(lockedUntilMs) || 0;
+  loginLockedUntil = lockedUntil;
+
+  if (!lockedUntil || lockedUntil <= Date.now()) {
+    stopLockCountdown();
+    loginMsg.style.color = "green";
+    loginMsg.textContent = "Pronto — você já pode tentar novamente.";
+    return;
+  }
+
+  if (btnLogin) btnLogin.disabled = true;
+
+  const updateCountdown = () => {
+    const remainingMs = lockedUntil - Date.now();
+    if (remainingMs <= 0) {
+      stopLockCountdown();
+      loginMsg.style.color = "green";
+      loginMsg.textContent = "Pronto — você já pode tentar novamente.";
+      return;
+    }
+
+    const remainingSec = Math.ceil(remainingMs / 1000);
+    const min = Math.floor(remainingSec / 60);
+    const sec = remainingSec % 60;
+
+    loginMsg.style.color = "red";
+    loginMsg.textContent =
+      min > 0
+        ? `Conta bloqueada. Tente novamente em ${min}m ${sec}s.`
+        : `Conta bloqueada. Tente novamente em ${sec}s.`;
+  };
+
+  updateCountdown();
+  loginLockTimer = setInterval(updateCountdown, 1000);
 }
 
 openRegister.addEventListener("click", () => showOverlay(overlayRegister));
@@ -104,6 +162,11 @@ loginForm.addEventListener("submit", async (e) => {
     return;
   }
 
+  if (loginLockedUntil && loginLockedUntil > Date.now()) {
+    startLockCountdown(loginLockedUntil);
+    return;
+  }
+
   try {
     const res = await fetch("/api/users", {
       method: "POST",
@@ -117,14 +180,34 @@ loginForm.addEventListener("submit", async (e) => {
     const body = await parseResponse(res);
 
     if (!res.ok) {
-      loginMsg.style.color = "red";
-      loginMsg.textContent = body.error || `Falha no login (${res.status})`;
       console.error("Login falhou:", body);
+
+      if (body && body.lockedUntil) {
+        startLockCountdown(body.lockedUntil);
+        return;
+      }
+
+      stopLockCountdown();
+
+      let message = body.error || `Falha no login (${res.status})`;
+      if (
+        body &&
+        typeof body.remainingAttempts === "number" &&
+        body.remainingAttempts > 0
+      ) {
+        const plural = body.remainingAttempts === 1 ? "tentativa" : "tentativas";
+        message += ` Restam ${body.remainingAttempts} ${plural}.`;
+      }
+
+      loginMsg.style.color = "red";
+      loginMsg.textContent = message;
       return;
     }
 
     // grava sessão somente em sessionStorage (não persiste entre janelas)
     sessionStorage.setItem("km_username", username);
+
+    stopLockCountdown();
 
     // redireciona para página original se fornecida
     const params = new URLSearchParams(window.location.search);
