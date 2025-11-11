@@ -60,7 +60,10 @@ if (!token || !username) {
       }
     } catch (error) {
       console.error("Erro ao validar token de redefinição:", error);
-      updateStatus("Erro ao validar o link. Tente novamente mais tarde.", "red");
+      updateStatus(
+        "Erro ao validar o link. Tente novamente mais tarde.",
+        "red"
+      );
       if (resetForm) {
         resetForm.style.display = "none";
       }

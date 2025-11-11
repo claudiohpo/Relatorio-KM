@@ -11,7 +11,8 @@
 }
 
 /* layout geral — centralizado horizontalmente */
-html, body {
+html,
+body {
     height: 100%;
 }
 
@@ -21,8 +22,10 @@ body {
     color: #111;
     min-height: 100vh;
     display: flex;
-    flex-direction: column; /* empilha main + footer verticalmente */
-    align-items: center;    /* centraliza horizontalmente os filhos do body */
+    flex-direction: column;
+    /* empilha main + footer verticalmente */
+    align-items: center;
+    /* centraliza horizontalmente os filhos do body */
     padding: 16px;
 }
 
@@ -36,7 +39,8 @@ body {
     box-shadow: 0 6px 20px rgba(20, 30, 50, 0.08);
 
     margin: 16px 0;
-    flex: 0 0 auto; /* não estica verticalmente */
+    flex: 0 0 auto;
+    /* não estica verticalmente */
 }
 
 /* Tipografia e form */
@@ -144,23 +148,31 @@ footer a:hover {
     }
 
     #user-footer {
-    text-align: right;   /* no mobile, deixa alinhado à esquerda */
-    margin-top: 8px;
+        text-align: right;
+        /* no mobile, deixa alinhado à esquerda */
+        margin-top: 8px;
     }
 
     .actions {
-    display: flex;
-    justify-content: center;   /* centraliza todos os botões */
-    flex-wrap: nowrap;           
-    gap: 10px;                 /* espaço entre os botões */
+        display: flex;
+        justify-content: center;
+        /* centraliza todos os botões */
+        flex-wrap: nowrap;
+        gap: 10px;
+        /* espaço entre os botões */
     }
 
     .actions button {
-        white-space: nowrap;       /* evita que o texto quebre */
-        flex: 1 1 120px;           /* largura mínima de 120px, cresce se houver espaço */
-        max-width: 150px;          /* opcional: limita largura máxima */
-        height: 40px;              /* garante altura uniforme */
-        display: flex;             /* centraliza o texto vertical e horizontalmente */
+        white-space: nowrap;
+        /* evita que o texto quebre */
+        flex: 1 1 120px;
+        /* largura mínima de 120px, cresce se houver espaço */
+        max-width: 150px;
+        /* opcional: limita largura máxima */
+        height: 40px;
+        /* garante altura uniforme */
+        display: flex;
+        /* centraliza o texto vertical e horizontalmente */
         align-items: center;
         justify-content: center;
     }
@@ -179,51 +191,64 @@ footer a:hover {
 }
 
 /* Seletores específicos para evitar sobrescritas por outros CSS */
-body > .container,
-html body > .container {
-  width: 100%;
-  max-width: 720px;
-  box-sizing: border-box;
-  background: var(--card);
-  border-radius: 12px;
-  padding: 18px;
-  box-shadow: 0 6px 20px rgba(20, 30, 50, 0.08);
-  margin: 16px 0;
-  position: relative;
-  left: auto;
-  right: auto;
-  float: none !important;
+body>.container,
+html body>.container {
+    width: 100%;
+    max-width: 720px;
+    box-sizing: border-box;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 6px 20px rgba(20, 30, 50, 0.08);
+    margin: 16px 0;
+    position: relative;
+    left: auto;
+    right: auto;
+    float: none !important;
 }
 
 /* Garante que estilos inline não atrapalhem */
-body > .container[style] {
-  margin-left: 0 !important;
-  margin-right: 0 !important;
+body>.container[style] {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
 }
 
 /* Garante o wrapper do footer com a mesma largura do container */
 footer {
-  display: flex;
-  justify-content: center;
+    display: flex;
+    justify-content: center;
 }
+
 footer .footer-inner {
-  width: 100%;
-  max-width: 720px;
+    width: 100%;
+    max-width: 720px;
 }
 
 /* Pequenas tweaks mobile  */
 @media (max-width: 520px) {
-  body > .container { margin: 12px 0; padding: 14px; }
-  footer .footer-inner { padding: 0 6px; }
+    body>.container {
+        margin: 12px 0;
+        padding: 14px;
+    }
+
+    footer .footer-inner {
+        padding: 0 6px;
+    }
 }
 
 #user-footer {
-  position: absolute;      /*fixa dentro do container*/
-  margin-top: 12px;
-  bottom: 10px;            /* 10px do fundo */
-  right: 15px;             /* canto direito */
-  font-style: italic;      /* itálico */
-  text-align: right;
-  font-size: 0.9em;        /* menor que texto normal */
-  color: #555;             /* cinza discreto */
+    position: absolute;
+    /*fixa dentro do container*/
+    margin-top: 12px;
+    bottom: 10px;
+    /* 10px do fundo */
+    right: 15px;
+    /* canto direito */
+    font-style: italic;
+    /* itálico */
+    text-align: right;
+    font-size: 0.9em;
+    /* menor que texto normal */
+    color: #555;
+    /* cinza discreto */
 }

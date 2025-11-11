@@ -39,7 +39,8 @@ function normalizarPlacaEntrada(valor) {
   const limpo = texto.toUpperCase().replace(/[^A-Z0-9]/g, "");
   if (limpo.length !== 7) {
     return {
-      error: "Placa inválida. Informe 7 caracteres no padrão Mercosul ou antigo.",
+      error:
+        "Placa inválida. Informe 7 caracteres no padrão Mercosul ou antigo.",
     };
   }
   const mercosulRegex = /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
@@ -66,9 +67,8 @@ async function carregarUltimoRegistro() {
     }
     const placaInput = document.getElementById("placa");
     if (placaInput) {
-      placaInput.value = ultimoRegistro && ultimoRegistro.placa
-        ? ultimoRegistro.placa
-        : "";
+      placaInput.value =
+        ultimoRegistro && ultimoRegistro.placa ? ultimoRegistro.placa : "";
     }
   } catch (error) {
     console.error("Erro ao carregar último registro:", error);
@@ -127,9 +127,8 @@ btnSalvar.addEventListener("click", async (e) => {
 
   const observacoes = document.getElementById("observacoes").value.trim();
   const kmChegada = kmChegadaInput === "" ? null : Number(kmChegadaInput);
-  const { placa: placaNormalizada, error: erroPlaca } = normalizarPlacaEntrada(
-    placaValor
-  );
+  const { placa: placaNormalizada, error: erroPlaca } =
+    normalizarPlacaEntrada(placaValor);
   if (erroPlaca) {
     msg.style.color = "red";
     msg.textContent = erroPlaca;
@@ -289,13 +288,15 @@ if (changePasswordForm) {
 
     if (newPassword.length < 6) {
       changePasswordMsg.style.color = "red";
-      changePasswordMsg.textContent = "A nova senha deve ter pelo menos 6 caracteres.";
+      changePasswordMsg.textContent =
+        "A nova senha deve ter pelo menos 6 caracteres.";
       return;
     }
 
     if (newPassword === currentPassword) {
       changePasswordMsg.style.color = "red";
-      changePasswordMsg.textContent = "A nova senha deve ser diferente da atual.";
+      changePasswordMsg.textContent =
+        "A nova senha deve ser diferente da atual.";
       return;
     }
 
@@ -330,7 +331,8 @@ if (changePasswordForm) {
       }
 
       changePasswordMsg.style.color = "green";
-      changePasswordMsg.textContent = body.message || "Senha atualizada com sucesso.";
+      changePasswordMsg.textContent =
+        body.message || "Senha atualizada com sucesso.";
       changePasswordForm.reset();
 
       setTimeout(() => {

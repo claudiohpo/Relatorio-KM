@@ -40,7 +40,8 @@ function normalizePlate(valor) {
   const limpo = texto.toUpperCase().replace(/[^A-Z0-9]/g, "");
   if (limpo.length !== 7) {
     return {
-      error: "Placa inválida. Informe 7 caracteres no padrão Mercosul ou antigo.",
+      error:
+        "Placa inválida. Informe 7 caracteres no padrão Mercosul ou antigo.",
     };
   }
   const mercosulRegex = /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
@@ -238,7 +239,7 @@ module.exports = async (req, res) => {
       return res.json({ message: "Atualizado" });
     }
 
-    // if (req.method === "DELETE") { 
+    // if (req.method === "DELETE") {
     //   const q = req.query || {};
     //   if (!q.id) return res.status(400).json({ error: "ID obrigatório" });
     //   try {
@@ -281,13 +282,11 @@ module.exports = async (req, res) => {
         }
       } catch (err) {
         console.error("Erro em DELETE /api/km:", err);
-        return res
-          .status(500)
-          .json({
-            error:
-              "Erro ao excluir registros: " +
-              (err && err.message ? err.message : "unknown"),
-          });
+        return res.status(500).json({
+          error:
+            "Erro ao excluir registros: " +
+            (err && err.message ? err.message : "unknown"),
+        });
       }
     }
 
@@ -295,11 +294,8 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: "Method Not Allowed" });
   } catch (err) {
     console.error("api/km error:", err);
-    return res
-      .status(500)
-      .json({
-        error:
-          "Erro interno: " + (err && err.message ? err.message : "unknown"),
-      });
+    return res.status(500).json({
+      error: "Erro interno: " + (err && err.message ? err.message : "unknown"),
+    });
   }
 };

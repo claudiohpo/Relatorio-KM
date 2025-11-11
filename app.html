@@ -19,7 +19,7 @@
   <script>
     (function () {
       try {
-  const username = sessionStorage.getItem('km_username');
+        const username = sessionStorage.getItem('km_username');
         if (!username) {
           // Remove qualquer rastro em localStorage (evita "último usuário" reaparecer)
           try { localStorage.removeItem('km_username'); } catch (e) { }

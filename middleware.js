@@ -1,5 +1,11 @@
 const MAINTENANCE_ON = ["on", "true", "1"];
-const STATIC_ALLOWLIST = [/^\/maintenance\.html$/i, /^\/css\/maintenance\.css$/i, /^\/images\//i, /^\/site\.webmanifest$/i, /^\/favicon\.ico$/i];
+const STATIC_ALLOWLIST = [
+  /^\/maintenance\.html$/i,
+  /^\/css\/maintenance\.css$/i,
+  /^\/images\//i,
+  /^\/site\.webmanifest$/i,
+  /^\/favicon\.ico$/i,
+];
 
 export const config = {
   matcher: "/:path*",

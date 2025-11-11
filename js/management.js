@@ -1,4 +1,3 @@
-// Variáveis globais
 let registroSelecionado = null;
 let registros = [];
 let paginaAtual = 1;
@@ -29,7 +28,8 @@ function normalizarPlacaEntrada(valor) {
   const limpo = texto.toUpperCase().replace(/[^A-Z0-9]/g, "");
   if (limpo.length !== 7) {
     return {
-      error: "Placa inválida. Informe 7 caracteres no padrão Mercosul ou antigo.",
+      error:
+        "Placa inválida. Informe 7 caracteres no padrão Mercosul ou antigo.",
     };
   }
   const mercosulRegex = /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
@@ -44,7 +44,9 @@ function normalizarPlacaEntrada(valor) {
 
 function sanitizarPlacaBusca(valor) {
   if (valor == null) return "";
-  const texto = String(valor).toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const texto = String(valor)
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
   return texto.slice(0, 8);
 }
 
@@ -400,9 +402,8 @@ async function salvarEdicao(e) {
     }
   }
 
-  const { placa: placaNormalizada, error: erroPlaca } = normalizarPlacaEntrada(
-    placaValor
-  );
+  const { placa: placaNormalizada, error: erroPlaca } =
+    normalizarPlacaEntrada(placaValor);
   if (erroPlaca) {
     if (msgEl) {
       msgEl.style.color = "red";

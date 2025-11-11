@@ -1,7 +1,7 @@
 const { MongoClient } = require("mongodb");
 
 const MONGODB_URI = process.env.MONGODB_URI;
-const DB_NAME = process.env.DB_NAME || "km_db";
+const DB_NAME = process.env.DB_NAME;
 const GLOBAL_COLLECTION = process.env.COLLECTION || "km_registros";
 
 let clientPromise = null;
@@ -25,16 +25,22 @@ function sanitizeUsername(u) {
   return s;
 }
 
-async function getCollectionForRequest(req) { 
+async function getCollectionForRequest(req) {
   const db = await getDb();
-  const headerUser = req.headers ? (req.headers['x-usuario'] || req.headers['x-user'] || req.headers['usuario']) : null;
+  const headerUser = req.headers
+    ? req.headers["x-usuario"] ||
+      req.headers["x-user"] ||
+      req.headers["usuario"]
+    : null;
   const username = sanitizeUsername(headerUser);
 
-  const method = (req && req.method) ? String(req.method).toUpperCase() : 'GET';
+  const method = req && req.method ? String(req.method).toUpperCase() : "GET";
   if (!username) {
-    if (['POST', 'PUT', 'DELETE'].includes(method)) {
-      const err = new Error('Usuário não fornecido ou inválido; autenticação necessária');
-      err.code = 'NO_USER';
+    if (["POST", "PUT", "DELETE"].includes(method)) {
+      const err = new Error(
+        "Usuário não fornecido ou inválido; autenticação necessária"
+      );
+      err.code = "NO_USER";
       throw err;
     }
     return db.collection(GLOBAL_COLLECTION);
@@ -56,11 +62,12 @@ function toCsv(rows, headers) {
 module.exports = async (req, res) => {
   res.setHeader("Content-Type", "application/json");
   try {
-    let col;  // Agora dinâmico, como em api/km.js
+    let col;
     try {
       col = await getCollectionForRequest(req);
     } catch (err) {
-      if (err && err.code === 'NO_USER') return res.status(401).json({ error: err.message });
+      if (err && err.code === "NO_USER")
+        return res.status(401).json({ error: err.message });
       throw err;
     }
 
@@ -69,8 +76,12 @@ module.exports = async (req, res) => {
       // filtro básico
       const filter = {};
       if (q.dataInicio || q.dataFim) {
-        const inicio = (q.dataInicio && /^\d{4}-\d{2}-\d{2}$/.test(q.dataInicio)) ? q.dataInicio : null;
-        const fim = (q.dataFim && /^\d{4}-\d{2}-\d{2}$/.test(q.dataFim)) ? q.dataFim : null;
+        const inicio =
+          q.dataInicio && /^\d{4}-\d{2}-\d{2}$/.test(q.dataInicio)
+            ? q.dataInicio
+            : null;
+        const fim =
+          q.dataFim && /^\d{4}-\d{2}-\d{2}$/.test(q.dataFim) ? q.dataFim : null;
         if (inicio || fim) filter.data = {};
         if (inicio) filter.data.$gte = inicio;
         if (fim) filter.data.$lte = fim;
@@ -80,8 +91,17 @@ module.exports = async (req, res) => {
       const docs = await col.find(filter).sort({ data: 1 }).toArray();
 
       if (q.format && q.format.toLowerCase() === "csv") {
-        const headers = ["data", "kmSaida", "kmChegada", "kmTotal", "local", "chamado", "observacoes", "createdAt"];
-        const rows = docs.map(d => ({
+        const headers = [
+          "data",
+          "kmSaida",
+          "kmChegada",
+          "kmTotal",
+          "local",
+          "chamado",
+          "observacoes",
+          "createdAt",
+        ];
+        const rows = docs.map((d) => ({
           data: d.data,
           kmSaida: d.kmSaida,
           kmChegada: d.kmChegada,
@@ -89,7 +109,7 @@ module.exports = async (req, res) => {
           local: d.local,
           chamado: d.chamado || "",
           observacoes: d.observacoes || "",
-          createdAt: d.createdAt ? (new Date(d.createdAt)).toISOString() : ""
+          createdAt: d.createdAt ? new Date(d.createdAt).toISOString() : "",
         }));
         const csv = toCsv(rows, headers);
         res.setHeader("Content-Type", "text/csv; charset=utf-8");
@@ -107,6 +127,11 @@ module.exports = async (req, res) => {
     }
   } catch (err) {
     console.error("api/report error:", err);
-    return res.status(500).json({ error: "Erro interno: " + (err && err.message ? err.message : "unknown") });
+    return res
+      .status(500)
+      .json({
+        error:
+          "Erro interno: " + (err && err.message ? err.message : "unknown"),
+      });
   }
 };

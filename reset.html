@@ -2,56 +2,58 @@
 <html lang="pt-BR">
 
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Redefinir senha - Sistema de Controle de KM</title>
-  <link rel="stylesheet" href="css/main.css" />
-  <link rel="stylesheet" href="css/auth.css" />
-  <link rel="icon" type="image/png" href="/images/favicon-96x96.png" sizes="96x96" />
-  <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
-  <link rel="shortcut icon" href="/images/favicon.ico" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png" />
-  <link rel="manifest" href="/images/site.webmanifest" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Redefinir senha - Sistema de Controle de KM</title>
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/auth.css" />
+    <link rel="icon" type="image/png" href="/images/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+    <link rel="shortcut icon" href="/images/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png" />
+    <link rel="manifest" href="/images/site.webmanifest" />
 </head>
 
 <body>
-  <div class="auth-card-wrapper">
-    <div class="card auth-card">
-      <h1>Redefinir senha</h1>
-      <p id="resetStatus" class="msg"></p>
-      <form id="resetForm" style="display:none;">
-        <label class="lbl" for="resetPassword">Nova senha</label>
-        <div class="password-wrapper">
-          <input class="inp" type="password" id="resetPassword" required data-password-toggle="true" />
-          <button type="button" class="password-toggle" aria-label="Mostrar senha" aria-pressed="false"></button>
-        </div>
+    <div class="auth-card-wrapper">
+        <div class="card auth-card">
+            <h1>Redefinir senha</h1>
+            <p id="resetStatus" class="msg"></p>
+            <form id="resetForm" style="display:none;">
+                <label class="lbl" for="resetPassword">Nova senha</label>
+                <div class="password-wrapper">
+                    <input class="inp" type="password" id="resetPassword" required data-password-toggle="true" />
+                    <button type="button" class="password-toggle" aria-label="Mostrar senha"
+                        aria-pressed="false"></button>
+                </div>
 
-        <label class="lbl" for="resetPasswordConfirm">Confirmar nova senha</label>
-        <div class="password-wrapper">
-          <input class="inp" type="password" id="resetPasswordConfirm" required data-password-toggle="true" />
-          <button type="button" class="password-toggle" aria-label="Mostrar senha" aria-pressed="false"></button>
-        </div>
+                <label class="lbl" for="resetPasswordConfirm">Confirmar nova senha</label>
+                <div class="password-wrapper">
+                    <input class="inp" type="password" id="resetPasswordConfirm" required data-password-toggle="true" />
+                    <button type="button" class="password-toggle" aria-label="Mostrar senha"
+                        aria-pressed="false"></button>
+                </div>
 
-        <div class="actions">
-          <button type="submit" class="btn primary" id="resetSubmit">Atualizar senha</button>
-        </div>
+                <div class="actions">
+                    <button type="submit" class="btn primary" id="resetSubmit">Atualizar senha</button>
+                </div>
 
-        <p id="resetMsg" class="msg"></p>
-      </form>
-      <div style="text-align:center; margin-top:16px;">
-        <a href="index.html" class="link-like">Voltar ao login</a>
-      </div>
+                <p id="resetMsg" class="msg"></p>
+            </form>
+            <div style="text-align:center; margin-top:16px;">
+                <a href="index.html" class="link-like">Voltar ao login</a>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <footer>
-    <div class="footer-inner">
-      © 2025 - Desenvolvido por <a href="https://github.com/claudiohpo" target="_blank" rel="noopener">Cláudio
-        Oliveira</a>
-    </div>
-  </footer>
+    <footer>
+        <div class="footer-inner">
+            © 2025 - Desenvolvido por <a href="https://github.com/claudiohpo" target="_blank" rel="noopener">Cláudio
+                Oliveira</a>
+        </div>
+    </footer>
 
-  <script src="js/reset.js"></script>
+    <script src="js/reset.js"></script>
 </body>
 
 </html>

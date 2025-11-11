@@ -1,7 +1,9 @@
 {
   "name": "relatorio-km",
   "version": "1.0.0",
-  "engines": { "node": "20.x" },
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "node index.js",
     "start": "node index.js"

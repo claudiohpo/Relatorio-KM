@@ -195,7 +195,8 @@ loginForm.addEventListener("submit", async (e) => {
         typeof body.remainingAttempts === "number" &&
         body.remainingAttempts > 0
       ) {
-        const plural = body.remainingAttempts === 1 ? "tentativa" : "tentativas";
+        const plural =
+          body.remainingAttempts === 1 ? "tentativa" : "tentativas";
         message += ` Restam ${body.remainingAttempts} ${plural}.`;
       }
 
@@ -277,10 +278,10 @@ recoverForm.addEventListener("submit", async (e) => {
       return;
     }
 
-  // // Fluxo antigo (senha retornada) removido por razões de segurança
+    // // Fluxo antigo (senha retornada) removido por razões de segurança
 
-  msgEl.textContent = "";
-  hideOverlay(overlayRecover);
+    msgEl.textContent = "";
+    hideOverlay(overlayRecover);
 
     const resultUserEl = document.getElementById("recResultUser");
     if (resultUserEl) resultUserEl.textContent = username;
@@ -319,7 +320,6 @@ document.getElementById("recResultOk").addEventListener("click", () => {
   const resultMsgEl = document.getElementById("recResultMessage");
   if (resultMsgEl) resultMsgEl.textContent = "";
 });
-
 
 // SVGs usados no botão
 const svgEyeOpen = `
