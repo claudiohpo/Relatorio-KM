@@ -128,7 +128,16 @@
         <form id="formConfirmarSenha">
           <p>Informe sua senha atual para excluir todos os seus registros.</p>
           <label for="inputSenhaConfirmacao">Senha atual</label>
-          <input type="password" id="inputSenhaConfirmacao" autocomplete="current-password" required />
+          <div class="password-wrapper">
+            <input
+              type="password"
+              id="inputSenhaConfirmacao"
+              class="inp"
+              data-password-toggle
+              autocomplete="current-password"
+              required
+            />
+          </div>
           <p id="msgSenhaConfirmacao" class="msg"></p>
           <div class="modal-buttons">
             <button type="button" id="btnCancelarSenhaConfirmacao">Cancelar</button>

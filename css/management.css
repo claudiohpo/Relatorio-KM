@@ -219,6 +219,35 @@ h1 {
     overflow-y: auto;
 }
 
+.modal-content form label {
+    display: block;
+    margin: 12px 0 6px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.modal-content form .inp,
+.modal-content form input,
+.modal-content form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.modal-content form textarea {
+    min-height: 90px;
+    resize: vertical;
+}
+
+.modal-content form .msg {
+    margin-top: 8px;
+    font-size: 13px;
+    text-align: center;
+}
+
 /* Centraliza apenas o título */
 .modal-content h3 {
     text-align: center;
@@ -238,6 +267,41 @@ h1 {
     justify-content: flex-end;
     gap: 10px;
     margin-top: 20px;
+}
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    padding-right: 44px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 8px;
+    background: transparent;
+    border: none;
+    height: 32px;
+    width: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #444;
+    outline: none;
+}
+
+.password-toggle svg {
+    width: 18px;
+    height: 18px;
+}
+
+.password-toggle:focus-visible {
+    outline: 2px solid #1f6feb;
+    outline-offset: 2px;
 }
 
 /* ================== RESPONSIVIDADE ================== */
@@ -328,6 +392,10 @@ h1 {
 
     .modal-buttons button {
         width: 100%;
+    }
+
+    .password-wrapper input {
+        padding-right: 40px;
     }
 
     .botoes-filtro {
