@@ -121,6 +121,23 @@
       </div>
     </div>
 
+    <!-- Modal para validar a senha antes de apagar tudo -->
+    <div id="modalConfirmarSenha" class="modal">
+      <div class="modal-content">
+        <h3>Confirme sua senha</h3>
+        <form id="formConfirmarSenha">
+          <p>Informe sua senha atual para excluir todos os seus registros.</p>
+          <label for="inputSenhaConfirmacao">Senha atual</label>
+          <input type="password" id="inputSenhaConfirmacao" autocomplete="current-password" required />
+          <p id="msgSenhaConfirmacao" class="msg"></p>
+          <div class="modal-buttons">
+            <button type="button" id="btnCancelarSenhaConfirmacao">Cancelar</button>
+            <button type="submit">Confirmar exclusão</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- Modal de edição -->
     <div id="modalEditar" class="modal">
       <div class="modal-content">

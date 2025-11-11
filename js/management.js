@@ -50,6 +50,17 @@ function sanitizarPlacaBusca(valor) {
   return texto.slice(0, 8);
 }
 
+async function parseJsonSafe(res) {
+  const text = await res.text().catch(() => "");
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch (err) {
+    console.warn("Resposta não-JSON recebida", err);
+    return {};
+  }
+}
+
 // Verifica sessão ao iniciar (caso o guard inline falhe)
 if (!sessionStorage.getItem("km_username")) {
   try {
@@ -122,7 +133,19 @@ document.addEventListener("DOMContentLoaded", function () {
     .addEventListener("click", fecharModalLimpeza);
   document
     .getElementById("btnConfirmarLimpeza")
-    .addEventListener("click", confirmarLimpeza);
+    .addEventListener("click", solicitarSenhaParaLimpeza);
+
+  const btnCancelarSenha = document.getElementById(
+    "btnCancelarSenhaConfirmacao"
+  );
+  if (btnCancelarSenha) {
+    btnCancelarSenha.addEventListener("click", fecharModalSenhaLimpeza);
+  }
+
+  const formConfirmarSenha = document.getElementById("formConfirmarSenha");
+  if (formConfirmarSenha) {
+    formConfirmarSenha.addEventListener("submit", confirmarSenhaLimpeza);
+  }
 
   // Modal de edição
   document
@@ -308,6 +331,35 @@ function fecharModalLimpeza() {
   document.getElementById("modalApagarTudo").style.display = "none";
 }
 
+function abrirModalSenhaLimpeza() {
+  const modal = document.getElementById("modalConfirmarSenha");
+  if (!modal) return;
+  const inputSenha = document.getElementById("inputSenhaConfirmacao");
+  const msg = document.getElementById("msgSenhaConfirmacao");
+  if (msg) {
+    msg.textContent = "";
+    msg.style.color = "";
+  }
+  modal.style.display = "flex";
+  if (inputSenha) {
+    inputSenha.value = "";
+    setTimeout(() => inputSenha.focus(), 50);
+  }
+}
+
+function fecharModalSenhaLimpeza() {
+  const modal = document.getElementById("modalConfirmarSenha");
+  if (!modal) return;
+  modal.style.display = "none";
+  const inputSenha = document.getElementById("inputSenhaConfirmacao");
+  if (inputSenha) inputSenha.value = "";
+  const msg = document.getElementById("msgSenhaConfirmacao");
+  if (msg) {
+    msg.textContent = "";
+    msg.style.color = "";
+  }
+}
+
 // Confirma a exclusão do registro
 async function confirmarExclusao() {
   if (!registroSelecionado) return;
@@ -327,21 +379,100 @@ async function confirmarExclusao() {
   }
 }
 
-async function confirmarLimpeza() {
+function solicitarSenhaParaLimpeza() {
+  fecharModalLimpeza();
+  abrirModalSenhaLimpeza();
+}
+
+async function confirmarSenhaLimpeza(event) {
+  event.preventDefault();
+  const username = sessionStorage.getItem("km_username");
+  if (!username) {
+    fecharModalSenhaLimpeza();
+    alert("Sessão expirada. Faça login novamente.");
+    window.location.href = "index.html";
+    return;
+  }
+
+  const inputSenha = document.getElementById("inputSenhaConfirmacao");
+  const msg = document.getElementById("msgSenhaConfirmacao");
+  const senha = inputSenha ? inputSenha.value : "";
+
+  if (!senha) {
+    if (msg) {
+      msg.style.color = "red";
+      msg.textContent = "Informe sua senha para continuar.";
+    }
+    if (inputSenha) inputSenha.focus();
+    return;
+  }
+
+  if (msg) {
+    msg.style.color = "#333";
+    msg.textContent = "Validando senha...";
+  }
+
+  try {
+    const verifyRes = await fetch("/api/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({ action: "login", username, password: senha }),
+    });
+
+    const verifyBody = await parseJsonSafe(verifyRes);
+
+    if (!verifyRes.ok) {
+      if (msg) {
+        msg.style.color = "red";
+        msg.textContent =
+          verifyBody.error || "Não foi possível validar a senha informada.";
+      }
+      if (inputSenha) inputSenha.focus();
+      return;
+    }
+
+    const resultado = await executarLimpezaTotal();
+    if (!resultado.ok) {
+      if (msg) {
+        msg.style.color = "red";
+        msg.textContent = resultado.error || "Falha ao remover registros.";
+      }
+      return;
+    }
+
+    fecharModalSenhaLimpeza();
+    alert("Todos os seus registros foram excluídos com sucesso!");
+    carregarRegistros();
+  } catch (error) {
+    console.error("Erro na validação de senha:", error);
+    if (msg) {
+      msg.style.color = "red";
+      msg.textContent =
+        "Erro ao validar a senha. Tente novamente em instantes.";
+    }
+  }
+}
+
+async function executarLimpezaTotal() {
   try {
     const response = await fetchWithUser("/api/km?all=true", {
       method: "DELETE",
     });
     if (!response.ok) {
       const txt = await response.text().catch(() => null);
-      throw new Error(`Status ${response.status} - ${txt || "sem corpo"}`);
+      const detalhe = txt || `Falha com status ${response.status}`;
+      return { ok: false, error: detalhe };
     }
-    alert("Todos os seus registros foram excluídos com sucesso!");
-    fecharModalLimpeza();
-    carregarRegistros();
+    return { ok: true };
   } catch (error) {
     console.error("Erro:", error);
-    alert("Erro ao excluir os registros. Detalhe: " + (error.message || error));
+    return {
+      ok: false,
+      error: error && error.message ? error.message : "Erro desconhecido",
+    };
   }
 }
 
