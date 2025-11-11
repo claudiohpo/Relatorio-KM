@@ -508,10 +508,13 @@ async function confirmarSenhaLimpeza(event) {
     const verifyBody = await parseJsonSafe(verifyRes);
 
     if (!verifyRes.ok) {
+      let customMessage = verifyBody.error || "Não foi possível validar a senha informada.";
+      if (verifyRes.status === 401) {
+        customMessage = "Senha inválida.";
+      }
       if (msg) {
         msg.style.color = "red";
-        msg.textContent =
-          verifyBody.error || "Não foi possível validar a senha informada.";
+        msg.textContent = customMessage;
       }
       if (inputSenha) inputSenha.focus();
       return;
