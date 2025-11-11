@@ -1,16 +1,22 @@
 # 🚗 Registro de KM Rodados
 
-Um sistema completo para controle de quilometragem veicular, permitindo o registro de deslocamentos, geração de relatórios e manutenção de registros.
+Aplicação completa para controle de quilometragem veicular com autenticação segura, exportação de relatórios e modo de manutenção controlado por variável de ambiente.
 
-## ✨ Funcionalidades
+## ✨ Funcionalidades Principais
+- Registro de deslocamentos com placa, chamado, local, quilometragens e observações
+- Filtros avançados por intervalo de datas, local e placa, além de exportação CSV
+- Gestão por usuário: cada colaborador consulta apenas seus próprios registros
+- Portal de administração com tabela ordenável/filtrável e ações de edição/remoção
+- Autenticação com cadastro, troca de senha autenticada e redefinição via e-mail Brevo
+- Bloqueio temporário após tentativas de login falhas e contagem regressiva no frontend
+- Modo manutenção ativado via `MAINTENANCE_MODE`, mantendo a página dedicada online
 
-- 📝 Registro de deslocamentos com dados completos (data, local, KM de saída/chegada)
-- 📊 Geração de relatórios em CSV e XLSX
-- ✏️ Edição e exclusão de registros existentes
-- 🔍 Sistema de filtros por data e local
-- 📱 Interface responsiva para mobile e desktop
-- 💾 Armazenamento em MongoDB
-- 🌐 Deploy pronto para Vercel
+## 🔒 Segurança e Conformidade
+- Senhas armazenadas com `bcrypt` e migração automática de hashes antigos
+- Tokens de redefinição assinados com SHA-256 e expiração de 1 hora
+- Conteúdo sensível enviado apenas por e-mail, nunca exibido em tela
+- Rate limit por usuário com bloqueio automático após 5 tentativas inválidas
+- Links de redefinição construídos com base em `APP_BASE_URL`, evitando URLs quebradas
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -19,136 +25,133 @@ Um sistema completo para controle de quilometragem veicular, permitindo o regist
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![bcryptjs](https://img.shields.io/badge/bcryptjs-00A95C?style=for-the-badge&logoColor=white)
+![Nodemailer](https://img.shields.io/badge/Nodemailer-1B1B1F?style=for-the-badge&logo=nodemailer&logoColor=white)
+![Brevo SMTP](https://img.shields.io/badge/Brevo%20SMTP-0A1F44?style=for-the-badge&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![Vercel Edge](https://img.shields.io/badge/Vercel%20Edge-111111?style=for-the-badge&logo=vercel&logoColor=white)
 
-## 📦 Estrutura do Projeto
-
-```
-📁 projeto-km/
-├── 📁 api/                # Funções serverless
-│   ├── km.js                 # API principal (CRUD)
-│   └── report.js             # Geração de relatórios
-├── 📁 css/                # Pasta contendo Estilos 
-│   ├── main.css              # Estilos principais 
-│   └── management.css        # Estilos da página de gestão 
-├── 📁 js/                 # Scripts frontend (agrupa JS para separar do backend em /api)
-│   ├── main.js               # Script principal 
-│   └── management.js         # Script da página de gestão 
-├── 📄 index.html          # Página principal 
-├── 📄 management.html     # Página de gestão 
-├── 📄 vercel.json         # Configuração do Vercel
-└── 📄 package.json        # Dependências do projeto
+## � Estrutura do Projeto
 
 ```
+📁 Relatorio-KM/
+├── api/
+│   ├── km.js              # CRUD das viagens (placa normalizada, filtros, multiusuário)
+│   ├── report.js          # Exportação CSV por usuário
+│   └── users.js           # Cadastro, login, lockout e redefinição de senha
+├── css/
+│   ├── auth.css           # Layout de autenticação, modais e reset
+│   ├── main.css           # Estilos do formulário principal (app.html)
+│   ├── management.css     # Estilos da tabela de administração
+│   └── maintenance.css    # Estilos dedicados à página de manutenção
+├── images/                # Assets estáticos (manifest, ícones, manutenção)
+├── js/
+│   ├── auth.js            # Fluxo de login, cadastro, recuperação e lockout
+│   ├── main.js            # Formulário de registro, mudança de senha in-app
+│   ├── management.js      # Tabela de registros com busca por placa
+│   └── reset.js           # Consumo do token e redefinição de senha
+├── app.html               # Tela principal pós-login
+├── index.html             # Portal de autenticação
+├── management.html        # Administração de registros
+├── maintenance.html       # Página estática exibida no modo manutenção
+├── reset.html             # Página acessada via link do e-mail de reset
+├── middleware.js          # Middleware Edge para chavear manutenção no deploy
+├── vercel.json            # Configuração de funções e middleware para Vercel
+├── package.json           # Dependências backend (MongoDB, bcrypt, nodemailer)
+└── .env.example           # Exemplo de variáveis obrigatórias mínimas
+```
 
-## 🚀 Como Usar
+## 🚀 Execução Local
 
 ### Pré-requisitos
+- Node.js 20+
+- Conta MongoDB (Atlas ou local)
+- Conta Brevo (SMTP) para o fluxo de redefinição de senha
 
-- Node.js instalado
-- Conta no MongoDB Atlas ou instância local
-- Conta no Vercel (para deploy)
+### Passo a passo
+1. Clone o repositório e acesse a pasta:
+  ```bash
+  git clone <url-do-repositorio>
+  cd Relatorio-KM
+  ```
+2. Instale as dependências (necessárias para as funções serverless):
+  ```bash
+  npm install
+  ```
+3. Configure um arquivo `.env` (veja a tabela abaixo). Em ambiente de desenvolvimento, você pode exportar as variáveis diretamente antes de rodar `vercel dev`.
+4. Execute localmente com o CLI da Vercel para simular as serverless functions:
+  ```bash
+  npx vercel dev
+  ```
+  Abra `http://localhost:3000` para acessar a aplicação.
 
-### Instalação Local
+> Dica: se preferir apenas testar o frontend estático, sirva a pasta via `npx serve .`, mas o backend `/api` não estará disponível.
 
-1. Clone o repositório:
-```bash
-git clone <url-do-repositorio>
-cd projeto-km
-```
+## 🔧 Variáveis de Ambiente
 
-2. Instale as dependências:
-```bash
-npm install
-```
+| Variável | Obrigatório | Descrição | Exemplo |
+|----------|-------------|-----------|---------|
+| `MONGODB_URI` | ✅ | URI de conexão MongoDB | `mongodb+srv://user:senha@cluster/...` |
+| `DB_NAME` | ⛔️ (default `km_db`) | Banco utilizado para todas as coleções | `km_db` |
+| `COLLECTION` | ⛔️ (default `km_registros`) | Coleção fallback para registros sem usuário | `km_registros` |
+| `USERS_COLLECTION` | ⛔️ (default `usuarios`) | Coleção que armazena contas de acesso | `usuarios` |
+| `BREVO_SMTP_HOST` | ✅ | Host SMTP da Brevo | `smtp-relay.brevo.com` |
+| `BREVO_SMTP_PORT` | ✅ | Porta SMTP (use 587 ou 465) | `587` |
+| `BREVO_SMTP_LOGIN` | ✅ | Usuário/API Key Brevo | `apikey` |
+| `BREVO_SMTP_PASSWORD` | ✅ | Senha/API Key Brevo | `xkeysib-...` |
+| `BREVO_MAIL_FROM` | ⛔️ | Remetente exibido no e-mail (fallback: login) | `suporte@empresa.com` |
+| `APP_BASE_URL` | ⛔️ | URL base para montar links de reset | `https://relatorio-km.vercel.app` |
+| `MAINTENANCE_MODE` | ⛔️ | Liga a página de manutenção no deploy | `on`, `true` ou `1` |
 
-3. Configure as variáveis de ambiente:
-```bash
-cp .env.example .env
-```
-Edite o arquivo `.env` com suas credenciais do MongoDB.
+> **Importante:** após alterar variáveis na Vercel, é necessário realizar um novo deploy. O middleware lê `MAINTENANCE_MODE` em tempo de execução e redireciona todas as rotas para `maintenance.html`, liberando apenas os assets dessa página.
 
-4. Execute localmente:
-```bash
-npm run dev
-```
+## 🖥️ Páginas e Fluxos
+- `index.html`: login, cadastro e recuperação de acesso com feedback em tempo real
+- `app.html`: formulário de lançamentos, mudança de senha e preenchimento automático
+- `management.html`: visão administrativa com filtros (data, texto e placa) e ações em massa
+- `reset.html`: formulário protegido por token para criação de nova senha
+- `maintenance.html`: tela estática estilizada com CSS dedicado
 
-### Deploy na Vercel
+## � API Endpoints
 
-1. Faça o fork deste repositório
-2. Conecte sua conta do Vercel ao repositório
-3. Configure as variáveis de ambiente no painel da Vercel
-4. Deploy automático! 🎉
+### `/api/users` (POST com `action`)
+| Action | Descrição |
+|--------|-----------|
+| `register` | Cria um novo usuário (username único e e-mail verificado) |
+| `login` | Autentica com bloqueio após 5 tentativas falhas e migra hash legado |
+| `recover` | Gera token temporário, salva hash e dispara e-mail via Brevo |
+| `verify-reset-token` | Valida token enviado por e-mail antes de mostrar `reset.html` |
+| `reset-password` | Define nova senha (após e-mail) e limpa tentativas/locks |
+| `change-password` | Troca senha autenticada dentro do app (header `x-usuario`) |
 
-## 🔧 Configuração
+### `/api/km`
+- GET: lista registros filtrados por data/local/placa ou retorna documento por `id`
+- POST: insere lançamento normalizando a placa (formato antigo e Mercosul)
+- PUT: atualiza campos individuais, recalculando o total e validando placa
+- DELETE: remove por `id` ou limpa todos os lançamentos do usuário (`?all=true`)
 
-### Variáveis de Ambiente
+### `/api/report`
+- GET: exporta registros no formato JSON (default) ou `?format=csv`, respeitando o usuário autenticado via `x-usuario`
 
-| Variável | Descrição | Exemplo |
-|----------|-----------|---------|
-| MONGODB_URI | URI de conexão com MongoDB | `mongodb+srv://user:pass@cluster...` |
-| DB_NAME | Nome do banco de dados | `km_db` |
-| COLLECTION | Nome da coleção | `km_registros` |
+## 🌐 Deploy na Vercel
+1. Conecte o repositório via painel da Vercel
+2. Preencha todas as variáveis acima em *Project Settings › Environment Variables*
+3. Faça o primeiro deploy (production ou preview)
+4. Para ativar manutenção, defina `MAINTENANCE_MODE` como `on`, `true` ou `1` e redeploy. Para desligar, remova ou altere o valor e redeploy novamente.
 
-### Estrutura dos Dados
-
-Cada registro possui:
-```json
-{
-  "data": "2023-12-01",
-  "chamado": "12345",
-  "local": "São Paulo - Cliente X",
-  "kmSaida": 15000,
-  "kmChegada": 15050,
-  "kmTotal": 50,
-  "observacoes": "Visita técnica",
-  "createdAt": "2023-12-01T10:00:00.000Z"
-}
-```
-
-## 📋 API Endpoints
-
-### GET `/api/km`
-Retorna todos os registros ou um registro específico com `?id=`
-
-### POST `/api/km`
-Cria um novo registro
-
-### PUT `/api/km?id=`
-Atualiza um registro existente
-
-### DELETE `/api/km?id=`
-Exclui um registro
-
-### GET `/api/report?format=csv`
-Gera relatório em CSV dos registros
-
-## 👨‍💻 Desenvolvimento
-
-Para contribuir com o projeto:
-
-1. Faça um fork do repositório
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
+## 👨‍💻 Contribuindo
+1. Fork o projeto
+2. Crie uma branch (`git checkout -b feat/minha-feature`)
+3. Commit (`git commit -m "feat: nova feature"`)
+4. Push (`git push origin feat/minha-feature`)
 5. Abra um Pull Request
 
 ## 📄 Licença
+Projeto licenciado sob MIT. Confira o arquivo [LICENSE](LICENSE).
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
-## 🤝 Contribuições
-
-Contribuições são sempre bem-vindas! Sinta-se à vontade para reportar bugs ou sugerir novas funcionalidades.
-
-## 📞 Suporte
-
-Em caso de dúvidas ou problemas, abra uma issue no repositório ou entre em contato.
-
-## 👨‍💻 Autor
-
-- [Cláudio Henrique](https://github.com/claudiohpo)  
+## 🤝 Suporte
+Abra uma issue para relatar bugs, sugerir melhorias ou tirar dúvidas.
 
 ---
 
-⭐️ Se este projeto te ajudou, deixe uma estrela no repositório!
+⭐️ Gostou? Deixe uma estrela e compartilhe com o time!
