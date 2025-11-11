@@ -100,7 +100,7 @@ Aplicação completa para controle de quilometragem veicular com autenticação 
 | `BREVO_SMTP_LOGIN` | ✅ | Usuário/API Key Brevo | `apikey` |
 | `BREVO_SMTP_PASSWORD` | ✅ | Senha/API Key Brevo | `xkeysib-...` |
 | `BREVO_MAIL_FROM` | ⛔️ | Remetente exibido no e-mail (fallback: login) | `suporte@empresa.com` |
-| `APP_BASE_URL` | ⛔️ | URL base para montar links de reset | `https://relatorio-km.vercel.app` |
+| `APP_BASE_URL` | ⛔️ | URL base para montar links de reset | `https://xxxx.vercel.app` |
 | `MAINTENANCE_MODE` | ⛔️ | Liga a página de manutenção no deploy | `on`, `true` ou `1` |
 
 > **Importante:** após alterar variáveis na Vercel, é necessário realizar um novo deploy. O middleware lê `MAINTENANCE_MODE` em tempo de execução e redireciona todas as rotas para `maintenance.html`, liberando apenas os assets dessa página.
