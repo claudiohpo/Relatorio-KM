@@ -5,7 +5,7 @@ export const config = {
   matcher: "/:path*",
 };
 
-export function middleware(request) {
+export default function middleware(request) {
   const flag = (process.env.MAINTENANCE_MODE || "").toLowerCase();
   if (!MAINTENANCE_ON.includes(flag)) {
     return;
