@@ -31,7 +31,7 @@ Aplicação completa para controle de quilometragem veicular com autenticação 
 ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
 ![Vercel Edge](https://img.shields.io/badge/Vercel%20Edge-111111?style=for-the-badge&logo=vercel&logoColor=white)
 
-## � Estrutura do Projeto
+## 📦 Estrutura do Projeto
 
 ```
 📁 Relatorio-KM/
@@ -112,7 +112,7 @@ Aplicação completa para controle de quilometragem veicular com autenticação 
 - `reset.html`: formulário protegido por token para criação de nova senha
 - `maintenance.html`: tela estática estilizada com CSS dedicado
 
-## � API Endpoints
+## 📋 API Endpoints
 
 ### `/api/users` (POST com `action`)
 | Action | Descrição |
