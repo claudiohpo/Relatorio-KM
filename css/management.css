@@ -269,6 +269,35 @@ h1 {
     margin-top: 20px;
 }
 
+#modalApagarTudo .modal-buttons,
+#modalConfirmarSenha .modal-buttons {
+    justify-content: center;
+}
+
+#btnConfirmarLimpeza {
+    background-color: #f44336;
+    color: #fff;
+    border: none;
+}
+
+#btnCancelarLimpeza {
+    background-color: #ff9800;
+    color: #fff;
+    border: none;
+}
+
+#modalConfirmarSenha .modal-buttons button[type="button"] {
+    background-color: #ff9800;
+    color: #fff;
+    border: none;
+}
+
+#modalConfirmarSenha .modal-buttons button[type="submit"] {
+    background-color: #f44336;
+    color: #fff;
+    border: none;
+}
+
 .password-wrapper {
     position: relative;
     display: flex;
