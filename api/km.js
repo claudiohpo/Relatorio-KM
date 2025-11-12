@@ -6,7 +6,7 @@ const GLOBAL_COLLECTION = process.env.COLLECTION || "km_registros";
 
 let clientPromise = null;
 
-// Função para obter a conexão com o banco de dados
+// Mantém uma conexão compartilhada com o banco MongoDB.
 async function getDb() {
   if (!MONGODB_URI) throw new Error("MONGODB_URI não definido");
   if (!clientPromise) {
@@ -21,7 +21,7 @@ async function getDb() {
   return client.db(DB_NAME);
 }
 
-// Função para limpar o nome de usuário
+// Normaliza e valida o identificador de usuário recebido.
 function sanitizeUsername(u) {
   if (!u) return null;
   const s = String(u).toLowerCase().trim();
@@ -29,6 +29,7 @@ function sanitizeUsername(u) {
   return s;
 }
 
+// Valida e padroniza placas de veículos recebidas pela API.
 function normalizePlate(valor) {
   if (valor === undefined || valor === null) {
     return { value: null };
@@ -54,7 +55,7 @@ function normalizePlate(valor) {
   return { value: limpo };
 }
 
-// Função para obter a coleção correta com base no nome de usuário
+// Seleciona a coleção correta considerando o usuário autenticado.
 async function getCollectionForRequest(req) {
   const db = await getDb();
   const headerUser = req.headers
@@ -85,7 +86,7 @@ async function getCollectionForRequest(req) {
   return db.collection(collName);
 }
 
-// ---- Converter data para YYYY-MM-DD
+// Converte diferentes representações de data para o formato YYYY-MM-DD.
 function toYMD(value) {
   if (!value) return null;
   // se já passou no frontend no formato YYYY-MM-DD, retorna
@@ -105,7 +106,7 @@ function toYMD(value) {
   return null;
 }
 
-// função para ler body (p/ ambientes sem body parser)
+// Lê o corpo da requisição quando não há body parser disponível.
 function readBody(req) {
   return new Promise((resolve) => {
     if (req.body) return resolve(req.body);
@@ -123,7 +124,7 @@ function readBody(req) {
   });
 }
 
-// função para processar a solicitação
+// Manipula todas as operações de CRUD da rota /api/km.
 module.exports = async (req, res) => {
   res.setHeader("Content-Type", "application/json");
   try {

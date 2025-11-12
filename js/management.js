@@ -25,7 +25,7 @@ if (!sessionStorage.getItem("km_username")) {
   window.location.replace("/index.html?redirect=" + redirect);
 }
 
-// Inicialização
+// Organiza eventos e inicia carregamento quando a tela estiver pronta.
 document.addEventListener("DOMContentLoaded", function () {
   carregarRegistros();
 
@@ -42,6 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Abre modal "Apagar Tabela" (limpeza total)
   document.getElementById("btnApagarTudo").addEventListener("click", () => {
+    // Solicita limpeza completa abrindo o modal correspondente.
     abrirModalLimpeza(); // sem id
   });
 
@@ -119,6 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("Selecione um registro para editar!");
       return;
     }
+    // Inicia a edição do registro selecionado na tabela.
     abrirModalEdicao(registroSelecionado);
   });
 
@@ -128,11 +130,12 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("Selecione um registro para excluir!");
       return;
     }
+    // Abre a confirmação de exclusão para o registro escolhido.
     abrirModalExclusao(registroSelecionado);
   });
 });
 
-// Limpar filtros
+// Limpa filtros aplicados e reinicia paginação.
 function limparFiltros() {
   document.getElementById("filtroDataInicio").value = "";
   document.getElementById("filtroDataFim").value = "";
@@ -144,7 +147,7 @@ function limparFiltros() {
   exibirRegistros();
 }
 
-// Carrega registros do backend
+// Busca registros no backend e prepara dados derivados.
 async function carregarRegistros() {
   try {
     const response = await fetchWithUser("/api/km");
@@ -171,7 +174,7 @@ async function carregarRegistros() {
   }
 }
 
-// Exibe os registros na tabela
+// Renderiza a tabela paginada conforme filtros atuais.
 function exibirRegistros() {
   const tbody = document.querySelector("#tabelaRegistros tbody");
   tbody.innerHTML = "";
@@ -227,13 +230,13 @@ function exibirRegistros() {
     });
 }
 
-// Aplica filtros
+// Reaplica filtros visuais reiniciando a navegação.
 function aplicarFiltros() {
   paginaAtual = 1;
   exibirRegistros();
 }
 
-// Aplica filtros internos
+// Filtra registros em memória conforme critérios escolhidos.
 function aplicarFiltrosInterno(registros) {
   const dataInicio = document.getElementById("filtroDataInicio").value;
   const dataFim = document.getElementById("filtroDataFim").value;
@@ -256,7 +259,7 @@ function aplicarFiltrosInterno(registros) {
   });
 }
 
-// Formata a data no formato DD/MM/YYYY
+// Converte uma data ISO em formato brasileiro DD/MM/AAAA.
 function formatarData(data) {
   if (!data) return "";
   const partes = (typeof data === "string" ? data : "").split("-");
@@ -264,31 +267,32 @@ function formatarData(data) {
   return data;
 }
 
-// Abre o modal de exclusão
+// Mostra o modal de exclusão para o registro indicado.
 function abrirModalExclusao(id) {
   registroSelecionado = id;
   document.getElementById("modalExcluir").style.display = "flex";
 }
 
-// Fecha o modal de exclusão
+// Fecha o modal de exclusão e limpa seleção.
 function fecharModalExclusao() {
   registroSelecionado = null;
   document.getElementById("modalExcluir").style.display = "none";
 }
 
-// Abre o modal de Limpeza (limpar toda a tabela do usuário)
+// Exibe o modal de limpeza completa da tabela.
 function abrirModalLimpeza() {
   // limpeza total não precisa de registroSelecionado
   registroSelecionado = null;
   document.getElementById("modalApagarTudo").style.display = "flex";
 }
 
-// Fecha o modal de limpeza
+// Oculta o modal de limpeza de registros.
 function fecharModalLimpeza() {
   registroSelecionado = null;
   document.getElementById("modalApagarTudo").style.display = "none";
 }
 
+// Solicita senha para confirmar a limpeza total.
 function abrirModalSenhaLimpeza() {
   const modal = document.getElementById("modalConfirmarSenha");
   if (!modal) return;
@@ -308,6 +312,7 @@ function abrirModalSenhaLimpeza() {
   }
 }
 
+// Fecha o modal de senha e restaura campos padrões.
 function fecharModalSenhaLimpeza() {
   const modal = document.getElementById("modalConfirmarSenha");
   if (!modal) return;
@@ -326,7 +331,7 @@ function fecharModalSenhaLimpeza() {
   }
 }
 
-// Confirma a exclusão do registro
+// Remove no servidor o registro atualmente selecionado.
 async function confirmarExclusao() {
   if (!registroSelecionado) return;
 
@@ -345,11 +350,13 @@ async function confirmarExclusao() {
   }
 }
 
+// Encadeia o fluxo para checar senha antes da limpeza geral.
 function solicitarSenhaParaLimpeza() {
   fecharModalLimpeza();
   abrirModalSenhaLimpeza();
 }
 
+// Valida a senha informada e executa a limpeza se aprovada.
 async function confirmarSenhaLimpeza(event) {
   event.preventDefault();
   const username = sessionStorage.getItem("km_username");
@@ -427,6 +434,7 @@ async function confirmarSenhaLimpeza(event) {
   }
 }
 
+// Envia solicitação para remover todos os registros do usuário.
 async function executarLimpezaTotal() {
   try {
     const response = await fetchWithUser("/api/km?all=true", {
@@ -447,7 +455,7 @@ async function executarLimpezaTotal() {
   }
 }
 
-// Abre o modal de edição
+// Prepara e exibe o modal para edição do registro escolhido.
 function abrirModalEdicao(id) {
   const registro = registros.find((r) => String(r._id) === String(id));
   if (!registro) return;
@@ -464,12 +472,12 @@ function abrirModalEdicao(id) {
   document.getElementById("modalEditar").style.display = "flex";
 }
 
-// Fecha o modal de edição
+// Oculta o modal de edição sem alterar dados.
 function fecharModalEdicao() {
   document.getElementById("modalEditar").style.display = "none";
 }
 
-// Salva as edições feitas no registro
+// Persiste alterações feitas no modal de edição.
 async function salvarEdicao(e) {
   e.preventDefault();
 
@@ -545,6 +553,7 @@ async function salvarEdicao(e) {
   }
 }
 
+// Atualiza o rodapé com o nome do usuário logado após carregar a página.
 window.addEventListener("DOMContentLoaded", () => {
   const username =
     sessionStorage.getItem("km_username") ||
@@ -557,7 +566,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// Baixa o relatório em CSV
+// Constrói arquivo CSV a partir dos registros filtrados e dispara download.
 async function baixarRelatorioCSV() {
   try {
     // 1. Filtra e ordena registros como antes
@@ -616,7 +625,7 @@ async function baixarRelatorioCSV() {
   }
 }
 
-// Baixa o relatório em XLS
+// Gera planilha XLSX com os dados filtrados e ordenados.
 async function baixarRelatorioXLS() {
   try {
     // //Ordem do mais novo para o mais antigo - Conforme inserção no banco - Preservar para uso futuro

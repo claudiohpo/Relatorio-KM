@@ -6,7 +6,7 @@ const GLOBAL_COLLECTION = process.env.COLLECTION || "km_registros";
 
 let clientPromise = null;
 
-// Função para obter a conexão com o banco de dados
+// Mantém conexão reutilizável com o banco para relatórios.
 async function getDb() {
   if (!MONGODB_URI) throw new Error("MONGODB_URI não definido");
   if (!clientPromise) {
@@ -17,7 +17,7 @@ async function getDb() {
   return client.db(DB_NAME);
 }
 
-// Função para limpar o nome de usuário
+// Valida e normaliza o identificador do usuário solicitante.
 function sanitizeUsername(u) {
   if (!u) return null;
   const s = String(u).toLowerCase().trim();
@@ -25,6 +25,7 @@ function sanitizeUsername(u) {
   return s;
 }
 
+// Determina a coleção apropriada a partir do usuário autenticado.
 async function getCollectionForRequest(req) {
   const db = await getDb();
   const headerUser = req.headers
@@ -49,6 +50,7 @@ async function getCollectionForRequest(req) {
   return db.collection(collName);
 }
 
+// Converte documentos em formato CSV com cabeçalhos fornecidos.
 function toCsv(rows, headers) {
   const esc = (v) => `"${(v || "").toString().replace(/"/g, '""')}"`;
   const lines = [headers.join(",")];
@@ -58,7 +60,7 @@ function toCsv(rows, headers) {
   return lines.join("\r\n");
 }
 
-// endpoint de relatório
+// Fornece o endpoint de relatório com suporte a JSON ou CSV.
 module.exports = async (req, res) => {
   res.setHeader("Content-Type", "application/json");
   try {

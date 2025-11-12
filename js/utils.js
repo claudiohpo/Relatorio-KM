@@ -1,14 +1,18 @@
+// Encapsula funções utilitárias utilizadas nas telas do sistema.
 (function (global) {
+  // Verifica se um cabeçalho existe desconsiderando maiúsculas/minúsculas.
   function hasHeader(headers, name) {
     if (!headers) return false;
     const target = String(name).toLowerCase();
     return Object.keys(headers).some((key) => key.toLowerCase() === target);
   }
 
+  // Preenche cabeçalhos obrigatórios (usuário e JSON) quando necessário.
   function ensureHeaders(options) {
     const opts = options || {};
     const headers = { ...(opts.headers || {}) };
-    const username = (function () {
+  // Obtém o usuário salvo na sessão tratando erros de acesso ao storage.
+  const username = (function () {
       try {
         return sessionStorage.getItem("km_username");
       } catch (err) {
@@ -30,11 +34,13 @@
     return { ...opts, headers };
   }
 
+  // Encaminha requisições fetch garantindo cabeçalhos padrão do sistema.
   function fetchWithUser(url, options = {}) {
     const finalOptions = ensureHeaders(options);
     return fetch(url, finalOptions);
   }
 
+  // Tenta converter uma resposta em JSON com fallback configurável.
   async function parseJson(response, config = {}) {
     const { fallback = {}, includeTextOnError = true } = config;
     const text = await response.text().catch(() => "");
@@ -46,6 +52,7 @@
     }
   }
 
+  // Valida e normaliza uma placa informada pelo usuário.
   function normalizarPlacaEntrada(valor) {
     if (valor === undefined || valor === null) {
       return { placa: null };
@@ -70,6 +77,7 @@
     return { placa: limpo };
   }
 
+  // Sanitiza texto para busca por placa mantendo apenas caracteres válidos.
   function sanitizarPlacaBusca(valor) {
     if (valor == null) return "";
     const texto = String(valor).toUpperCase().replace(/[^A-Z0-9]/g, "");

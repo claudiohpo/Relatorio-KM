@@ -20,6 +20,7 @@ const overlayRecoverResult = document.getElementById("overlayRecoverResult");
 let loginLockTimer = null;
 let loginLockedUntil = null;
 
+// Exibe um overlay modal e reconfigura toggles de senha embutidos.
 function showOverlay(el) {
   el.classList.add("show");
   el.setAttribute("aria-hidden", "false");
@@ -30,6 +31,7 @@ function showOverlay(el) {
       .forEach((input) => PasswordToggle.reset(input));
   }
 }
+// Oculta um overlay modal e reseta toggles de senha associados.
 function hideOverlay(el) {
   el.classList.remove("show");
   el.setAttribute("aria-hidden", "true");
@@ -41,6 +43,7 @@ function hideOverlay(el) {
 }
 
 // --- contador regressivo para bloqueio de login ---
+// Cancela o contador de bloqueio de login e libera o botão de acesso.
 function stopLockCountdown() {
   if (loginLockTimer) {
     clearInterval(loginLockTimer);
@@ -50,6 +53,7 @@ function stopLockCountdown() {
   if (btnLogin) btnLogin.disabled = false;
 }
 
+// Inicia o contador regressivo informando quanto falta para novo login.
 function startLockCountdown(lockedUntilMs) {
   if (!loginMsg) return;
 
@@ -70,6 +74,7 @@ function startLockCountdown(lockedUntilMs) {
 
   if (btnLogin) btnLogin.disabled = true;
 
+  // Atualiza a mensagem do usuário com o tempo restante de bloqueio.
   const updateCountdown = () => {
     const remainingMs = lockedUntil - Date.now();
     if (remainingMs <= 0) {
@@ -103,6 +108,7 @@ document
   .addEventListener("click", () => hideOverlay(overlayRegister));
 
 // Função para registrar um novo usuário
+// Processa o fluxo de cadastro de um novo usuário.
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const username = document.getElementById("regUsername").value.trim();
@@ -156,6 +162,7 @@ registerForm.addEventListener("submit", async (e) => {
 });
 
 // Função para login
+// Gerencia a tentativa de login aplicando bloqueio quando necessário.
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const username = document.getElementById("loginUsername").value.trim();
@@ -243,6 +250,7 @@ loginForm.addEventListener("submit", async (e) => {
 
 // ---- Recuperação de senha ----
 document.getElementById("recCancel").addEventListener("click", () => {
+  // Limpa os campos de recuperação e fecha o overlay correspondente.
   // limpar campos e mensagem
   document.getElementById("recUsername").value = "";
   document.getElementById("recEmail").value = "";
@@ -250,6 +258,7 @@ document.getElementById("recCancel").addEventListener("click", () => {
   hideOverlay(overlayRecover);
 });
 
+// Dispara o processo de recuperação de senha via API.
 recoverForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const username = document.getElementById("recUsername").value.trim();
@@ -316,6 +325,7 @@ recoverForm.addEventListener("submit", async (e) => {
 // });
 
 document.getElementById("recResultOk").addEventListener("click", () => {
+  // Esconde o resultado da recuperação e restaura campos para novo uso.
   hideOverlay(overlayRecoverResult);
 
   // limpa campos de recuperação e o campo de resultado

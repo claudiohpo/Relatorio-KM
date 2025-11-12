@@ -14,6 +14,7 @@ const changePasswordMsg = document.getElementById("changePasswordMsg");
 const changePwdCancel = document.getElementById("changePwdCancel");
 
 // Função para carregar o último registro e preencher KM Saída
+// Obtém o último registro salvo para pré-preencher saída e placa.
 async function carregarUltimoRegistro() {
   try {
     const response = await fetchWithUser("/api/km?ultimo=true");
@@ -38,6 +39,7 @@ async function carregarUltimoRegistro() {
 // Carregar último registro do kmChegada para o label kmSaida quando a página for carregada
 document.addEventListener("DOMContentLoaded", carregarUltimoRegistro);
 
+// Valida e envia o formulário principal de registro de KM.
 btnSalvar.addEventListener("click", async (e) => {
   e.preventDefault();
   msg.textContent = "";
@@ -139,6 +141,7 @@ btnSalvar.addEventListener("click", async (e) => {
   }
 });
 
+// Preenche usuário/log e data padrão quando o DOM é carregado.
 window.addEventListener("DOMContentLoaded", () => {
   const username =
     sessionStorage.getItem("km_username") ||
@@ -164,10 +167,12 @@ window.addEventListener("DOMContentLoaded", () => {
 const btnManutencao = document.getElementById("btnManutencao");
 if (btnManutencao) {
   btnManutencao.addEventListener("click", () => {
+    // Leva o usuário para a tela de manutenção de registros.
     window.location.href = "/management.html";
   });
 }
 
+// Exibe o modal de troca de senha já preparado para nova entrada.
 function showChangePasswordModal() {
   if (!overlayChangePassword) return;
   if (changePasswordForm) {
@@ -190,6 +195,7 @@ function showChangePasswordModal() {
   }
 }
 
+// Oculta o modal de troca de senha resetando estados internos.
 function hideChangePasswordModal() {
   if (!overlayChangePassword) return;
   overlayChangePassword.classList.remove("show");
@@ -209,12 +215,14 @@ function hideChangePasswordModal() {
 
 if (btnTrocarSenha && overlayChangePassword) {
   btnTrocarSenha.addEventListener("click", () => {
+    // Abre o modal para que o usuário atualize a própria senha.
     showChangePasswordModal();
   });
 }
 
 if (changePwdCancel) {
   changePwdCancel.addEventListener("click", (event) => {
+    // Interrompe a ação padrão e fecha o modal de troca de senha.
     event.preventDefault();
     hideChangePasswordModal();
   });
@@ -222,6 +230,7 @@ if (changePwdCancel) {
 
 if (overlayChangePassword) {
   overlayChangePassword.addEventListener("click", (event) => {
+    // Fecha o modal quando o usuário clica fora do conteúdo interno.
     if (event.target === overlayChangePassword) {
       hideChangePasswordModal();
     }
@@ -229,6 +238,7 @@ if (overlayChangePassword) {
 }
 
 if (changePasswordForm) {
+  // Lida com a alteração de senha validando regras básicas.
   changePasswordForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!changePasswordMsg) return;
@@ -324,6 +334,7 @@ if (window.PasswordToggle) {
 // Botão de Sair
 const btnSair = document.getElementById("btnSair");
 btnSair.addEventListener("click", () => {
+  // Limpa credenciais temporárias e retorna ao login.
   // Remove sessão e qualquer vestígio em localStorage
   try {
     sessionStorage.removeItem("km_username");

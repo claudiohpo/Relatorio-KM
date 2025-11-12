@@ -23,6 +23,7 @@ let clientPromise = null;
 
 let mailTransporter = null;
 
+// Cria e reutiliza o transporte SMTP utilizado para envio de emails.
 function getMailTransporter() {
   if (mailTransporter) return mailTransporter;
   if (!BREVO_SMTP_LOGIN || !BREVO_SMTP_PASSWORD) {
@@ -44,10 +45,12 @@ function getMailTransporter() {
   return mailTransporter;
 }
 
+// Verifica se uma string já está no formato de hash bcrypt.
 function isBcryptHash(value) {
   return /^\$2[aby]\$/.test(String(value || ""));
 }
 
+// Compara a senha fornecida e atualiza hashes antigos quando necessário.
 async function verifyUserPassword(usersCollection, user, candidatePassword) {
   const storedPassword = String(user.password || "");
   const candidate = String(candidatePassword || "");
@@ -76,10 +79,12 @@ async function verifyUserPassword(usersCollection, user, candidatePassword) {
   return match;
 }
 
+// Gera hash SHA-256 para tokens sensíveis antes de armazená-los.
 function hashToken(token) {
   return crypto.createHash("sha256").update(String(token)).digest("hex");
 }
 
+// Determina a URL base da aplicação considerando headers de proxy.
 function resolveBaseUrl(req) {
   if (APP_BASE_URL) {
     return APP_BASE_URL.replace(/\/$/, "");
@@ -97,6 +102,7 @@ function resolveBaseUrl(req) {
   return `${protocol}://${host}`.replace(/\/$/, "");
 }
 
+// Constrói o link público usado no email de redefinição de senha.
 function buildResetLink(req, username, token) {
   const baseUrl = resolveBaseUrl(req);
   return `${baseUrl}/reset.html?token=${encodeURIComponent(
@@ -104,6 +110,7 @@ function buildResetLink(req, username, token) {
   )}&u=${encodeURIComponent(username)}`;
 }
 
+// Envia o email com o link de redefinição para o usuário.
 async function sendResetEmail({ to, username, link }) {
   const transporter = getMailTransporter();
   const fromAddress = BREVO_MAIL_FROM || BREVO_SMTP_LOGIN;
@@ -142,7 +149,7 @@ async function sendResetEmail({ to, username, link }) {
   });
 }
 
-// Função para obter a conexão com o banco de dados
+// Mantém uma conexão compartilhada com o banco dos usuários.
 async function getDb() {
   if (!MONGODB_URI) throw new Error("MONGODB_URI não definido");
   if (!clientPromise) {
@@ -153,7 +160,7 @@ async function getDb() {
   return client.db(DB_NAME);
 }
 
-// Função para ler o corpo da requisição em ambientes sem suporte a req.body
+// Lê o corpo cru da requisição quando req.body não está disponível.
 async function readRawBody(req) {
   return new Promise((resolve) => {
     let data = "";
@@ -163,7 +170,7 @@ async function readRawBody(req) {
   });
 }
 
-// Função para processar a solicitação
+// Processa todas as ações suportadas pela rota /api/users.
 module.exports = async (req, res) => {
   res.setHeader("Content-Type", "application/json; charset=utf-8");
 

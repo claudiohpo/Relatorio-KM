@@ -8,6 +8,7 @@ const resetForm = document.getElementById("resetForm");
 const resetMsg = document.getElementById("resetMsg");
 const resetStatus = document.getElementById("resetStatus");
 
+// Atualiza a mensagem de status exibida acima do formulário.
 function updateStatus(message, color = "#333") {
   if (!resetStatus) return;
   resetStatus.style.color = color;
@@ -24,6 +25,7 @@ if (!token || !username) {
     resetForm.style.display = "none";
   }
 } else {
+  // Verifica com o servidor se o token de redefinição é válido.
   (async () => {
     updateStatus("Validando link de redefinição...");
     try {
@@ -73,6 +75,7 @@ if (!token || !username) {
 }
 
 if (resetForm) {
+  // Processa a redefinição de senha validando regras básicas.
   resetForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!resetMsg) return;
