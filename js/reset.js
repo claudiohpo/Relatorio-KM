@@ -1,3 +1,9 @@
+if (!window.KMUtils) {
+  throw new Error("KMUtils not loaded. Ensure js/utils.js runs before reset.js");
+}
+
+const { parseJson } = window.KMUtils;
+
 const resetForm = document.getElementById("resetForm");
 const resetMsg = document.getElementById("resetMsg");
 const resetStatus = document.getElementById("resetStatus");
@@ -6,16 +12,6 @@ function updateStatus(message, color = "#333") {
   if (!resetStatus) return;
   resetStatus.style.color = color;
   resetStatus.textContent = message;
-}
-
-async function parseResponse(res) {
-  const text = await res.text().catch(() => "");
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch (err) {
-    return { error: text };
-  }
 }
 
 const params = new URLSearchParams(window.location.search);
@@ -44,7 +40,7 @@ if (!token || !username) {
         }),
       });
 
-      const body = await parseResponse(res);
+  const body = await parseJson(res);
 
       if (!res.ok) {
         updateStatus(body.error || "Link inválido ou expirado.", "red");
@@ -126,7 +122,7 @@ if (resetForm) {
         }),
       });
 
-      const body = await parseResponse(res);
+  const body = await parseJson(res);
 
       if (!res.ok) {
         resetMsg.style.color = "red";
@@ -154,6 +150,7 @@ if (resetForm) {
   });
 }
 
+// Inicializa o Password Toggle
 if (window.PasswordToggle) {
   PasswordToggle.setup(document);
 }

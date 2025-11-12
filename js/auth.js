@@ -1,3 +1,9 @@
+if (!window.KMUtils) {
+  throw new Error("KMUtils not loaded. Ensure js/utils.js runs before auth.js");
+}
+
+const { parseJson } = window.KMUtils;
+
 const loginForm = document.getElementById("loginForm");
 const loginMsg = document.getElementById("loginMsg");
 const btnLogin = document.getElementById("btnLogin");
@@ -96,16 +102,6 @@ document
   .getElementById("regCancel")
   .addEventListener("click", () => hideOverlay(overlayRegister));
 
-// Função para tratar a resposta da API
-async function parseResponse(res) {
-  const text = await res.text().catch(() => "");
-  try {
-    return text ? JSON.parse(text) : {};
-  } catch (e) {
-    return { error: text || "Resposta inválida do servidor" };
-  }
-}
-
 // Função para registrar um novo usuário
 registerForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -140,7 +136,7 @@ registerForm.addEventListener("submit", async (e) => {
       body: JSON.stringify({ action: "register", username, email, password }),
     });
 
-    const body = await parseResponse(res);
+  const body = await parseJson(res);
 
     if (!res.ok) {
       msgEl.style.color = "red";
@@ -188,7 +184,7 @@ loginForm.addEventListener("submit", async (e) => {
       body: JSON.stringify({ action: "login", username, password }),
     });
 
-    const body = await parseResponse(res);
+  const body = await parseJson(res);
 
     if (!res.ok) {
       console.error("Login falhou:", body);
@@ -279,7 +275,7 @@ recoverForm.addEventListener("submit", async (e) => {
       body: JSON.stringify({ action: "recover", username, email }),
     });
 
-    const body = await parseResponse(res);
+  const body = await parseJson(res);
 
     if (!res.ok) {
       msgEl.style.color = "red";
@@ -332,7 +328,7 @@ document.getElementById("recResultOk").addEventListener("click", () => {
   if (resultMsgEl) resultMsgEl.textContent = "";
 });
 
-// SVGs usados no botão
+// Inicializa o Password Toggle
 if (window.PasswordToggle) {
   PasswordToggle.setup(document);
 }

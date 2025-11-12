@@ -1,65 +1,18 @@
+if (!window.KMUtils) {
+  throw new Error("KMUtils not loaded. Ensure js/utils.js runs before management.js");
+}
+
+const {
+  fetchWithUser,
+  parseJson,
+  normalizarPlacaEntrada,
+  sanitizarPlacaBusca,
+} = window.KMUtils;
+
 let registroSelecionado = null;
 let registros = [];
 let paginaAtual = 1;
 const registrosPorPagina = 10;
-
-// Centraliza chamada ao backend, adicionando usuário logado e Content-Type
-function fetchWithUser(url, opts = {}) {
-  const username = sessionStorage.getItem("km_username");
-  opts = opts || {};
-  opts.headers = opts.headers || {};
-
-  if (username) opts.headers["X-Usuario"] = username;
-  if (opts.body && !opts.headers["Content-Type"]) {
-    opts.headers["Content-Type"] = "application/json";
-  }
-
-  return fetch(url, opts);
-}
-
-function normalizarPlacaEntrada(valor) {
-  if (valor === undefined || valor === null) {
-    return { placa: null };
-  }
-  const texto = String(valor).trim();
-  if (!texto) {
-    return { placa: null };
-  }
-  const limpo = texto.toUpperCase().replace(/[^A-Z0-9]/g, "");
-  if (limpo.length !== 7) {
-    return {
-      error:
-        "Placa inválida. Informe 7 caracteres no padrão Mercosul ou antigo.",
-    };
-  }
-  const mercosulRegex = /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
-  const antigoRegex = /^[A-Z]{3}[0-9]{4}$/;
-  if (!mercosulRegex.test(limpo) && !antigoRegex.test(limpo)) {
-    return {
-      error: "Placa inválida. Utilize formatos como AAA-1234 ou AAA1A23.",
-    };
-  }
-  return { placa: limpo };
-}
-
-function sanitizarPlacaBusca(valor) {
-  if (valor == null) return "";
-  const texto = String(valor)
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, "");
-  return texto.slice(0, 8);
-}
-
-async function parseJsonSafe(res) {
-  const text = await res.text().catch(() => "");
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch (err) {
-    console.warn("Resposta não-JSON recebida", err);
-    return {};
-  }
-}
 
 // Verifica sessão ao iniciar (caso o guard inline falhe)
 if (!sessionStorage.getItem("km_username")) {
@@ -147,6 +100,7 @@ document.addEventListener("DOMContentLoaded", function () {
     formConfirmarSenha.addEventListener("submit", confirmarSenhaLimpeza);
   }
 
+  // Inicializa o Password Toggle
   if (window.PasswordToggle) {
     PasswordToggle.setup(document);
   }
@@ -434,7 +388,9 @@ async function confirmarSenhaLimpeza(event) {
       body: JSON.stringify({ action: "login", username, password: senha }),
     });
 
-    const verifyBody = await parseJsonSafe(verifyRes);
+    const verifyBody = await parseJson(verifyRes, {
+      includeTextOnError: false,
+    });
 
     if (!verifyRes.ok) {
       let customMessage = verifyBody.error || "Não foi possível validar a senha informada.";

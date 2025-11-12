@@ -1,4 +1,8 @@
-const BACKEND_URL = ""; // deixar vazio para usar mesmo domínio (/api/*)
+if (!window.KMUtils) {
+  throw new Error("KMUtils not loaded. Ensure js/utils.js runs before main.js");
+}
+
+const { fetchWithUser, parseJson, normalizarPlacaEntrada } = window.KMUtils;
 
 const form = document.getElementById("kmForm");
 const msg = document.getElementById("msg");
@@ -8,50 +12,6 @@ const overlayChangePassword = document.getElementById("overlayChangePassword");
 const changePasswordForm = document.getElementById("changePasswordForm");
 const changePasswordMsg = document.getElementById("changePasswordMsg");
 const changePwdCancel = document.getElementById("changePwdCancel");
-
-// Função para chamar o backend com o cabeçalho X-Usuario
-function fetchWithUser(url, opts = {}) {
-  const username = sessionStorage.getItem("km_username");
-  opts = opts || {};
-  opts.headers = opts.headers || {};
-  if (username) opts.headers["X-Usuario"] = username;
-  return fetch(url, opts);
-}
-
-async function parseJsonResponse(res) {
-  const text = await res.text().catch(() => "");
-  if (!text) return {};
-  try {
-    return JSON.parse(text);
-  } catch (err) {
-    return { error: text };
-  }
-}
-
-function normalizarPlacaEntrada(valor) {
-  if (valor === undefined || valor === null) {
-    return { placa: null };
-  }
-  const texto = String(valor).trim();
-  if (!texto) {
-    return { placa: null };
-  }
-  const limpo = texto.toUpperCase().replace(/[^A-Z0-9]/g, "");
-  if (limpo.length !== 7) {
-    return {
-      error:
-        "Placa inválida. Informe 7 caracteres no padrão Mercosul ou antigo.",
-    };
-  }
-  const mercosulRegex = /^[A-Z]{3}[0-9][A-Z][0-9]{2}$/;
-  const antigoRegex = /^[A-Z]{3}[0-9]{4}$/;
-  if (!mercosulRegex.test(limpo) && !antigoRegex.test(limpo)) {
-    return {
-      error: "Placa inválida. Utilize formatos como AAA-1234 ou AAA1A23.",
-    };
-  }
-  return { placa: limpo };
-}
 
 // Função para carregar o último registro e preencher KM Saída
 async function carregarUltimoRegistro() {
@@ -332,7 +292,7 @@ if (changePasswordForm) {
         }),
       });
 
-      const body = await parseJsonResponse(res);
+  const body = await parseJson(res);
 
       if (!res.ok) {
         changePasswordMsg.style.color = "red";
@@ -356,6 +316,7 @@ if (changePasswordForm) {
   });
 }
 
+// Inicializa o Password Toggle
 if (window.PasswordToggle) {
   PasswordToggle.setup(document);
 }
