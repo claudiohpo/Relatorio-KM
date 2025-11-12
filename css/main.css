@@ -93,6 +93,26 @@ button {
     cursor: pointer;
 }
 
+#btnSalvar {
+    background-color: #1f6feb;
+    color: white;
+}
+
+#btnManutencao {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#btnTrocarSenha {
+    background-color: #ff9800;
+    color: white;
+}
+
+#btnSair {
+    background-color: #f44336;
+    color: white;
+}
+
 button#downloadCsv {
     background: #333;
 }
