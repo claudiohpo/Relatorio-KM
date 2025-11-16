@@ -427,6 +427,39 @@ h1 {
         padding-right: 40px;
     }
 
+/* Desktop: tabela usa largura total disponível com pequena margem lateral
+   mantendo comportamento mobile intacto. */
+@media (min-width: 769px) {
+    .container {
+        max-width: none;
+        width: calc(100% - 48px);
+        margin: 0 24px;
+        box-sizing: border-box;
+    }
+
+    .table-responsive {
+        width: 100%;
+    }
+
+    /* Faz a tabela ocupar a largura disponível no desktop */
+    .table-responsive table {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* Permite quebrar o texto das células para melhor distribuição horizontal */
+    .table-responsive th,
+    .table-responsive td {
+        white-space: normal;
+    }
+
+    /* Garante uma pequena margem entre o modal e as bordas da janela */
+    .modal-content {
+        margin: 0 24px;
+        max-width: 900px;
+    }
+}
+
     .botoes-filtro {
         gap: 5px;
     }
