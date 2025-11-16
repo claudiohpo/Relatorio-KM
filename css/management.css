@@ -528,3 +528,23 @@ h1 {
     font-size: 0.9em;
     color: #555;
 }
+
+/* Restaurar comportamento mobile para a página de gerenciamento, sobrescrevendo
+   o estilo inline aplicado ao <main> nesta página (aplica somente em telas pequenas). */
+@media (max-width: 768px) {
+    .management-page > .container {
+        max-width: 720px !important;
+        width: 100% !important;
+        margin: 12px 0 !important;
+        padding: 14px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Modal reduzido novamente para mobile */
+    .management-page .modal-content {
+        width: 95% !important;
+        margin: 0 auto !important;
+        padding: 15px !important;
+        max-width: 500px !important;
+    }
+}
