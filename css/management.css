@@ -463,6 +463,33 @@ h1 {
     }
 }
 
+/* Regras fortes específicas para a página de gerenciamento para garantir override
+   dos estilos globais (ex.: css/main.css). Aplicadas somente em desktop. */
+@media (min-width: 769px) {
+    .management-page > .container,
+    .management-page body > .container {
+        max-width: none !important;
+        width: calc(100% - 48px) !important;
+        margin: 0 24px !important;
+        box-sizing: border-box !important;
+    }
+
+    .management-page .table-responsive table {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .management-page .table-responsive th,
+    .management-page .table-responsive td {
+        white-space: normal !important;
+    }
+
+    .management-page .modal-content {
+        margin: 0 24px !important;
+        max-width: 900px !important;
+    }
+}
+
     .botoes-filtro {
         gap: 5px;
     }
