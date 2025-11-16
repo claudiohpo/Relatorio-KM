@@ -428,8 +428,11 @@ h1 {
     }
 
 /* Desktop: tabela usa largura total disponível com pequena margem lateral
-   mantendo comportamento mobile intacto. */
+   mantendo comportamento mobile intacto. Use seletores com mesma
+   especificidade dos estilos de `main.css` para garantir override. */
 @media (min-width: 769px) {
+    body>.container,
+    html body>.container,
     .container {
         max-width: none;
         width: calc(100% - 48px);
