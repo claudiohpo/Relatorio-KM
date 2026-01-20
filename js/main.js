@@ -51,18 +51,9 @@ btnSalvar.addEventListener("click", async (e) => {
   //   return;
   // }
 
-  // Preenche data atual (e define dataInput no escopo acessível)
+  // Lê a data informada pelo usuário no formulário
   const dataInput = document.getElementById("data");
-  if (dataInput) {
-    const hoje = new Date();
-    const ano = hoje.getFullYear();
-    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
-    const dia = String(hoje.getDate()).padStart(2, "0");
-    dataInput.value = `${ano}-${mes}-${dia}`;
-  }
-
-  // const data = document.getElementById("data").value; //antigo
-  const data = dataInput.value;
+  const data = dataInput ? dataInput.value : "";
   const chamado = document.getElementById("chamado").value.trim();
   const local = document.getElementById("local").value.trim();
   const placaValor = document.getElementById("placa").value.trim();
@@ -126,7 +117,14 @@ btnSalvar.addEventListener("click", async (e) => {
 
     form.reset();
 
-    dataInput.value = data; // Restaura o valor da data capturado
+    // Preenche novamente com a data atual para o próximo registro
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+    const dia = String(hoje.getDate()).padStart(2, "0");
+    if (dataInput) {
+      dataInput.value = `${ano}-${mes}-${dia}`;
+    }
 
     // Recarregar o último KM para o próximo registro
     await carregarUltimoRegistro();
