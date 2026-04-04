@@ -253,7 +253,7 @@ function aplicarFiltrosInterno(registros) {
     if (local && !campoLocal.includes(local)) return false;
     if (placaFiltro) {
       const placaRegistro = sanitizarPlacaBusca(registro.placa || "");
-      if (placaRegistro !== placaFiltro) return false;
+      if (!placaRegistro.includes(placaFiltro)) return false;
     }
     return true;
   });
